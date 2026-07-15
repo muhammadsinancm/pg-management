@@ -1,0 +1,20 @@
+appId: com.bisidq.pg-management
+productName: PG Management
+directories:
+  buildResources: resources
+  output: release
+files:
+  - out/**/*
+  - package.json
+mac:
+  target:
+    - dmg
+    - zip
+  category: public.app-category.business
+win:
+  target:
+    - nsis
+    - portable
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true

@@ -1,0 +1,86 @@
+@import 'tailwindcss';
+
+@theme inline {
+  --font-sans: 'Source Sans 3', 'Segoe UI', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces', 'Georgia', ui-serif, serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+}
+
+@font-face {
+  font-family: 'Source Sans 3';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: local('Source Sans 3'), local('SourceSans3-Regular');
+}
+
+:root {
+  --background: #f3f1ec;
+  --foreground: #1c2430;
+  --card: #fffcf7;
+  --card-foreground: #1c2430;
+  --primary: #0f6b5c;
+  --primary-foreground: #f4faf8;
+  --secondary: #e7e2d8;
+  --secondary-foreground: #243040;
+  --muted: #ebe6dc;
+  --muted-foreground: #5f6b7a;
+  --accent: #d8efe8;
+  --accent-foreground: #0b4f44;
+  --destructive: #b42318;
+  --border: #d6d0c4;
+  --input: #d6d0c4;
+  --ring: #0f6b5c;
+  --sidebar: #16302b;
+  --sidebar-foreground: #e8f3ef;
+  --sidebar-muted: #8fb4ab;
+  --radius: 0.625rem;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
