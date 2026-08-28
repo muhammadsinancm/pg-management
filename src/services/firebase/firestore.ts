@@ -1,44 +1,76 @@
 /**
  * Firestore stubs — implement when wiring Firebase Database.
  */
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, updateDoc, type DocumentData } from "firebase/firestore"
+import { firestoreDb } from "./config"
 
 export interface FirestoreDocument {
   id: string
-  [key: string]: unknown
+  // [key: string]: unknown
 }
 
 export interface FirestoreRepository<T extends FirestoreDocument> {
-  list(collection: string): Promise<T[]>
-  get(collection: string, id: string): Promise<T | null>
-  create(collection: string, data: Omit<T, 'id'>): Promise<T>
-  update(collection: string, id: string, data: Partial<T>): Promise<T>
-  remove(collection: string, id: string): Promise<void>
+  list(collectionName: string): Promise<T[]>
+  get(collectionName: string, id: string): Promise<T | null>
+  create(collectionName: string, data: Omit<T, 'id'>): Promise<T>
+  update(collectionName: string, id: string, data: Partial<Omit<T, 'id'>>): Promise<T>
+  remove(collectionName: string, id: string): Promise<void>
 }
 
-export class StubFirestoreRepository implements FirestoreRepository<FirestoreDocument> {
-  async list(): Promise<FirestoreDocument[]> {
-    return []
+export class FirebaseFirestoreRepository<T extends FirestoreDocument> implements FirestoreRepository<T> {
+
+  async list(collectionName: string): Promise<T[]> {
+    const snapshot = await getDocs(
+      collection(firestoreDb, collectionName)
+    )
+    return snapshot.docs.map((document) => ({
+      id: document.id,
+      ...document.data(),
+    })) as T[]
   }
 
-  async get(): Promise<FirestoreDocument | null> {
-    return null
+  async get(collectionName: string, id: string): Promise<T | null> {
+    const documentRef = doc(firestoreDb, collectionName, id)
+
+    const snapshot = await getDoc(documentRef)
+    if (!snapshot.exists()) {
+      return null
+    }
+    return {
+      id: snapshot.id,
+      ...snapshot.data()
+    } as T
   }
 
-  async create(_collection: string, data: Omit<FirestoreDocument, 'id'>): Promise<FirestoreDocument> {
-    return { id: `stub-${Date.now()}`, ...data }
+  async create(collectionName: string, data: Omit<T, 'id'>): Promise<T> {
+    const documentRef = await addDoc(collection(firestoreDb, collectionName), data as DocumentData)
+
+    return {
+      id: documentRef.id,
+      ...data
+    } as T
   }
 
-  async update(
-    _collection: string,
-    id: string,
-    data: Partial<FirestoreDocument>
-  ): Promise<FirestoreDocument> {
-    return { id, ...data }
+  async update(collectionName: string, id: string, data: Partial<Omit<T, 'id'>>): Promise<T> {
+    const documentRef = doc(firestoreDb, collectionName, id)
+
+    await updateDoc(documentRef, data as DocumentData)
+
+    const snapshot = await getDoc(documentRef)
+    if (!snapshot.exists()) {
+      throw new Error('Document not found after update')
+    }
+
+    return {
+      id: snapshot.id,
+      ...snapshot.data()
+    } as T
   }
 
-  async remove(): Promise<void> {
-    // no-op stub
+  async remove(collectionName: string, id: string): Promise<void> {
+    const documentRef = doc(firestoreDb, collectionName, id)
+    await deleteDoc(documentRef)
   }
 }
 
-export const firestoreRepository = new StubFirestoreRepository()
+export const firestoreRepository = new FirebaseFirestoreRepository<FirestoreDocument>()

@@ -18,10 +18,10 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard, enabled: true },
-  { label: 'Rooms', to: '/pg/rooms', icon: BedDouble, enabled: false },
-  { label: 'Payments', to: '/pg/payments', icon: Wallet, enabled: false },
-  { label: 'Bookings', to: '/pg/bookings', icon: CalendarCheck, enabled: false },
-  { label: 'Reports', to: '/pg/reports', icon: BarChart3, enabled: false }
+  { label: 'Rooms', to: '/pg/rooms', icon: BedDouble, enabled: true },
+  { label: 'Payments', to: '/pg/payments/create', icon: Wallet, enabled: true },
+  { label: 'Bookings', to: '/pg/bookings', icon: CalendarCheck, enabled: true },
+  { label: 'Reports', to: '/pg/reports', icon: BarChart3, enabled: true }
 ]
 
 export function DashboardSidebar(): React.JSX.Element {

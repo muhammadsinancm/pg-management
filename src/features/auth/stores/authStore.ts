@@ -22,6 +22,7 @@ function loadPersistedSession(): Pick<AuthState, 'user' | 'token' | 'isAuthentic
       return { user: null, token: null, isAuthenticated: false }
     }
     const parsed = JSON.parse(raw) as { user: AuthUser; token: string }
+    
     return {
       user: parsed.user,
       token: parsed.token,
