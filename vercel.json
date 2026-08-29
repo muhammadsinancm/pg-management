@@ -1,8 +1,9 @@
 {
+  "outputDirectory": "out/renderer",
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/"
+      "destination": "/index.html"
     }
   ]
 }
