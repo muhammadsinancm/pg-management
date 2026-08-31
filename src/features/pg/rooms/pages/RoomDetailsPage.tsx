@@ -57,6 +57,7 @@ export function RoomDetailsPage() {
         }
         const updated = await allocateBed(roomId, allocationBed?.id, customerId, customerName)
         setRoom(updated)
+        setAllocationBed(null)
     }
 
     async function handleVacate() {
@@ -65,6 +66,7 @@ export function RoomDetailsPage() {
         }
         const updated = await vacateBed(roomId, vacateBedState.id)
         setRoom(updated)
+        setVacateBedState(null)
     }
 
     async function handleMaintenance(bed: Bed) {
