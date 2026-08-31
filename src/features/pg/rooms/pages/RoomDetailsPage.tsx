@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { Room } from "../types/room.types";
 import { Bed } from "../types/bed.types";
-import { allocateBed, getRoom, setBedMaintenance, vacateBed } from "../services/roomService";
+import { allocateBed, getRoom, makeBedAvailable, setBedMaintenance, vacateBed } from "../services/roomService";
 import { VacateBedDialog } from "../components/VacateBedDialog";
 import { BedAllocation } from "../components/BedAllocation";
 import { RoomDetails } from "../components/RoomDetails";
@@ -75,6 +75,15 @@ export function RoomDetailsPage() {
         setRoom(updated)
     }
 
+    async function handleMakeAvailable(bed: Bed) {
+        if (!roomId) {
+            return
+        }
+
+        const updated = await makeBedAvailable(roomId, bed.id)
+        setRoom(updated)
+    }
+
     if (loading) {
         return (
             <div className="p-10 text-center">
@@ -129,6 +138,7 @@ export function RoomDetailsPage() {
                 onMaintenance={
                     handleMaintenance
                 }
+                onMakeAvailable={handleMakeAvailable}
             />
 
             <BedAllocation
