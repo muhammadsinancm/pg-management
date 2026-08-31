@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Room } from "../types/room.types";
 import { createRoom, deleteRoom, getRooms, updateRoom } from "../services/roomService";
 
-export function useRooms() {
+export function useRooms(floorId?: string) {
 
     const [rooms, setRooms] = useState<Room[]>([])
     const [isLoading, setLoading] = useState(true)
@@ -15,7 +15,10 @@ export function useRooms() {
             setError(null)
 
             const data = await getRooms()
-            setRooms(data)
+
+            const filteredRooms = floorId ? data.filter((room) => room.floorId === floorId) : data
+
+            setRooms(filteredRooms)
 
         } catch (error) {
             console.error(error)
