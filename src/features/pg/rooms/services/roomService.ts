@@ -66,15 +66,23 @@ export async function allocateBed(roomId: string, bedId: string, customerId: str
 export async function vacateBed(roomId: string, bedId: string): Promise<Room> {
     return updateBed(roomId, bedId, {
         status: 'available',
-        customerId: undefined,
-        customerName: undefined
+        customerId: null,
+        customerName: null
     })
 }
 
 export async function setBedMaintenance(roomId: string, bedId: string): Promise<Room> {
     return updateBed(roomId, bedId, {
         status: 'maintenance',
-        customerId: undefined,
-        customerName: undefined
+        customerId: null,
+        customerName: null
+    })
+}
+
+export async function makeBedAvailable(roomId: string, bedId: string): Promise<Room> {
+    return updateBed(roomId, bedId, {
+        status: 'available',
+        customerId: null,
+        customerName: null
     })
 }
