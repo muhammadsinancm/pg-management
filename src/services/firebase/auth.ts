@@ -1,5 +1,5 @@
 import type { AuthSession, LoginCredentials } from '@/features/auth/types'
-import { signInWithEmailAndPassword, signOut as firebaseSignOut, onAuthStateChanged, type User, signOut } from 'firebase/auth'
+import { signInWithEmailAndPassword, signOut as firebaseSignOut, onAuthStateChanged, type User } from 'firebase/auth'
 import { firebaseAuth } from './config'
 
 /**
@@ -95,10 +95,9 @@ export class FirevaseAuthService {
       }
 
     } catch (error: any) {
-
       if (error.code === 'auth/invalid-credential' ||
         error.code === 'auth/user-not-found' ||
-        error.code === 'auth/wrong/password') {
+        error.code === 'auth/wrong-password') {
         throw new Error('Invalid email or password')
       }
 
