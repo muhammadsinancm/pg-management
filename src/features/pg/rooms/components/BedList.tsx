@@ -6,9 +6,10 @@ interface BedListProps {
     onAllocate: (bed: Bed) => void
     onVacate: (bed: Bed) => void
     onMaintenance: (bed: Bed) => void
+    onMakeAvailable: (bed: Bed) => void
 }
 
-export function BedList({ beds, onAllocate, onVacate, onMaintenance }: BedListProps) {
+export function BedList({ beds, onAllocate, onVacate, onMaintenance, onMakeAvailable }: BedListProps) {
     if (!beds.length) {
         return (
             <div className="rounded-lg border border-dashed p-8 text-center">
@@ -27,6 +28,7 @@ export function BedList({ beds, onAllocate, onVacate, onMaintenance }: BedListPr
                     onAllocate={onAllocate}
                     onVacate={onVacate}
                     onMaintenance={onMaintenance}
+                    onMakeAvailable={onMakeAvailable}
                 />
             ))}
         </div>
