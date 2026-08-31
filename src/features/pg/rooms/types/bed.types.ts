@@ -5,6 +5,6 @@ export interface Bed {
     bedNumber: string
     status: BedStatus
     
-    customerId?: string
-    customerName?:string
+    customerId?: string | null
+    customerName?:string | null
 }
