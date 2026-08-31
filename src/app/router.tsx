@@ -12,6 +12,7 @@ import { ReceiptPage } from '@/features/pg/payments/pages/ReceiptPage'
 import { BookingsPage } from '@/features/pg/bookings/components/BookingsPage'
 import { BookingDetailsPage } from '@/features/pg/bookings/pages/BookingDetailsPage'
 import { BookingCreatePage } from '@/features/pg/bookings/pages/BookingCreatePage'
+import { ReportsPage } from '@/features/pg/reports/pages/ReportsPage'
 
 export function AppRouter(): React.JSX.Element {
   return (
@@ -31,6 +32,7 @@ export function AppRouter(): React.JSX.Element {
             <Route path='/pg/bookings' element={<BookingsPage/>}/>
             <Route path='/pg/bookings/create' element={<BookingCreatePage/>}/>
             <Route path='/pg/bookings/:bookingId' element={<BookingDetailsPage/>}/>
+            <Route path='/pg/reports' element={<ReportsPage/>}/>
           </Route>
         </Route>
 
