@@ -9,8 +9,8 @@ export type RoomStatus = | 'available' | 'occupied' | 'maintenance'
 export interface Room {
     id: string
     branchId: string
+    floorId: string
     roomNumber: string
-    floor: string
     type: RoomType
     sharingType: SharingType
     capacity: number
@@ -25,5 +25,5 @@ export interface Room {
 
 export type CreateRoomInput = Omit<
     Room,
-    'id' | 'createdAt' | 'updatedAt' //'status' |
+    'id' | 'createdAt' | 'updatedAt'
 >
