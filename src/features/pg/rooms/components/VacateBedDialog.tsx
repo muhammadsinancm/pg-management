@@ -12,7 +12,7 @@ export function VacateBedDialog({ bed, open, onClose, onConfirm }: VacateBedDial
     if (!open || !bed) {
         return null
     }
-    async function handleConfirm() {
+    async function handleConfirm() {        
         await onConfirm()
         onClose()
     }
