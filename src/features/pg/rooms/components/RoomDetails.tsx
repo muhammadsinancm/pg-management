@@ -8,10 +8,10 @@ interface RoomDetailsProps {
     onAllocate: (bed: Bed) => void
     onVacate: (bed: Bed) => void
     onMaintenance: (bed: Bed) => void
-
+    onMakeAvailable: (bed: Bed) => void
 }
 
-export function RoomDetails({ room, onAllocate, onVacate, onMaintenance }: RoomDetailsProps) {
+export function RoomDetails({ room, onAllocate, onVacate, onMaintenance, onMakeAvailable }: RoomDetailsProps) {
 
     const beds = room.beds ?? []
 
@@ -113,6 +113,7 @@ export function RoomDetails({ room, onAllocate, onVacate, onMaintenance }: RoomD
                     onMaintenance={
                         onMaintenance
                     }
+                    onMakeAvailable={onMakeAvailable}
                 />
             </section>
         </div>
