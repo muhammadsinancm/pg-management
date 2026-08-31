@@ -14,12 +14,23 @@ function createBeds(capacity: number): Bed[] {
     }))
 }
 
-export async function getRooms(): Promise<Room[]> {
-    return roomRepository.list(COLLECTION)
+export async function getRooms(floorId?: string): Promise<Room[]> {
+    const rooms = await roomRepository.list(COLLECTION)
+
+    if (!floorId) {
+        return rooms
+    }
+
+    return rooms.filter((room) => room.floorId === floorId)
 }
 
 export async function getRoom(id: string): Promise<Room | null> {
     return roomRepository.get(COLLECTION, id)
+}
+
+export async function getRoomsByFloor(floorId: string): Promise<Room[]> {
+    const rooms = await roomRepository.list(COLLECTION)
+    return rooms.filter(room => room.floorId == floorId)
 }
 
 export async function createRoom(room: CreateRoomInput): Promise<Room> {
@@ -27,9 +38,9 @@ export async function createRoom(room: CreateRoomInput): Promise<Room> {
     const beds = room.beds?.length ? room.beds : createBeds(room.capacity)
     const data: Omit<Room, 'id'> = {
         ...room,
-        status: 'available',
         beds,
     }
+
     return roomRepository.create(COLLECTION, data)
 }
 
