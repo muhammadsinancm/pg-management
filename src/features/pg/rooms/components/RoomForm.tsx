@@ -20,6 +20,13 @@ export function RoomForm({ room, onSubmit, onCancel }: RoomFormProps) {
     const [description, setDescription] = useState(room?.description ?? '')
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [errors, setErrors] = useState({
+        branchId: '',
+        roomNumber: '',
+        floor: '',
+        capacity: '',
+        rent: '',
+    })
 
     useEffect(() => {
         if (!room) {
@@ -50,26 +57,38 @@ export function RoomForm({ room, onSubmit, onCancel }: RoomFormProps) {
     async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
         event.preventDefault()
 
+        const newErrors = {
+            branchId: '',
+            roomNumber: '',
+            floor: '',
+            capacity: '',
+            rent: ''
+        }
+
         if (!branchId.trim()) {
-            alert('Branch is required')
-            return
+            newErrors.branchId = 'Branch is required'
         }
         if (!roomNumber.trim()) {
-            alert('Room number is required')
-            return
+            newErrors.roomNumber = 'Room number is required'
+        }
+        if (!floor.trim()) {
+            newErrors.floor = 'Floor is required'
+        }
+        if (!capacity.trim()) {
+            newErrors.capacity = 'Capacity is required'
+        } else if (!Number.isInteger(Number(capacity)) || Number(capacity) <= 0) {
+            newErrors.capacity = 'Enter a valid capacity'
         }
 
-        const capacityNumber = Number(capacity)
-
-        if (!Number.isInteger(capacityNumber) || capacityNumber <= 0) {
-            alert('Enter a valid capacity')
-            return
+        if (!rent.trim()) {
+            newErrors.rent = 'Monthly rent is required'
+        } else if (Number.isNaN(Number(rent)) || Number(rent) < 0) {
+            newErrors.rent = 'Enter a valid rent'
         }
 
-        const rentNumber = Number(rent)
+        setErrors(newErrors)
 
-        if (Number.isNaN(rentNumber) || rentNumber < 0) {
-            alert('Enter a valid rent')
+        if (Object.values(newErrors).some(Boolean)) {
             return
         }
 
@@ -79,8 +98,8 @@ export function RoomForm({ room, onSubmit, onCancel }: RoomFormProps) {
             floor: floor.trim(),
             type,
             sharingType,
-            capacity: capacityNumber,
-            rent: rentNumber,
+            capacity: Number(capacity),
+            rent: Number(rent),
             status,
             description: description.trim() || undefined
         }
@@ -97,14 +116,23 @@ export function RoomForm({ room, onSubmit, onCancel }: RoomFormProps) {
             setIsSubmitting(false)
         }
     }
+
+    function clearError(field: keyof typeof errors) {
+        setErrors((pre) => ({
+            ...pre,
+            [field] : ''
+        }))
+    }
+
     return (
         <form
             onSubmit={handleSubmit}
+            noValidate
             className="space-y-6"
         >
 
-            {/* Branch */}
             <div className="space-y-2">
+
                 <label
                     htmlFor="branchId"
                     className="text-sm font-medium"
@@ -115,15 +143,30 @@ export function RoomForm({ room, onSubmit, onCancel }: RoomFormProps) {
                 <input
                     id="branchId"
                     value={branchId}
-                    onChange={(e) => setBranchId(e.target.value)}
+                    onChange={(e) => {
+                        setBranchId(e.target.value);
+
+                        if (e.target.value.trim()) {
+                            clearError('branchId');
+                        }
+                    }}
                     placeholder="Enter branch ID"
-                    className="w-full rounded-md border px-3 py-2"
-                    required
+                    className={`w-full rounded-md border px-3 py-2 outline-none ${errors.branchId
+                            ? 'border-red-500 focus:border-red-500'
+                            : 'border-gray-300 focus:border-primary'
+                        }`}
                 />
+
+                {errors.branchId && (
+                    <p className="text-sm text-red-500">
+                        {errors.branchId}
+                    </p>
+                )}
+
             </div>
 
-            {/* Room Number */}
             <div className="space-y-2">
+
                 <label
                     htmlFor="roomNumber"
                     className="text-sm font-medium"
@@ -134,15 +177,30 @@ export function RoomForm({ room, onSubmit, onCancel }: RoomFormProps) {
                 <input
                     id="roomNumber"
                     value={roomNumber}
-                    onChange={(e) => setRoomNumber(e.target.value)}
+                    onChange={(e) => {
+                        setRoomNumber(e.target.value);
+
+                        if (e.target.value.trim()) {
+                            clearError('roomNumber');
+                        }
+                    }}
                     placeholder="101"
-                    className="w-full rounded-md border px-3 py-2"
-                    required
+                    className={`w-full rounded-md border px-3 py-2 outline-none ${errors.roomNumber
+                            ? 'border-red-500 focus:border-red-500'
+                            : 'border-gray-300 focus:border-primary'
+                        }`}
                 />
+
+                {errors.roomNumber && (
+                    <p className="text-sm text-red-500">
+                        {errors.roomNumber}
+                    </p>
+                )}
+
             </div>
 
-            {/* Floor */}
             <div className="space-y-2">
+
                 <label
                     htmlFor="floor"
                     className="text-sm font-medium"
@@ -153,14 +211,30 @@ export function RoomForm({ room, onSubmit, onCancel }: RoomFormProps) {
                 <input
                     id="floor"
                     value={floor}
-                    onChange={(e) => setFloor(e.target.value)}
+                    onChange={(e) => {
+                        setFloor(e.target.value);
+
+                        if (e.target.value.trim()) {
+                            clearError('floor');
+                        }
+                    }}
                     placeholder="Ground Floor"
-                    className="w-full rounded-md border px-3 py-2"
+                    className={`w-full rounded-md border px-3 py-2 outline-none ${errors.floor
+                            ? 'border-red-500 focus:border-red-500'
+                            : 'border-gray-300 focus:border-primary'
+                        }`}
                 />
+
+                {errors.floor && (
+                    <p className="text-sm text-red-500">
+                        {errors.floor}
+                    </p>
+                )}
+
             </div>
 
-            {/* Room Type */}
             <div className="space-y-2">
+
                 <label
                     htmlFor="type"
                     className="text-sm font-medium"
@@ -172,17 +246,25 @@ export function RoomForm({ room, onSubmit, onCancel }: RoomFormProps) {
                     id="type"
                     value={type}
                     onChange={(e) =>
-                        setType(e.target.value as RoomType)
+                        setType(
+                            e.target.value as RoomType
+                        )
                     }
-                    className="w-full rounded-md border px-3 py-2"
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-primary"
                 >
-                    <option value="AC">AC</option>
-                    <option value="NON_AC">Non AC</option>
+                    <option value="AC">
+                        AC
+                    </option>
+
+                    <option value="NON_AC">
+                        Non AC
+                    </option>
                 </select>
+
             </div>
 
-            {/* Sharing */}
             <div className="space-y-2">
+
                 <label
                     htmlFor="sharingType"
                     className="text-sm font-medium"
@@ -194,24 +276,37 @@ export function RoomForm({ room, onSubmit, onCancel }: RoomFormProps) {
                     id="sharingType"
                     value={sharingType}
                     onChange={(e) =>
-                        setSharingType(e.target.value as SharingType)
+                        setSharingType(
+                            e.target.value as SharingType
+                        )
                     }
-                    className="w-full rounded-md border px-3 py-2"
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-primary"
                 >
-                    <option value="SINGLE">Single</option>
-                    <option value="DOUBLE">Double</option>
-                    <option value="TRIPLE">Triple</option>
+                    <option value="SINGLE">
+                        Single
+                    </option>
+
+                    <option value="DOUBLE">
+                        Double
+                    </option>
+
+                    <option value="TRIPLE">
+                        Triple
+                    </option>
+
                     <option value="FOUR_SHARING">
                         Four Sharing
                     </option>
+
                     <option value="DORMITORY">
                         Dormitory
                     </option>
                 </select>
+
             </div>
 
-            {/* Capacity */}
             <div className="space-y-2">
+
                 <label
                     htmlFor="capacity"
                     className="text-sm font-medium"
@@ -224,15 +319,30 @@ export function RoomForm({ room, onSubmit, onCancel }: RoomFormProps) {
                     type="number"
                     min="1"
                     value={capacity}
-                    onChange={(e) => setCapacity(e.target.value)}
+                    onChange={(e) => {
+                        setCapacity(e.target.value);
+
+                        if (e.target.value.trim()) {
+                            clearError('capacity');
+                        }
+                    }}
                     placeholder="4"
-                    className="w-full rounded-md border px-3 py-2"
-                    required
+                    className={`w-full rounded-md border px-3 py-2 outline-none ${errors.capacity
+                            ? 'border-red-500 focus:border-red-500'
+                            : 'border-gray-300 focus:border-primary'
+                        }`}
                 />
+
+                {errors.capacity && (
+                    <p className="text-sm text-red-500">
+                        {errors.capacity}
+                    </p>
+                )}
+
             </div>
 
-            {/* Rent */}
             <div className="space-y-2">
+
                 <label
                     htmlFor="rent"
                     className="text-sm font-medium"
@@ -245,15 +355,30 @@ export function RoomForm({ room, onSubmit, onCancel }: RoomFormProps) {
                     type="number"
                     min="0"
                     value={rent}
-                    onChange={(e) => setRent(e.target.value)}
+                    onChange={(e) => {
+                        setRent(e.target.value);
+
+                        if (e.target.value.trim()) {
+                            clearError('rent');
+                        }
+                    }}
                     placeholder="8000"
-                    className="w-full rounded-md border px-3 py-2"
-                    required
+                    className={`w-full rounded-md border px-3 py-2 outline-none ${errors.rent
+                            ? 'border-red-500 focus:border-red-500'
+                            : 'border-gray-300 focus:border-primary'
+                        }`}
                 />
+
+                {errors.rent && (
+                    <p className="text-sm text-red-500">
+                        {errors.rent}
+                    </p>
+                )}
+
             </div>
 
-            {/* Status */}
             <div className="space-y-2">
+
                 <label
                     htmlFor="status"
                     className="text-sm font-medium"
@@ -265,20 +390,29 @@ export function RoomForm({ room, onSubmit, onCancel }: RoomFormProps) {
                     id="status"
                     value={status}
                     onChange={(e) =>
-                        setStatus(e.target.value as Room['status'])
+                        setStatus(
+                            e.target.value as Room['status']
+                        )
                     }
-                    className="w-full rounded-md border px-3 py-2"
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-primary"
                 >
-                    <option value="available">Available</option>
-                    <option value="occupied">Occupied</option>
+                    <option value="available">
+                        Available
+                    </option>
+
+                    <option value="occupied">
+                        Occupied
+                    </option>
+
                     <option value="maintenance">
                         Maintenance
                     </option>
                 </select>
+
             </div>
 
-            {/* Description */}
             <div className="space-y-2">
+
                 <label
                     htmlFor="description"
                     className="text-sm font-medium"
@@ -294,22 +428,20 @@ export function RoomForm({ room, onSubmit, onCancel }: RoomFormProps) {
                     }
                     placeholder="Room description..."
                     rows={4}
-                    className="w-full rounded-md border px-3 py-2"
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-primary"
                 />
+
             </div>
 
-            {/* Buttons */}
             <div className="flex justify-end gap-3">
 
-                {onCancel && (
-                    <button
-                        type="button"
-                        onClick={onCancel}
-                        className="rounded-md border px-4 py-2"
-                    >
-                        Cancel
-                    </button>
-                )}
+                <button
+                    type="button"
+                    onClick={onCancel}
+                    className="rounded-md border px-4 py-2"
+                >
+                    Cancel
+                </button>
 
                 <button
                     type="submit"
@@ -326,6 +458,6 @@ export function RoomForm({ room, onSubmit, onCancel }: RoomFormProps) {
             </div>
 
         </form>
-    )
+    );
 
 }
