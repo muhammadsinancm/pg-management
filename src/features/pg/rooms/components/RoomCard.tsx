@@ -38,7 +38,7 @@ export function RoomCard({ room, onView, onEdit, onDelete }: RoomCardProps) {
                     </p>
 
                     <p className="font-medium">
-                        {room.floor || '-'}
+                        {room.floorId || '-'}
                     </p>
                 </div>
 

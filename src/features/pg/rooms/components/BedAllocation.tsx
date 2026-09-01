@@ -5,13 +5,13 @@ interface BedAllocationProps {
     bed: Bed | null
     open: boolean
     onClose: () => void
-    onSubmit: (customerId: string, customerName: string) => Promise<void>
+    onSubmit: (guestId: string, guestName: string) => Promise<void>
 }
 
 export function BedAllocation({ bed, open, onClose, onSubmit }: BedAllocationProps) {
 
-    const [customerId, setCustomerId] = useState('')
-    const [customerName, setCustomerName] = useState('')
+    const [guestId, setGuestId] = useState('')
+    const [guestName, setCustomerName] = useState('')
     const [loading, setLoading] = useState(false)
 
     if (!open || !bed) {
@@ -21,10 +21,10 @@ export function BedAllocation({ bed, open, onClose, onSubmit }: BedAllocationPro
     async function handleSubmit(event: React.FormEvent) {
         event.preventDefault()
 
-        if (!customerId.trim()) {
+        if (!guestId.trim()) {
             return
         }
-        if (!customerName.trim()) {
+        if (!guestName.trim()) {
             return
         }
 
@@ -32,9 +32,9 @@ export function BedAllocation({ bed, open, onClose, onSubmit }: BedAllocationPro
 
             setLoading(true)
 
-            await onSubmit(customerId.trim(), customerName.trim())
+            await onSubmit(guestId.trim(), guestName.trim())
 
-            setCustomerId('')
+            setGuestId('')
             setCustomerName('')
             onClose()
 
@@ -68,9 +68,9 @@ export function BedAllocation({ bed, open, onClose, onSubmit }: BedAllocationPro
                         </label>
 
                         <input
-                            value={customerId}
+                            value={guestId}
                             onChange={(event) =>
-                                setCustomerId(
+                                setGuestId(
                                     event.target.value
                                 )
                             }
@@ -85,7 +85,7 @@ export function BedAllocation({ bed, open, onClose, onSubmit }: BedAllocationPro
                         </label>
 
                         <input
-                            value={customerName}
+                            value={guestName}
                             onChange={(event) =>
                                 setCustomerName(
                                     event.target.value

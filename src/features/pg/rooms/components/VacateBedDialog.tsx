@@ -28,11 +28,11 @@ export function VacateBedDialog({ bed, open, onClose, onConfirm }: VacateBedDial
                     <strong>{bed.bedNumber}</strong>?
                 </p>
 
-                {bed.customerName && (
+                {bed.guestName && (
                     <p className="mt-2 text-sm">
-                        Customer:{' '}
+                        Guest:{' '}
                         <strong>
-                            {bed.customerName}
+                            {bed.guestName}
                         </strong>
                     </p>
                 )}

@@ -67,7 +67,7 @@ export function RoomTable({rooms, onView, onEdit, onDelete}: RoomTableProps) {
                 </td>
 
                 <td className="px-4 py-3">
-                  {room.floor || '-'}
+                  {room.floorId || '-'}
                 </td>
 
                 <td className="px-4 py-3">

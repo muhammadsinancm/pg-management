@@ -33,7 +33,7 @@ export function RoomDetails({ room, onAllocate, onVacate, onMaintenance, onMakeA
                         </h1>
 
                         <p className="mt-1 text-sm text-muted-foreground">
-                            {room.floor || 'Floor not specified'}
+                            {room.floorId || 'Floor not specified'}
                         </p>
                     </div>
 

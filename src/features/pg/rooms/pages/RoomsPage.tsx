@@ -24,7 +24,7 @@ export function RoomsPage() {
 
         return (
             room.roomNumber.toLowerCase().includes(query) ||
-            room.floor.toLowerCase().includes(query) ||
+            room.floorId.toLowerCase().includes(query) ||
             room.type.toLowerCase().includes(query) ||
             room.sharingType.toLowerCase().includes(query)
         )

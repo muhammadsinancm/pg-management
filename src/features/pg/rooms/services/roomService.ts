@@ -66,34 +66,34 @@ export async function updateBed(roomId: string, bedId: string, data: Partial<Bed
     })
 }
 
-export async function allocateBed(roomId: string, bedId: string, customerId: string, customerName: string): Promise<Room> {
+export async function allocateBed(roomId: string, bedId: string, guestId: string, guestName: string): Promise<Room> {
     return updateBed(roomId, bedId, {
         status: 'occupied',
-        customerId,
-        customerName
+        guestId,
+        guestName
     })
 }
 
 export async function vacateBed(roomId: string, bedId: string): Promise<Room> {
     return updateBed(roomId, bedId, {
         status: 'available',
-        customerId: null,
-        customerName: null
+        guestId: null,
+        guestName: null
     })
 }
 
 export async function setBedMaintenance(roomId: string, bedId: string): Promise<Room> {
     return updateBed(roomId, bedId, {
         status: 'maintenance',
-        customerId: null,
-        customerName: null
+        guestId: null,
+        guestName: null
     })
 }
 
 export async function makeBedAvailable(roomId: string, bedId: string): Promise<Room> {
     return updateBed(roomId, bedId, {
         status: 'available',
-        customerId: null,
-        customerName: null
+        guestId: null,
+        guestName: null
     })
 }

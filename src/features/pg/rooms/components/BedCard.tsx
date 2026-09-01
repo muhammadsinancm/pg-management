@@ -36,14 +36,14 @@ export function BedCard({ bed, onAllocate, onVacate, onMaintenance, onMakeAvaila
         </span>
       </div>
 
-      {bed.customerName && (
+      {bed.guestName && (
         <div className="mt-3">
           <p className="text-xs text-muted-foreground">
-            Customer
+            Guest
           </p>
 
           <p className="text-sm font-medium">
-            {bed.customerName}
+            {bed.guestName}
           </p>
         </div>
       )}
