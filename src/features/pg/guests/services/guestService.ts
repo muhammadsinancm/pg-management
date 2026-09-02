@@ -5,9 +5,8 @@ import { allocateGuestBed, releaseGuestBed } from "./guestAccommodationService";
 
 const guestsCollection = collection(firestoreDb, 'guests')
 
-export async function getGuests(branchId: string): Promise<Guest[]> {
-    const q = query(guestsCollection, where('branchId', '==', branchId))
-    const snapshot = await getDocs(q)
+export async function getGuests(): Promise<Guest[]> {
+    const snapshot = await getDocs(guestsCollection)
     return snapshot.docs.map((document) => ({
         id: document.id,
         ...document.data()

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { CreateGuestInput, Guest } from "../types/guests.types";
 import { cancelGuest, checkOutGuest, createGuest, deleteGuest, getGuests, updateGuest } from "../services/guestService";
 
-export function useGuests(branchId: string) {
+export function useGuests() {
     const [guests, setGuests] = useState<Guest[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -12,7 +12,7 @@ export function useGuests(branchId: string) {
             setLoading(true)
             setError(null)
 
-            const data = await getGuests(branchId)
+            const data = await getGuests()
             setGuests(data)
 
         } catch (error) {
@@ -22,7 +22,7 @@ export function useGuests(branchId: string) {
         } finally {
             setLoading(false)
         }
-    }, [branchId])
+    }, [])
 
     useEffect(() => {
         loadGuests()

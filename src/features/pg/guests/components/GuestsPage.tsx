@@ -7,8 +7,8 @@ import { useNavigate } from "react-router"
 
 export function GuestsPage() {
     const navigate = useNavigate()
-    const branchId = 'branch-001'
-    const { guests, loading, error, addGuest, editGuest, removeGuest, checkOutGuest, cancelGuest } = useGuests(branchId)
+
+    const { guests, loading, error, addGuest, editGuest, removeGuest, checkOutGuest, cancelGuest } = useGuests()
     const [showForm, setShowForm] = useState(false)
     const [editingGuest, setEditingGuest] = useState<Guest | undefined>()
 
@@ -197,8 +197,6 @@ export function GuestsPage() {
 
 
                         <GuestForm
-
-                            branchId={branchId}
 
                             guest={editingGuest}
 

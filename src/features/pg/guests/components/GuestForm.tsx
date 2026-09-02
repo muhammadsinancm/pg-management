@@ -4,15 +4,16 @@ import { Room } from "../../rooms/types/room.types"
 import { getRooms } from "../../rooms/services/roomService"
 import { Floor } from "../../rooms/types/floor.types"
 import { getFloors } from "../../rooms/services/floorService"
+import { Branch } from "../../branches/types/branch.types"
+import { getBranches } from "../../branches/services/branchService"
 
 interface GuestFormProps {
-    branchId: string
     guest?: Guest
     onSubmit: (data: CreateGuestInput) => Promise<void>
     onCancel: () => void
 }
 
-export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProps) {
+export function GuestForm({ guest, onSubmit, onCancel }: GuestFormProps) {
 
     const [fullName, setFullName] = useState(guest?.fullName ?? '')
     const [phone, setPhone] = useState(guest?.phone ?? '')
@@ -36,32 +37,91 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
     const [loadingRooms, setLoadingRooms] = useState(false)
     const [checkInDate, setCheckInDate] = useState(guest?.checkInDate ?? '')
     const [expectedCheckOutDate, setExpectedCheckOutDate] = useState(guest?.expectedCheckOutDate ?? '')
+    const [branches, setBranches] = useState<Branch[]>([])
+    const [branchId, setBranchId] = useState(guest?.branchId ?? '')
     const [notes, setNotes] = useState(guest?.notes ?? '')
     const [loading, setLoading] = useState(false)
+    const [loadingBranches, setLoadingBranches] = useState(true)
+    const [loadingFloors, setLoadingFloors] = useState(true)
 
     useEffect(() => {
-        async function loadData() {
+        if (!floorId) {
+            setRooms([])
+            setRoomId('')
+            setBedId('')
+            setLoadingRooms(false)
+            return
+        }
+
+        async function loadRooms() {
             try {
                 setLoadingRooms(true)
 
-                const [floorData, roomData] = await Promise.all([
-                    getFloors(),
-                    getRooms()
-                ])
-
-                setFloors(floorData.filter(floor => floor.branchId === branchId))
-
-                setRooms(roomData.filter(room => room.branchId === branchId))
+                const flootRooms = await getRooms(floorId)
+                setRooms(flootRooms)
 
             } catch (error) {
-                console.error('Failed to load rools/floors', error)
+                console.error('Failed to load rooms', error)
+                setRooms([])
 
             } finally {
                 setLoadingRooms(false)
             }
         }
-        loadData()
+        loadRooms()
+    }, [floorId])
+
+    useEffect(() => {
+        if (!branchId) {
+            setFloors([])
+            setFloorId('')
+            setRooms([])
+            setRoomId('')
+            setBedId('')
+            setLoadingFloors(false)
+            return
+        }
+
+        async function loadFloors() {
+            try {
+                setLoadingFloors(true)
+
+                const branchFloors = await getFloors(branchId)
+
+                setFloors(branchFloors)
+
+            } catch (error) {
+                console.error('Failed to load floors', error)
+                setFloors([])
+
+            } finally {
+                setLoadingFloors(false)
+            }
+        }
+
+        loadFloors()
+
     }, [branchId])
+
+    useEffect(() => {
+        async function loadBranches() {
+            try {
+
+                setLoadingBranches(true)
+
+                const data = await getBranches()
+                setBranches(data)
+
+            } catch (error) {
+                console.error('Failed to load branches', error)
+
+            } finally {
+                setLoadingBranches(false)
+            }
+        }
+        loadBranches()
+    }, [])
+
 
     useEffect(() => {
         if (guest?.roomId && rooms.length > 0) {
@@ -73,12 +133,37 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
     }, [guest?.roomId, rooms])
 
     const selectedFloor = floors.find(floor => floor.id === floorId)
+    const floorRooms = rooms.filter(room => room.floorId === floorId)
 
     const selectedRoom = rooms.find(room => room.id === roomId && room.floorId === floorId)
 
-    const floorRooms = rooms.filter(room => room.floorId === floorId)
-
     const availableBeds = selectedRoom?.beds?.filter(bed => bed.status === 'available' || bed.id === guest?.bedId) ?? []
+
+    function handleBranchChange(newBranchId: string) {
+        setBranchId(newBranchId)
+
+        setFloorId('')
+        setRoomId('')
+        setBedId('')
+
+        setFloors([])
+        setRooms([])
+    }
+
+    function handleFloorChange(newFloorId: string) {
+        setFloorId(newFloorId)
+
+        setRoomId('')
+        setBedId('')
+
+        setRooms([])
+    }
+
+    function handleRoomChange(newRoomId: string) {
+        setRoomId(newRoomId)
+
+        setBedId('')
+    }
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -180,7 +265,7 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
         >
 
             {/* ================================= */}
-            {/* Personal Information */}
+            {/* PERSONAL INFORMATION */}
             {/* ================================= */}
 
             <div>
@@ -192,13 +277,16 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
                 <input
                     value={fullName}
                     onChange={e =>
-                        setFullName(e.target.value)
+                        setFullName(
+                            e.target.value
+                        )
                     }
                     placeholder="Full Name"
                     className="w-full rounded-md border px-3 py-2"
                 />
 
             </div>
+
 
             <div>
 
@@ -209,13 +297,16 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
                 <input
                     value={phone}
                     onChange={e =>
-                        setPhone(e.target.value)
+                        setPhone(
+                            e.target.value
+                        )
                     }
                     placeholder="9876543210"
                     className="w-full rounded-md border px-3 py-2"
                 />
 
             </div>
+
 
             <div>
 
@@ -227,12 +318,15 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
                     type="date"
                     value={dateOfBirth}
                     onChange={e =>
-                        setDateOfBirth(e.target.value)
+                        setDateOfBirth(
+                            e.target.value
+                        )
                     }
                     className="w-full rounded-md border px-3 py-2"
                 />
 
             </div>
+
 
             <div>
 
@@ -244,7 +338,9 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
                     type="email"
                     value={email}
                     onChange={e =>
-                        setEmail(e.target.value)
+                        setEmail(
+                            e.target.value
+                        )
                     }
                     placeholder="guest@email.com"
                     className="w-full rounded-md border px-3 py-2"
@@ -252,8 +348,9 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
 
             </div>
 
+
             {/* ================================= */}
-            {/* Gender + ID Type */}
+            {/* GENDER + ID TYPE */}
             {/* ================================= */}
 
             <div className="grid grid-cols-2 gap-4">
@@ -289,6 +386,7 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
                     </select>
 
                 </div>
+
 
                 <div>
 
@@ -332,8 +430,9 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
 
             </div>
 
+
             {/* ================================= */}
-            {/* ID Number */}
+            {/* ID NUMBER */}
             {/* ================================= */}
 
             <div>
@@ -345,7 +444,9 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
                 <input
                     value={idNumber}
                     onChange={e =>
-                        setIdNumber(e.target.value)
+                        setIdNumber(
+                            e.target.value
+                        )
                     }
                     placeholder="ID number"
                     className="w-full rounded-md border px-3 py-2"
@@ -353,8 +454,223 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
 
             </div>
 
+
             {/* ================================= */}
-            {/* Address */}
+            {/* BRANCH */}
+            {/* ================================= */}
+
+            <div>
+
+                <label className="mb-1 block text-sm font-medium">
+                    Branch
+                </label>
+
+                <select
+                    value={branchId}
+                    onChange={e =>
+                        handleBranchChange(
+                            e.target.value
+                        )
+                    }
+                    disabled={
+                        loadingBranches
+                    }
+                    className="
+                        w-full
+                        rounded-md
+                        border
+                        px-3
+                        py-2
+                    "
+                >
+
+                    <option value="">
+
+                        {loadingBranches
+                            ? 'Loading branches...'
+                            : 'Select Branch'}
+
+                    </option>
+
+
+                    {branches.map(
+                        branch => (
+
+                            <option
+                                key={branch.id}
+                                value={branch.id}
+                            >
+                                {branch.name}
+                                {' '}
+                                ({branch.code})
+                            </option>
+
+                        )
+                    )}
+
+                </select>
+
+            </div>
+
+
+            {/* ================================= */}
+            {/* FLOOR → ROOM → BED */}
+            {/* ================================= */}
+
+            <div className="grid grid-cols-3 gap-4">
+
+
+                {/* FLOOR */}
+
+                <div>
+
+                    <label className="mb-1 block text-sm font-medium">
+                        Floor
+                    </label>
+
+                    <select
+                        value={floorId}
+                        onChange={e =>
+                            handleFloorChange(e.target.value)
+                        }
+                        disabled={!branchId || loadingFloors}
+                        className="
+        w-full
+        rounded-md
+        border
+        px-3
+        py-2
+    "
+                    >
+                        <option value="">
+                            {!branchId
+                                ? 'Select Branch First'
+                                : loadingFloors
+                                    ? 'Loading Floors...'
+                                    : floors.length === 0
+                                        ? 'No Floors'
+                                        : 'Select Floor'}
+                        </option>
+
+                        {floors.map(floor => (
+                            <option
+                                key={floor.id}
+                                value={floor.id}
+                            >
+                                Floor {floor.floorNumber} - {floor.name}
+                            </option>
+                        ))}
+                    </select>
+
+                </div>
+
+
+                {/* ROOM */}
+
+                <div>
+
+                    <label className="mb-1 block text-sm font-medium">
+                        Room
+                    </label>
+
+                    <select
+                        value={roomId}
+                        onChange={e =>
+                            handleRoomChange(e.target.value)
+                        }
+                        disabled={!floorId || loadingRooms}
+                        className="
+        w-full
+        rounded-md
+        border
+        px-3
+        py-2
+    "
+                    >
+                        <option value="">
+                            {!floorId
+                                ? 'Select Floor First'
+                                : loadingRooms
+                                    ? 'Loading Rooms...'
+                                    : rooms.length === 0
+                                        ? 'No Rooms'
+                                        : 'Select Room'}
+                        </option>
+
+                        {rooms.map(room => (
+                            <option
+                                key={room.id}
+                                value={room.id}
+                            >
+                                Room {room.roomNumber}
+                            </option>
+                        ))}
+                    </select>
+
+                </div>
+
+
+                {/* BED */}
+
+                <div>
+
+                    <label className="mb-1 block text-sm font-medium">
+                        Bed
+                    </label>
+
+                    <select
+                        value={bedId}
+                        onChange={e =>
+                            setBedId(
+                                e.target.value
+                            )
+                        }
+                        disabled={
+                            !roomId
+                        }
+                        className="
+                            w-full
+                            rounded-md
+                            border
+                            px-3
+                            py-2
+                            disabled:bg-gray-100
+                        "
+                    >
+
+                        <option value="">
+
+                            {!roomId
+                                ? 'Select Room First'
+                                : availableBeds.length === 0
+                                    ? 'No Beds Available'
+                                    : 'Select Bed'}
+
+                        </option>
+
+
+                        {availableBeds.map(
+                            bed => (
+
+                                <option
+                                    key={bed.id}
+                                    value={bed.id}
+                                >
+                                    Bed {bed.bedNumber}
+                                </option>
+
+                            )
+                        )}
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            {/* ================================= */}
+            {/* ADDRESS */}
             {/* ================================= */}
 
             <div>
@@ -366,7 +682,9 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
                 <textarea
                     value={address}
                     onChange={e =>
-                        setAddress(e.target.value)
+                        setAddress(
+                            e.target.value
+                        )
                     }
                     rows={3}
                     placeholder="Full address"
@@ -375,8 +693,9 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
 
             </div>
 
+
             {/* ================================= */}
-            {/* City / State / Pincode */}
+            {/* CITY / STATE / PINCODE */}
             {/* ================================= */}
 
             <div className="grid grid-cols-3 gap-4">
@@ -390,13 +709,16 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
                     <input
                         value={city}
                         onChange={e =>
-                            setCity(e.target.value)
+                            setCity(
+                                e.target.value
+                            )
                         }
                         placeholder="City"
                         className="w-full rounded-md border px-3 py-2"
                     />
 
                 </div>
+
 
                 <div>
 
@@ -407,13 +729,16 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
                     <input
                         value={state}
                         onChange={e =>
-                            setState(e.target.value)
+                            setState(
+                                e.target.value
+                            )
                         }
                         placeholder="State"
                         className="w-full rounded-md border px-3 py-2"
                     />
 
                 </div>
+
 
                 <div>
 
@@ -424,7 +749,9 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
                     <input
                         value={pincode}
                         onChange={e =>
-                            setPincode(e.target.value)
+                            setPincode(
+                                e.target.value
+                            )
                         }
                         placeholder="Pincode"
                         inputMode="numeric"
@@ -435,163 +762,9 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
 
             </div>
 
-            {/* ================================= */}
-            {/* FLOOR → ROOM → BED */}
-            {/* ================================= */}
-
-            <div className="grid grid-cols-3 gap-4">
-
-                {/* FLOOR */}
-
-                <div>
-
-                    <label className="mb-1 block text-sm font-medium">
-                        Floor
-                    </label>
-
-                    <select
-                        value={floorId}
-                        onChange={e => {
-
-                            const newFloorId =
-                                e.target.value
-
-                            setFloorId(newFloorId)
-
-                            // Reset room
-                            setRoomId('')
-
-                            // Reset bed
-                            setBedId('')
-                        }}
-                        disabled={loadingRooms}
-                        className="w-full rounded-md border px-3 py-2"
-                    >
-
-                        <option value="">
-
-                            {loadingRooms
-                                ? 'Loading floors...'
-                                : 'Select Floor'}
-
-                        </option>
-
-                        {floors.map(floor => (
-
-                            <option
-                                key={floor.id}
-                                value={floor.id}
-                            >
-
-                                {floor.name}
-
-                            </option>
-
-                        ))}
-
-                    </select>
-
-                </div>
-
-                {/* ROOM */}
-
-                <div>
-
-                    <label className="mb-1 block text-sm font-medium">
-                        Room
-                    </label>
-
-                    <select
-                        value={roomId}
-                        onChange={e => {
-
-                            const newRoomId =
-                                e.target.value
-
-                            setRoomId(newRoomId)
-
-                            // Reset bed
-                            setBedId('')
-                        }}
-                        disabled={!floorId}
-                        className="w-full rounded-md border px-3 py-2 disabled:bg-gray-100"
-                    >
-
-                        <option value="">
-
-                            {!floorId
-                                ? 'Select Floor First'
-                                : floorRooms.length === 0
-                                    ? 'No Rooms'
-                                    : 'Select Room'}
-
-                        </option>
-
-                        {floorRooms.map(room => (
-
-                            <option
-                                key={room.id}
-                                value={room.id}
-                            >
-
-                                Room {room.roomNumber}
-
-                            </option>
-
-                        ))}
-
-                    </select>
-
-                </div>
-
-                {/* BED */}
-
-                <div>
-
-                    <label className="mb-1 block text-sm font-medium">
-                        Bed
-                    </label>
-
-                    <select
-                        value={bedId}
-                        onChange={e =>
-                            setBedId(e.target.value)
-                        }
-                        disabled={!roomId}
-                        className="w-full rounded-md border px-3 py-2 disabled:bg-gray-100"
-                    >
-
-                        <option value="">
-
-                            {!roomId
-                                ? 'Select Room First'
-                                : availableBeds.length === 0
-                                    ? 'No Beds Available'
-                                    : 'Select Bed'}
-
-                        </option>
-
-                        {availableBeds.map(bed => (
-
-                            <option
-                                key={bed.id}
-                                value={bed.id}
-                            >
-
-                                Bed {bed.bedNumber}
-
-                            </option>
-
-                        ))}
-
-                    </select>
-
-                </div>
-
-            </div>
 
             {/* ================================= */}
-            {/* Emergency Contact */}
+            {/* EMERGENCY CONTACT */}
             {/* ================================= */}
 
             <div>
@@ -612,6 +785,7 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
                 />
 
             </div>
+
 
             <div className="grid grid-cols-2 gap-4">
 
@@ -634,6 +808,7 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
 
                 </div>
 
+
                 <div>
 
                     <label className="mb-1 block text-sm font-medium">
@@ -655,8 +830,9 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
 
             </div>
 
+
             {/* ================================= */}
-            {/* Stay Dates */}
+            {/* STAY DATES */}
             {/* ================================= */}
 
             <div className="grid grid-cols-2 gap-4">
@@ -680,6 +856,7 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
 
                 </div>
 
+
                 <div>
 
                     <label className="mb-1 block text-sm font-medium">
@@ -701,8 +878,9 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
 
             </div>
 
+
             {/* ================================= */}
-            {/* Notes */}
+            {/* NOTES */}
             {/* ================================= */}
 
             <div>
@@ -714,7 +892,9 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
                 <textarea
                     value={notes}
                     onChange={e =>
-                        setNotes(e.target.value)
+                        setNotes(
+                            e.target.value
+                        )
                     }
                     rows={3}
                     placeholder="Additional notes"
@@ -723,8 +903,9 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
 
             </div>
 
+
             {/* ================================= */}
-            {/* Buttons */}
+            {/* BUTTONS */}
             {/* ================================= */}
 
             <div className="flex justify-end gap-3">
@@ -733,15 +914,29 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
                     type="button"
                     onClick={onCancel}
                     disabled={loading}
-                    className="rounded-md border px-4 py-2 disabled:opacity-50"
+                    className="
+                        rounded-md
+                        border
+                        px-4
+                        py-2
+                        disabled:opacity-50
+                    "
                 >
                     Cancel
                 </button>
 
+
                 <button
                     type="submit"
                     disabled={loading}
-                    className="rounded-md bg-primary px-4 py-2 text-white disabled:opacity-50"
+                    className="
+                        rounded-md
+                        bg-primary
+                        px-4
+                        py-2
+                        text-white
+                        disabled:opacity-50
+                    "
                 >
 
                     {loading
