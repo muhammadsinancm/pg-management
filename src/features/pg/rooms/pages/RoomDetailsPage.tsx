@@ -170,5 +170,4 @@ export function RoomDetailsPage() {
             />
         </div>
     )
-
 }

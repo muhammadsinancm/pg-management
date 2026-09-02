@@ -28,7 +28,7 @@ export function useRooms(floorId?: string) {
             setLoading(false)
         }
 
-    }, [])
+    }, [floorId])
 
     useEffect(() => {
         loadRooms()
