@@ -16,6 +16,10 @@ import { FloorRoomsPage } from '@/features/pg/rooms/pages/FloorRoomsPage'
 import { FloorsPage } from '@/features/pg/rooms/pages/FloorsPage'
 import { GuestsPage } from '@/features/pg/guests/components/GuestsPage'
 import { GuestDetailsPage } from '@/features/pg/guests/pages/GuestDetailsPage'
+import { BranchesPage } from '@/features/pg/branches/pages/BranchPage'
+import { CreateBranchPage } from '@/features/pg/branches/pages/CreateBranchPage'
+import { BranchDetailsPage } from '@/features/pg/branches/pages/BranchDetailsPage'
+import { EditBranchPage } from '@/features/pg/branches/pages/EditBranchPage'
 
 export function AppRouter(): React.JSX.Element {
   return (
@@ -28,18 +32,21 @@ export function AppRouter(): React.JSX.Element {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path='/pg/rooms' element={<FloorsPage />} />
             <Route path='/pg/rooms/floor/:floorId' element={<FloorRoomsPage />} />
-            <Route path='/pg/rooms/:floorId/:roomId' element={<RoomDetailsPage />} />
             <Route path='/pg/payments' element={<PaymentsPage />} />
             <Route path='/pg/rooms/:roomId' element={<RoomDetailsPage />} />
             <Route path='/pg/payments/create' element={<PaymentCreatePage />} />
             <Route path='/pg/payments/:paymentId' element={<PaymentDetailsPage />} />
-           <Route path='/pg/payments/:paymentId/receipt' element={<ReceiptPage />} />
+            <Route path='/pg/payments/:paymentId/receipt' element={<ReceiptPage />} />
             <Route path='/pg/bookings' element={<BookingsPage />} />
             <Route path='/pg/bookings/create' element={<BookingCreatePage />} />
             <Route path='/pg/bookings/:bookingId' element={<BookingDetailsPage />} />
             <Route path='/pg/reports' element={<ReportsPage />} />
-            <Route path='/pg/customers' element={<GuestsPage/>}/>
-            <Route path='/pg/customers/:guestId' element={<GuestDetailsPage/>}/>
+            <Route path='/pg/customers' element={<GuestsPage />} />
+            <Route path='/pg/customers/:guestId' element={<GuestDetailsPage />} />
+            <Route path='/pg/branches' element={<BranchesPage />} />
+            <Route path='/pg/branches/create' element={<CreateBranchPage />} />
+            <Route path='/pg/branches/:branchId' element={<BranchDetailsPage />} />
+            <Route path='/pg/branches/:branchId/edit' element={<EditBranchPage />} />
           </Route>
         </Route>
 
