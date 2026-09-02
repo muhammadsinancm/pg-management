@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { CreateFloorInput, Floor } from "../types/floor.types";
 import { createFloor, deleteFloor, getFloors, updateFloor } from "../services/floorService";
 
-export function useFloors() {
+export function useFloors(branchId?: string) {
     const [floors, setFloors] = useState<Floor[]>([])
     const [isLoading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -12,7 +12,12 @@ export function useFloors() {
             setLoading(true)
             setError(null)
 
-            const data = await getFloors()
+            if (!branchId) {
+                setFloors([])
+                return
+            }
+
+            const data = await getFloors(branchId)
 
             setFloors(data)
 
@@ -23,7 +28,7 @@ export function useFloors() {
         } finally {
             setLoading(false)
         }
-    }, [])
+    }, [branchId])
 
     useEffect(() => {
         loadFloors()
