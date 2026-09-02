@@ -6,7 +6,8 @@ import {
   CalendarCheck,
   BarChart3,
   type LucideIcon,
-  UsersRound
+  UsersRound,
+  Building2
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 
@@ -23,7 +24,8 @@ const navItems: NavItem[] = [
   { label: 'Payments', to: '/pg/payments/create', icon: Wallet, enabled: true },
   { label: 'Bookings', to: '/pg/bookings', icon: CalendarCheck, enabled: true },
   { label: 'Reports', to: '/pg/reports', icon: BarChart3, enabled: true },
-  { label: 'Customers', to: '/pg/customers', icon: UsersRound, enabled: true }
+  { label: 'Customers', to: '/pg/customers', icon: UsersRound, enabled: true },
+  { label: 'Branches', to: '/pg/branches', icon: Building2, enabled: true }
 ]
 
 export function DashboardSidebar(): React.JSX.Element {
