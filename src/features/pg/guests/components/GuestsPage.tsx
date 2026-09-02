@@ -1,18 +1,18 @@
 import { useState } from "react"
 import { useGuests } from "../hooks/useGuests"
-import { Guest } from "../types/guests.types"
+import { CreateGuestInput, Guest } from "../types/guests.types"
 import { GuestForm } from "./GuestForm"
 import { GuestTable } from "./GuestTable"
-import { GuestDetails } from "./GuestDetails"
+import { useNavigate } from "react-router"
 
 export function GuestsPage() {
+    const navigate = useNavigate()
     const branchId = 'branch-001'
-    const { guests, loading, error, addGuest, editGuest, removeGuest } = useGuests(branchId)
+    const { guests, loading, error, addGuest, editGuest, removeGuest, checkOutGuest, cancelGuest } = useGuests(branchId)
     const [showForm, setShowForm] = useState(false)
     const [editingGuest, setEditingGuest] = useState<Guest | undefined>()
-    const [viewingGuest, setViewingGuest] = useState<Guest | undefined>()
 
-    async function handleSubmit(data: any) {
+    async function handleSubmit(data: CreateGuestInput) {
         if (editingGuest) {
             await editGuest(editingGuest.id, data)
         } else {
@@ -28,83 +28,106 @@ export function GuestsPage() {
         setShowForm(true)
     }
 
-    async function handleDelete(guest: Guest) {
-        const confirmed = window.confirm(`Delete ${guest.fullName}`)
+    async function handleCheckOut(guest: Guest) {
+        const confirmed = window.confirm(`Check out ${guest.fullName}`)
+
         if (!confirmed) {
             return
         }
-        await removeGuest(guest.id)
+
+        try {
+            await checkOutGuest(guest)
+            alert(`${guest.fullName} checked out successfully`)
+        } catch (error) {
+            console.error(error)
+            alert('Failed to checkout guest')
+        }
+    }
+
+    async function handleCancel(guest: Guest) {
+        const confirmed = window.confirm(`Cancel the stay of ${guest.fullName}`)
+
+        if (!confirmed) {
+            return
+        }
+
+        try {
+            await cancelGuest(guest)
+            alert(`${guest.fullName}'s stay has beed cancelled`)
+        } catch (error) {
+            console.error(error)
+            alert('Failed to cancel guest')
+        }
+
     }
 
     function handleView(guest: Guest) {
-        setViewingGuest(guest)
+        navigate(`/pg/customers/${guest.id}`)
+    }
+
+    async function handleRemove(guest: Guest) {
+        if (guest.status === 'active') {
+            return
+        }
+
+        const confirmed = window.confirm(`Are you sure you want to permanently remove ${guest.fullName}`)
+
+        if (!confirmed) return
+
+        try {
+            await removeGuest(guest.id)
+        } catch (error) {
+            console.error(error)
+            alert('failed to remove guest')
+        }
+
     }
 
     if (loading) {
         return (
             <div className="p-6">
-                Loading guests...
+                Loading customers...
             </div>
         )
     }
 
-    if (viewingGuest) {
-        return (
-            <GuestDetails
-                guest={viewingGuest}
-                onBack={() => {
-                    setViewingGuest(undefined)
-                }}
-                onEdit={(guest) => {
-
-                    setViewingGuest(undefined)
-
-                    setEditingGuest(guest)
-
-                    setShowForm(true)
-                }}
-            />
-        )
-    }
-
-return (
+    return (
 
         <div className="space-y-6 p-6">
 
-            {/* Header */}
+            {/* HEADER */}
 
             <div className="flex items-center justify-between">
 
                 <div>
 
                     <h1 className="text-2xl font-semibold">
-                        Guests
+                        Customers
                     </h1>
 
                     <p className="text-sm text-muted-foreground">
-                        Manage PG guests and their stay details.
+                        Manage PG customers and their stay details.
                     </p>
 
                 </div>
 
 
                 <button
-                    type="button"
                     onClick={() => {
 
                         setEditingGuest(undefined)
-
                         setShowForm(true)
+
                     }}
                     className="rounded-md bg-primary px-4 py-2 text-white"
                 >
-                    + Add Guest
+                    + Add Customers
                 </button>
 
             </div>
 
 
-            {/* Error */}
+            {/* ERROR */}
 
             {error && (
 
@@ -115,18 +138,18 @@ return (
             )}
 
 
-            {/* Guest Table */}
+            {/* TABLE */}
 
             {!guests.length ? (
 
                 <div className="rounded-xl border border-dashed p-10 text-center">
 
                     <h2 className="font-medium">
-                        No guests found
+                        No customers found
                     </h2>
 
                     <p className="mt-1 text-sm text-muted-foreground">
-                        Add your first guest.
+                        Add your first customers.
                     </p>
 
                 </div>
@@ -134,16 +157,25 @@ return (
             ) : (
 
                 <GuestTable
+
                     guests={guests}
+
                     onView={handleView}
+
                     onEdit={handleEdit}
-                    onDelete={handleDelete}
+
+                    onCheckOut={handleCheckOut}
+
+                    onCancel={handleCancel}
+
+                    onRemove={handleRemove}
+
                 />
 
             )}
 
 
-            {/* Guest Form Modal */}
+            {/* FORM MODAL */}
 
             {showForm && (
 
@@ -151,35 +183,34 @@ return (
 
                     <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-background p-6 shadow-xl">
 
-                        <div className="mb-6 flex items-center justify-between">
+                        <div className="mb-6">
 
-                            <div>
+                            <h2 className="text-xl font-semibold">
 
-                                <h2 className="text-xl font-semibold">
-                                    {editingGuest
-                                        ? 'Edit Guest'
-                                        : 'Add Guest'}
-                                </h2>
+                                {editingGuest
+                                    ? "Edit Guest"
+                                    : "Add Guest"}
 
-                                <p className="mt-1 text-sm text-muted-foreground">
-                                    Enter guest information and accommodation.
-                                </p>
-
-                            </div>
+                            </h2>
 
                         </div>
 
 
                         <GuestForm
+
                             branchId={branchId}
+
                             guest={editingGuest}
+
                             onSubmit={handleSubmit}
+
                             onCancel={() => {
 
                                 setShowForm(false)
-
                                 setEditingGuest(undefined)
+
                             }}
+
                         />
 
                     </div>

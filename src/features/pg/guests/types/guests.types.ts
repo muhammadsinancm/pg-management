@@ -64,6 +64,7 @@ export interface CreateGuestInput {
     bedNumber?: string
     checkInDate?: string
     expectedCheckOutDate?: string
+    actualCheckOutDate?: string
     status?: GuestStatus
     notes?: string
 }

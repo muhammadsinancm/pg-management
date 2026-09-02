@@ -16,6 +16,7 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
 
     const [fullName, setFullName] = useState(guest?.fullName ?? '')
     const [phone, setPhone] = useState(guest?.phone ?? '')
+    const [dateOfBirth, setDateOfBirth] = useState(guest?.dateOfBirth ?? '')
     const [email, setEmail] = useState(guest?.email ?? '')
     const [gender, setGender] = useState<Gender>(guest?.gender ?? 'male')
     const [idType, setIdType] = useState<IdType>(guest?.idType ?? 'aadhar')
@@ -77,7 +78,7 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
 
     const floorRooms = rooms.filter(room => room.floorId === floorId)
 
-    const availableBeds = selectedRoom?.beds?.filter(bed => bed.status === 'available') ?? []
+    const availableBeds = selectedRoom?.beds?.filter(bed => bed.status === 'available' || bed.id === guest?.bedId) ?? []
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -103,6 +104,9 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
             phone: phone.trim(),
             ...(email.trim() && {
                 email: email.trim()
+            }),
+            ...(dateOfBirth.trim() && {
+                dateOfBirth
             }),
             gender,
             idType,
@@ -208,6 +212,23 @@ export function GuestForm({ branchId, guest, onSubmit, onCancel }: GuestFormProp
                         setPhone(e.target.value)
                     }
                     placeholder="9876543210"
+                    className="w-full rounded-md border px-3 py-2"
+                />
+
+            </div>
+
+            <div>
+
+                <label className="mb-1 block text-sm font-medium">
+                    Date of Birth
+                </label>
+
+                <input
+                    type="date"
+                    value={dateOfBirth}
+                    onChange={e =>
+                        setDateOfBirth(e.target.value)
+                    }
                     className="w-full rounded-md border px-3 py-2"
                 />
 
