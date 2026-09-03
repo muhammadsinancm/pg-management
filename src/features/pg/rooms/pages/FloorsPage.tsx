@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router";
+import { useNavigate } from "react-router";
 import { useFloors } from "../hooks/useFloors";
 import { useState } from "react";
 import { CreateFloorInput, Floor } from "../types/floor.types";
@@ -12,8 +12,6 @@ export function FloorsPage() {
     const navigate = useNavigate()
 
     const { branches, loading: branchesLoading, error: branchesError } = useBranches()
-
-    const { branchId } = useParams<{ branchId: string }>()
 
     const [showForm, setShowForm] = useState(false)
     const [editingFloor, setEditingFloor] = useState<Floor | undefined>()
@@ -37,7 +35,7 @@ export function FloorsPage() {
     }
 
     async function handleSubmit(data: CreateFloorInput) {
-        if (!branchId) {
+        if (!selectedBranchId) {
             alert('Please select a branch first')
             return
         }
