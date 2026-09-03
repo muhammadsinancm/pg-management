@@ -20,6 +20,10 @@ import { BranchesPage } from '@/features/pg/branches/pages/BranchPage'
 import { CreateBranchPage } from '@/features/pg/branches/pages/CreateBranchPage'
 import { BranchDetailsPage } from '@/features/pg/branches/pages/BranchDetailsPage'
 import { EditBranchPage } from '@/features/pg/branches/pages/EditBranchPage'
+import { StaffPage } from '@/features/pg/staff/pages/StaffPage'
+import { CreateStaffPage } from '@/features/pg/staff/pages/CreateStaffPage'
+import { StaffDetailsPage } from '@/features/pg/staff/pages/StaffDetailsPage'
+import { EditStaffPage } from '@/features/pg/staff/pages/EditStaffPage'
 
 export function AppRouter(): React.JSX.Element {
   return (
@@ -47,6 +51,10 @@ export function AppRouter(): React.JSX.Element {
             <Route path='/pg/branches/create' element={<CreateBranchPage />} />
             <Route path='/pg/branches/:branchId' element={<BranchDetailsPage />} />
             <Route path='/pg/branches/:branchId/edit' element={<EditBranchPage />} />
+            <Route path='/pg/staff/' element={<StaffPage />} />
+            <Route path='/pg/staff/create' element={<CreateStaffPage />} />
+            <Route path='/pg/staff/:staffId' element={<StaffDetailsPage />} />
+            <Route path='/pg/staff/:staffId/edit' element={<EditStaffPage />} />
           </Route>
         </Route>
 
