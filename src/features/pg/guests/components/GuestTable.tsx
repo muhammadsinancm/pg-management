@@ -6,229 +6,192 @@ interface GuestTableProps {
   guests: Guest[]
   onView: (guest: Guest) => void
   onEdit: (guest: Guest) => void
-  onCheckOut: (guest: Guest) => Promise<void>
-  onCancel: (guest: Guest) => Promise<void>
-  onRemove: (guest: Guest) => Promise<void>
 }
 
-export function GuestTable({ guests, onView, onEdit, onCheckOut, onCancel, onRemove }: GuestTableProps) {
+export function GuestTable({ guests, onView, onEdit }: GuestTableProps) {
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'checked_out' | 'cancelled'>('all')
 
   const filteredGuests = guests.filter((guest) => {
-    const matchesSearch = guest.fullName.toLowerCase().includes(search.toLowerCase())
+    const searchValue = search.toLowerCase().trim()
 
-    const matchesStatus = statusFilter === 'all' || guest.status === statusFilter
-    return matchesSearch && matchesStatus
+    const matchesSearch = guest.fullName.toLowerCase().includes(searchValue) ||
+    guest.phone.toLowerCase().includes(searchValue) ||
+    guest.email?.toLowerCase().includes(searchValue)
+
+    return matchesSearch
 
   })
 
   return (
-    <div className="overflow-hidden rounded-xl border">
+        <div className="overflow-hidden rounded-xl border">
 
-      {/* Search & Filter */}
-      <div className="mb-4 flex gap-3 p-4">
+            {/* Search & Filter */}
+            <div className="mb-4 flex gap-3 p-4">
 
-        <input
-          type="text"
-          placeholder="Search guest name..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 rounded-md border px-3 py-2"
-        />
+                <input
+                    type="text"
+                    placeholder="Search guest..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="flex-1 rounded-md border px-3 py-2"
+                />
 
-        <select
-          value={statusFilter}
-          onChange={(e) =>
-            setStatusFilter(
-              e.target.value as
-              | 'all'
-              | 'active'
-              | 'checked_out'
-              | 'cancelled'
-            )
-          }
-          className="rounded-md border px-3 py-2"
-        >
-          <option value="all">All</option>
-          <option value="active">Active</option>
-          <option value="checked_out">Checked Out</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
+            </div>
 
-      </div>
+            {/* Table */}
+            <div className="overflow-x-auto">
 
-      <table className="w-full">
+                <table className="w-full">
 
-        {/* TABLE HEADER */}
-        <thead>
+                    {/* TABLE HEADER */}
+                    <thead>
+                        <tr className="border-b bg-muted/30">
 
-          <tr className="border-b bg-muted/30">
+                            <th className="px-4 py-3 text-left text-sm font-medium">
+                                Guest
+                            </th>
 
-            <th className="px-4 py-3 text-left text-sm font-medium">
-              Customers
-            </th>
+                            <th className="px-4 py-3 text-left text-sm font-medium">
+                                Phone
+                            </th>
 
-            <th className="px-4 py-3 text-left text-sm font-medium">
-              Phone
-            </th>
+                            <th className="px-4 py-3 text-left text-sm font-medium">
+                                Email
+                            </th>
 
-            <th className="px-4 py-3 text-left text-sm font-medium">
-              Floor
-            </th>
+                            <th className="px-4 py-3 text-left text-sm font-medium">
+                                ID
+                            </th>
 
-            <th className="px-4 py-3 text-left text-sm font-medium">
-              Room
-            </th>
+                            <th className="px-4 py-3 text-left text-sm font-medium">
+                                Status
+                            </th>
 
-            <th className="px-4 py-3 text-left text-sm font-medium">
-              Bed
-            </th>
+                            <th className="px-4 py-3 text-left text-sm font-medium">
+                                Actions
+                            </th>
 
-            <th className="px-4 py-3 text-left text-sm font-medium">
-              Check In
-            </th>
+                        </tr>
+                    </thead>
 
-            <th className="px-4 py-3 text-left text-sm font-medium">
-              Status
-            </th>
+                    {/* TABLE BODY */}
+                    <tbody>
 
-            <th className="px-4 py-3 text-left text-sm font-medium">
-              Actions
-            </th>
+                        {filteredGuests.length === 0 ? (
+                            <tr>
+                                <td
+                                    colSpan={6}
+                                    className="px-4 py-8 text-center text-sm text-muted-foreground"
+                                >
+                                    No guests found
+                                </td>
+                            </tr>
+                        ) : (
+                            filteredGuests.map((guest) => (
 
-          </tr>
+                                <tr
+                                    key={guest.id}
+                                    className="border-b last:border-b-0"
+                                >
 
-        </thead>
+                                    {/* GUEST */}
+                                    <td className="px-4 py-3">
+                                        <div>
+                                            <p className="font-medium">
+                                                {guest.fullName}
+                                            </p>
 
-        {/* TABLE BODY */}
-        <tbody>
+                                            {guest.gender && (
+                                                <p className="text-xs text-muted-foreground capitalize">
+                                                    {guest.gender}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </td>
 
-          {filteredGuests.map((guest) => (
+                                    {/* PHONE */}
+                                    <td className="px-4 py-3">
+                                        {guest.phone}
+                                    </td>
 
-            <tr
-              key={guest.id}
-              className="border-b last:border-b-0"
-            >
+                                    {/* EMAIL */}
+                                    <td className="px-4 py-3">
+                                        {guest.email || "-"}
+                                    </td>
 
-              {/* GUEST */}
-              <td className="px-4 py-3">
-                {guest.fullName}
-              </td>
+                                    {/* ID */}
+                                    <td className="px-4 py-3">
+                                        {guest.idNumber ? (
+                                            <div>
+                                                <p className="text-sm">
+                                                    {guest.idNumber}
+                                                </p>
 
-              {/* PHONE */}
-              <td className="px-4 py-3">
-                {guest.phone}
-              </td>
+                                                {guest.idType && (
+                                                    <p className="text-xs text-muted-foreground capitalize">
+                                                        {guest.idType.replace(
+                                                            "_",
+                                                            " "
+                                                        )}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            "-"
+                                        )}
+                                    </td>
 
-              {/* FLOOR */}
-              <td className="px-4 py-3">
+                                    {/* STATUS */}
+                                    <td className="px-4 py-3">
+                                        <GuestStatusBadge
+                                            status={guest.status}
+                                        />
+                                    </td>
 
-                {guest.floorName
-                  ? `${guest.floorName}${guest.floorNumber !== undefined
-                    ? ` (${guest.floorNumber})`
-                    : ""
-                  }`
-                  : "-"
-                }
+                                    {/* ACTIONS */}
+                                    <td className="px-4 py-3">
 
-              </td>
+                                        <div className="flex flex-wrap gap-2">
 
-              {/* ROOM */}
-              <td className="px-4 py-3">
+                                            {/* VIEW */}
+                                            <button
+                                                onClick={() =>
+                                                    onView(guest)
+                                                }
+                                                className="rounded-md border px-3 py-1 text-sm"
+                                            >
+                                                View
+                                            </button>
 
-                {guest.roomNumber
-                  ? `Room ${guest.roomNumber}`
-                  : "-"
-                }
+                                            {/* EDIT */}
+                                            {guest.status === "active" && (
+                                                <button
+                                                    onClick={() =>
+                                                        onEdit(guest)
+                                                    }
+                                                    className="rounded-md border px-3 py-1 text-sm"
+                                                >
+                                                    Edit
+                                                </button>
+                                            )}
+                                            
+                                        </div>
 
-              </td>
+                                    </td>
 
-              {/* BED */}
-              <td className="px-4 py-3">
+                                </tr>
 
-                {guest.bedNumber
-                  ? `Bed ${guest.bedNumber}`
-                  : "-"
-                }
+                            ))
+                        )}
 
-              </td>
+                    </tbody>
 
-              {/* CHECK IN */}
-              <td className="px-4 py-3">
-                {guest.checkInDate ?? "-"}
-              </td>
+                </table>
 
-              {/* STATUS */}
-              <td className="px-4 py-3">
-                <GuestStatusBadge status={guest.status} />
-              </td>
+            </div>
 
-              {/* ACTIONS */}
-              <td className="px-4 py-3">
+        </div>
+    )
 
-                <div className="flex gap-2">
-
-                  {/* VIEW */}
-                  <button
-                    onClick={() => onView(guest)}
-                    className="rounded-md border px-3 py-1 text-sm"
-                  >
-                    View
-                  </button>
-
-                  {/* EDIT */}
-                  {guest.status === "active" && (
-                    <button
-                      onClick={() => onEdit(guest)}
-                      className="rounded-md border px-3 py-1 text-sm"
-                    >
-                      Edit
-                    </button>
-                  )}
-
-                  {/* CHECKOUT + CANCEL */}
-                  {guest.status === "active" && (
-                    <>
-                      <button
-                        onClick={() => onCheckOut(guest)}
-                        className="rounded-md border px-3 py-1 text-sm"
-                      >
-                        Checkout
-                      </button>
-
-                      <button
-                        onClick={() => onCancel(guest)}
-                        className="rounded-md border px-3 py-1 text-sm"
-                      >
-                        Cancel
-                      </button>
-                    </>
-                  )}
-
-                  {/* REMOVE */}
-                  {guest.status !== "active" && (
-                    <button
-                      onClick={() => onRemove(guest)}
-                      className="rounded-md border border-red-500 px-3 py-1 text-sm text-red-600 hover:bg-red-50"
-                    >
-                      Remove
-                    </button>
-                  )}
-
-                </div>
-
-              </td>
-
-            </tr>
-
-          ))}
-
-        </tbody>
-
-      </table>
-
-    </div>
-  )
 }
 

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { CreateGuestInput, Guest } from "../types/guests.types";
-import { cancelGuest, checkOutGuest, createGuest, deleteGuest, getGuests, updateGuest } from "../services/guestService";
+import { createGuest, getGuests, updateGuest } from "../services/guestService";
 
 export function useGuests() {
     const [guests, setGuests] = useState<Guest[]>([])
@@ -38,30 +38,12 @@ export function useGuests() {
         await loadGuests()
     }
 
-    async function removeGuest(guestId: string) {
-        await deleteGuest(guestId)
-        await loadGuests()
-    }
-
-    async function handleCheckOut(guest: Guest) {
-        await checkOutGuest(guest)
-        await loadGuests()
-    }
-
-    async function handleCancel(guest: Guest) {
-        await cancelGuest(guest)
-        await loadGuests()
-    }
-
     return {
         guests,
         loading,
         error,
         addGuest,
         editGuest,
-        removeGuest,
-        checkOutGuest: handleCheckOut,
-        cancelGuest: handleCancel,
         refresh: loadGuests
     }
 

@@ -10,7 +10,12 @@ interface GuestCardProps {
 
 export function GuestCard({ guest, onView, onEdit, onDelete }: GuestCardProps) {
     return (
+
         <div className="rounded-xl border bg-card p-5 shadow-sm">
+
+            {/* =============================== */}
+            {/* GUEST INFORMATION */}
+            {/* =============================== */}
 
             <div className="flex items-start justify-between">
 
@@ -36,67 +41,112 @@ export function GuestCard({ guest, onView, onEdit, onDelete }: GuestCardProps) {
 
             </div>
 
+
+            {/* =============================== */}
+            {/* CONTACT INFORMATION */}
+            {/* =============================== */}
+
             <div className="mt-5 grid grid-cols-2 gap-4">
 
                 <div>
+
                     <p className="text-xs text-muted-foreground">
-                        Room
+                        Email
                     </p>
 
                     <p className="font-medium">
-                        {guest.roomNumber ?? '-'}
+                        {guest.email ?? '-'}
                     </p>
+
                 </div>
 
+
                 <div>
+
                     <p className="text-xs text-muted-foreground">
-                        Bed
+                        Gender
                     </p>
 
-                    <p className="font-medium">
-                        {guest.bedNumber ?? '-'}
+                    <p className="font-medium capitalize">
+                        {guest.gender ?? '-'}
                     </p>
+
                 </div>
 
+
                 <div>
+
                     <p className="text-xs text-muted-foreground">
-                        Check In
+                        ID Type
                     </p>
 
                     <p className="font-medium">
-                        {guest.checkInDate ?? '-'}
+                        {guest.idType ?? '-'}
                     </p>
+
                 </div>
 
+
                 <div>
+
                     <p className="text-xs text-muted-foreground">
-                        Expected Checkout
+                        ID Number
                     </p>
 
                     <p className="font-medium">
-                        {guest.expectedCheckOutDate ?? '-'}
+                        {guest.idNumber ?? '-'}
                     </p>
+
                 </div>
 
             </div>
 
+
+            {/* =============================== */}
+            {/* ADDRESS */}
+            {/* =============================== */}
+
+            <div className="mt-5">
+
+                <p className="text-xs text-muted-foreground">
+                    Address
+                </p>
+
+                <p className="font-medium">
+                    {guest.city || guest.state
+                        ? `${guest.city ?? ''}${guest.city && guest.state ? ', ' : ''}${guest.state ?? ''}`
+                        : '-'}
+                </p>
+
+            </div>
+
+
+            {/* =============================== */}
+            {/* ACTIONS */}
+            {/* =============================== */}
+
             <div className="mt-5 flex gap-2">
 
                 <button
+                    type="button"
                     onClick={() => onView(guest)}
                     className="flex-1 rounded-md border px-3 py-2 text-sm"
                 >
                     View
                 </button>
 
+
                 <button
+                    type="button"
                     onClick={() => onEdit(guest)}
                     className="flex-1 rounded-md border px-3 py-2 text-sm"
                 >
                     Edit
                 </button>
 
+
                 <button
+                    type="button"
                     onClick={() => onDelete(guest)}
                     className="rounded-md bg-red-600 px-3 py-2 text-sm text-white"
                 >

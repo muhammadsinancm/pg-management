@@ -11,19 +11,25 @@ function InfoRow({ label, value }: {
     value?: string | number | null
 }) {
     return (
+
         <div className="flex flex-col gap-1">
+
             <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 {label}
             </span>
 
             <span className="text-sm">
+
                 {value !== undefined &&
                     value !== null &&
                     value !== ''
                     ? value
                     : '-'}
+
             </span>
+
         </div>
+
     )
 }
 
@@ -32,6 +38,7 @@ function Section({ title, children }: {
     children: React.ReactNode
 }) {
     return (
+
         <section className="rounded-xl border bg-background p-5">
 
             <h2 className="mb-5 text-lg font-semibold">
@@ -41,15 +48,20 @@ function Section({ title, children }: {
             {children}
 
         </section>
+
     )
 
 }
 
 export function GuestDetails({ guest, onBack, onEdit }: GuestDetailsProps) {
     return (
+
         <div className="space-y-6 p-6">
 
-            {/* Header */}
+
+            {/* =============================== */}
+            {/* HEADER */}
+            {/* =============================== */}
 
             <div className="flex items-center justify-between">
 
@@ -68,10 +80,11 @@ export function GuestDetails({ guest, onBack, onEdit }: GuestDetailsProps) {
                     </h1>
 
                     <p className="mt-1 text-sm text-muted-foreground">
-                        Guest details and stay information
+                        Guest personal and contact information
                     </p>
 
                 </div>
+
 
                 <button
                     type="button"
@@ -84,7 +97,9 @@ export function GuestDetails({ guest, onBack, onEdit }: GuestDetailsProps) {
             </div>
 
 
-            {/* Status */}
+            {/* =============================== */}
+            {/* STATUS */}
+            {/* =============================== */}
 
             <div className="rounded-xl border bg-background p-5">
 
@@ -97,14 +112,17 @@ export function GuestDetails({ guest, onBack, onEdit }: GuestDetailsProps) {
                         </p>
 
                         <p className="mt-1 font-medium">
+
                             {guest.status === 'active'
                                 ? 'Active'
                                 : guest.status === 'checked_out'
                                     ? 'Checked Out'
                                     : 'Cancelled'}
+
                         </p>
 
                     </div>
+
 
                     <span
                         className={`rounded-full px-3 py-1 text-xs font-medium ${guest.status === 'active'
@@ -114,7 +132,9 @@ export function GuestDetails({ guest, onBack, onEdit }: GuestDetailsProps) {
                                     : 'bg-red-100 text-red-700'
                             }`}
                     >
+
                         {guest.status.replace('_', ' ')}
+
                     </span>
 
                 </div>
@@ -122,7 +142,9 @@ export function GuestDetails({ guest, onBack, onEdit }: GuestDetailsProps) {
             </div>
 
 
-            {/* Personal Information */}
+            {/* =============================== */}
+            {/* PERSONAL INFORMATION */}
+            {/* =============================== */}
 
             <Section title="Personal Information">
 
@@ -158,7 +180,9 @@ export function GuestDetails({ guest, onBack, onEdit }: GuestDetailsProps) {
             </Section>
 
 
-            {/* ID Information */}
+            {/* =============================== */}
+            {/* IDENTIFICATION */}
+            {/* =============================== */}
 
             <Section title="Identification">
 
@@ -179,7 +203,9 @@ export function GuestDetails({ guest, onBack, onEdit }: GuestDetailsProps) {
             </Section>
 
 
-            {/* Address */}
+            {/* =============================== */}
+            {/* ADDRESS */}
+            {/* =============================== */}
 
             <Section title="Address">
 
@@ -210,79 +236,9 @@ export function GuestDetails({ guest, onBack, onEdit }: GuestDetailsProps) {
             </Section>
 
 
-            {/* Accommodation */}
-
-            <Section title="Accommodation">
-
-                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-
-                    <InfoRow
-                        label="Floor"
-                        value={
-                            guest.floorName
-                                ? `${guest.floorName} ${guest.floorNumber !== undefined
-                                    ? `(${guest.floorNumber})`
-                                    : ''
-                                }`
-                                : guest.floorNumber
-                        }
-                    />
-
-                    <InfoRow
-                        label="Room"
-                        value={
-                            guest.roomNumber
-                                ? `Room ${guest.roomNumber}`
-                                : undefined
-                        }
-                    />
-
-                    <InfoRow
-                        label="Bed"
-                        value={
-                            guest.bedNumber
-                                ? `Bed ${guest.bedNumber}`
-                                : undefined
-                        }
-                    />
-
-                    <InfoRow
-                        label="Room ID"
-                        value={guest.roomId}
-                    />
-
-                </div>
-
-            </Section>
-
-
-            {/* Stay */}
-
-            <Section title="Stay Information">
-
-                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-
-                    <InfoRow
-                        label="Check In"
-                        value={guest.checkInDate}
-                    />
-
-                    <InfoRow
-                        label="Expected Check Out"
-                        value={guest.expectedCheckOutDate}
-                    />
-
-                    <InfoRow
-                        label="Actual Check Out"
-                        value={guest.actualcheckOutDate}
-                    />
-
-                </div>
-
-            </Section>
-
-
-            {/* Emergency Contact */}
+            {/* =============================== */}
+            {/* EMERGENCY CONTACT */}
+            {/* =============================== */}
 
             <Section title="Emergency Contact">
 
@@ -290,17 +246,23 @@ export function GuestDetails({ guest, onBack, onEdit }: GuestDetailsProps) {
 
                     <InfoRow
                         label="Name"
-                        value={guest.emergencyContact?.name}
+                        value={
+                            guest.emergencyContact?.name
+                        }
                     />
 
                     <InfoRow
                         label="Phone"
-                        value={guest.emergencyContact?.phone}
+                        value={
+                            guest.emergencyContact?.phone
+                        }
                     />
 
                     <InfoRow
                         label="Relationship"
-                        value={guest.emergencyContact?.relation}
+                        value={
+                            guest.emergencyContact?.relation
+                        }
                     />
 
                 </div>
@@ -308,17 +270,24 @@ export function GuestDetails({ guest, onBack, onEdit }: GuestDetailsProps) {
             </Section>
 
 
-            {/* Notes */}
+            {/* =============================== */}
+            {/* NOTES */}
+            {/* =============================== */}
 
             <Section title="Notes">
 
                 <p className="whitespace-pre-wrap text-sm text-muted-foreground">
+
                     {guest.notes || 'No notes added.'}
+
                 </p>
 
             </Section>
 
+
         </div>
+
     )
+
 
 }

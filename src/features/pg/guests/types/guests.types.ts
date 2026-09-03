@@ -12,7 +12,6 @@ interface EmergencyContact {
 
 export interface Guest {
     id: string
-    branchId: string
     fullName: string
     phone: string
     email?: string
@@ -25,16 +24,6 @@ export interface Guest {
     state?: string
     pincode?: string
     emergencyContact?: EmergencyContact
-    floorId?: string
-    floorNumber?: number
-    floorName?: string
-    roomId?: string
-    roomNumber?: string
-    bedId?: string
-    bedNumber?: string
-    checkInDate?: string
-    expectedCheckOutDate?: string
-    actualcheckOutDate?: string
     status: GuestStatus
     notes?: string
     createdAt?: string
@@ -42,7 +31,6 @@ export interface Guest {
 }
 
 export interface CreateGuestInput {
-    branchId: string
     fullName: string
     phone: string
     email?: string
@@ -55,16 +43,6 @@ export interface CreateGuestInput {
     state?: string
     pincode?: string
     emergencyContact?: EmergencyContact
-    floorId?: string
-    floorNumber?: number
-    floorName?: string
-    roomId?: string
-    roomNumber?: string
-    bedId?: string
-    bedNumber?: string
-    checkInDate?: string
-    expectedCheckOutDate?: string
-    actualCheckOutDate?: string
     status?: GuestStatus
     notes?: string
 }
