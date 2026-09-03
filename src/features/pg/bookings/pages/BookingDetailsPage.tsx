@@ -3,9 +3,11 @@ import { useNavigate, useParams } from "react-router";
 import { Booking } from "../types/booking.types";
 import { getBooking } from "../services/bookingService";
 import { BookingDetails } from "../components/BookingDetails";
+import { useBookings } from "../hooks/useBookings";
 
 export function BookingDetailsPage() {
     const { bookingId } = useParams<{ bookingId: string }>()
+    const { changeBookingStatus } = useBookings()
 
     const navigate = useNavigate()
 
@@ -95,6 +97,54 @@ export function BookingDetailsPage() {
             <BookingDetails
                 booking={booking}
             />
+
+            {booking.status === "pending" && (
+                <div className="flex gap-3">
+                    <button
+                        type="button"
+                        onClick={async () => {
+                            try {
+                                await changeBookingStatus(
+                                    booking.id,
+                                    "confirmed"
+                                )
+
+                                setBooking({
+                                    ...booking,
+                                    status: "confirmed",
+                                })
+                            } catch (error) {
+                                console.error(error)
+                            }
+                        }}
+                        className="rounded-lg bg-green-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-green-700"
+                    >
+                        Confirm Booking
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={async () => {
+                            try {
+                                await changeBookingStatus(
+                                    booking.id,
+                                    "cancelled"
+                                )
+
+                                setBooking({
+                                    ...booking,
+                                    status: "cancelled",
+                                })
+                            } catch (error) {
+                                console.error(error)
+                            }
+                        }}
+                        className="rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-700"
+                    >
+                        Cancel Booking
+                    </button>
+                </div>
+            )}
 
         </div>
     )

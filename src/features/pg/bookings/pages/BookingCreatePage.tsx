@@ -8,35 +8,29 @@ export function BookingCreatePage() {
     const { addBooking } = useBookings()
 
     const organizationId = 'org001'
-    const branchId = 'branch001'
     const createdBy = 'current-user'
 
-    const handleSubmit = async (data: any) => {
-        await addBooking(data)
-        navigate('/pg/bookings')
+    const handleSubmit = async (data: Parameters<typeof addBooking>[0]) => {
+        try {
+            await addBooking(data)
+            navigate('/pg/bookings')
+
+        } catch (error) {
+            console.error('Failed to create booking', error)
+            throw error
+        }
+
     }
     return (
-        <div className="mx-auto max-w-5xl">
 
-            <div className="mb-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-teal-700">
-                    PG Management / Bookings
-                </p>
-            </div>
+        <div className="p-6">
 
             <BookingForm
-                organizationId={
-                    organizationId
-                }
-                branchId={branchId}
+                organizationId={organizationId}
                 createdBy={createdBy}
-                onSubmit={
-                    handleSubmit
-                }
+                onSubmit={handleSubmit}
                 onCancel={() =>
-                    navigate(
-                        "/pg/bookings"
-                    )
+                    navigate("/pg/bookings")
                 }
             />
 

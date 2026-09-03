@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { Booking, CreateBookingInput, UpdateBookingInput } from "../types/booking.types";
-import { createBooking, deleteBooking, getBooking, getBookings, updateBooking } from "../services/bookingService";
+import { Booking, BookingStatus, CreateBookingInput, UpdateBookingInput } from "../types/booking.types";
+import { createBooking, deleteBooking, getBooking, getBookings, updateBooking, updateBookingStatus } from "../services/bookingService";
 
 export function useBookings() {
     const [bookings, setBookings] = useState<Booking[]>([])
@@ -47,7 +47,12 @@ export function useBookings() {
         return getBooking(id)
     }
 
+    async function changeBookingStatus(bookingId: string, status: BookingStatus) {
+        await updateBookingStatus(bookingId, status)
+        await loadBookings()
+    }
+
     return {
-        bookings, loading, error, reload: loadBookings, addBooking, editBooking, removeBooking, findBooking
+        bookings, loading, error, reload: loadBookings, addBooking, editBooking, removeBooking, findBooking, changeBookingStatus
     }
 }
