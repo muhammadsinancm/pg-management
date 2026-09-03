@@ -133,7 +133,6 @@ export function GuestForm({ guest, onSubmit, onCancel }: GuestFormProps) {
     }, [guest?.roomId, rooms])
 
     const selectedFloor = floors.find(floor => floor.id === floorId)
-    const floorRooms = rooms.filter(room => room.floorId === floorId)
 
     const selectedRoom = rooms.find(room => room.id === roomId && room.floorId === floorId)
 
