@@ -7,7 +7,8 @@ import {
   BarChart3,
   type LucideIcon,
   UsersRound,
-  Building2
+  Building2,
+  UserRound
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 
@@ -25,7 +26,8 @@ const navItems: NavItem[] = [
   { label: 'Bookings', to: '/pg/bookings', icon: CalendarCheck, enabled: true },
   { label: 'Reports', to: '/pg/reports', icon: BarChart3, enabled: true },
   { label: 'Customers', to: '/pg/customers', icon: UsersRound, enabled: true },
-  { label: 'Branches', to: '/pg/branches', icon: Building2, enabled: true }
+  { label: 'Branches', to: '/pg/branches', icon: Building2, enabled: true },
+  {label: 'Staff', to: '/pg/staff', icon: UserRound, enabled: true}
 ]
 
 export function DashboardSidebar(): React.JSX.Element {
