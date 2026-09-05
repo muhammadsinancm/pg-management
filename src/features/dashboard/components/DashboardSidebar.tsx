@@ -8,7 +8,8 @@ import {
   type LucideIcon,
   UsersRound,
   Building2,
-  UserRound
+  UserRound,
+  Receipt
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 
@@ -22,12 +23,13 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard, enabled: true },
   { label: 'Rooms', to: '/pg/rooms', icon: BedDouble, enabled: true },
-  { label: 'Payments', to: '/pg/payments/create', icon: Wallet, enabled: true },
+  { label: 'Billing', to: '/pg/billing', icon: Wallet, enabled: true },
   { label: 'Bookings', to: '/pg/bookings', icon: CalendarCheck, enabled: true },
   { label: 'Reports', to: '/pg/reports', icon: BarChart3, enabled: true },
   { label: 'Customers', to: '/pg/customers', icon: UsersRound, enabled: true },
   { label: 'Branches', to: '/pg/branches', icon: Building2, enabled: true },
-  {label: 'Staff', to: '/pg/staff', icon: UserRound, enabled: true}
+  { label: 'Staff', to: '/pg/staff', icon: UserRound, enabled: true },
+  {label: 'Expenses', to: '/pg/expenses', icon: Receipt, enabled: true}
 ]
 
 export function DashboardSidebar(): React.JSX.Element {
