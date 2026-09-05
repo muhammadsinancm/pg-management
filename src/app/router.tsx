@@ -24,6 +24,14 @@ import { StaffPage } from '@/features/pg/staff/pages/StaffPage'
 import { CreateStaffPage } from '@/features/pg/staff/pages/CreateStaffPage'
 import { StaffDetailsPage } from '@/features/pg/staff/pages/StaffDetailsPage'
 import { EditStaffPage } from '@/features/pg/staff/pages/EditStaffPage'
+import { BillingPage } from '@/features/pg/billing/pages/BillingPage'
+import CreateInvoicePage from '@/features/pg/billing/pages/CreateInvoicePage'
+import InvoiceDetailsPage from '@/features/pg/billing/pages/InvoiceDetailsPage'
+import CreatePaymentPage from '@/features/pg/billing/pages/CreatePaymentPage'
+import CreateExpensePage from '@/features/pg/expenses/pages/CreateExpensePage'
+import EditExpensePage from '@/features/pg/expenses/pages/EditExpensePage'
+import ExpenseDetailsPage from '@/features/pg/expenses/pages/ExpenseDetailsPage'
+import ExpensesPage from '@/features/pg/expenses/pages/ExpensesPage'
 
 export function AppRouter(): React.JSX.Element {
   return (
@@ -55,6 +63,15 @@ export function AppRouter(): React.JSX.Element {
             <Route path='/pg/staff/create' element={<CreateStaffPage />} />
             <Route path='/pg/staff/:staffId' element={<StaffDetailsPage />} />
             <Route path='/pg/staff/:staffId/edit' element={<EditStaffPage />} />
+            <Route path='/pg/billing' element={<BillingPage/>}/>
+            <Route path='/pg/billing/invoices/create' element={<CreateInvoicePage/>}/>
+            <Route path='/pg/billing/invoices/:invoiceId' element={<InvoiceDetailsPage/>}/>
+            <Route path='/pg/billing/payments/:paymentId' element={<PaymentDetailsPage/>}/>
+            <Route path='/pg/billing/payments/create' element={<CreatePaymentPage/>}/>
+            <Route path='/pg/expenses' element={<ExpensesPage/>}/>
+            <Route path='/pg/expenses/create' element={<CreateExpensePage/>}/>
+            <Route path='/pg/expenses/edit/:expenseId' element={<EditExpensePage/>}/>
+            <Route path='/pg/expenses/:expenseId' element={<ExpenseDetailsPage/>}/>
           </Route>
         </Route>
 
