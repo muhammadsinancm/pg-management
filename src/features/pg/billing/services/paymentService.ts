@@ -1,8 +1,9 @@
-import { addDoc, collection, doc, getDoc, getDocs, Timestamp, updateDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, runTransaction, Timestamp, updateDoc } from "firebase/firestore";
 import { CreatePaymentInput, Payment, UpdatePaymentInput } from "../types/payment.types";
 import { firestoreDb } from "@/services/firebase/config";
 
 const COLLECTION = 'payments'
+const INVOICE_COLLECTION = 'invoices'
 
 function convertDate(value: unknown): string | undefined {
     if (value instanceof Timestamp) {
@@ -41,25 +42,75 @@ function mapPayment(id: string, data: Record<string, unknown>): Payment {
 export async function createPayment(data: CreatePaymentInput): Promise<string> {
     const now = Timestamp.now()
 
-    const paymentData = {
-        organizationId: data.organizationId,
-        branchId: data.branchId,
-        customerId: data.customerId,
-        bookingId: data.bookingId,
-        paymentNumber: data.paymentNumber,
-        amount: data.amount,
-        paymentDate: data.paymentDate,
-        paymentMethod: data.paymentMethod,
-        status: data.status ?? 'completed',
-        createdAt: now,
-        updatedAt: now,
-        ...(data.invoiceId ? { invoiceId: data.invoiceId } : {}),
-        ...(data.referenceNumber ? { referenceNumber: data.referenceNumber } : {}),
-        ...(data.notes ? { notes: data.notes } : {})
+    if (!data.invoiceId) {
+        throw new Error('Invoice is required for payment')
+    }
+    if (data.amount <= 0) {
+        throw new Error('Payment amount must be greater than 0')
     }
 
-    const paymentRef = await addDoc(collection(firestoreDb, COLLECTION), paymentData)
+    const invoiceRef = doc(firestoreDb, INVOICE_COLLECTION, data.invoiceId)
+    const paymentRef = doc(collection(firestoreDb, COLLECTION))
+
+    await runTransaction(firestoreDb, async (transaction) => {
+        const invoiceSnapshot = await transaction.get(invoiceRef)
+
+        if (!invoiceSnapshot.exists()) {
+            throw new Error('Invoice not found')
+        }
+
+        const invoice = invoiceSnapshot.data()
+        const totalAmount = Number(invoice.totalAmount ?? 0)
+        const currentPaidAmount = Number(invoice.paidAmount ?? 0)
+        const currentDueAmount = Number(invoice.dueAmount ?? 0)
+
+        if (data.amount > currentDueAmount) {
+            throw new Error(`Payment can not due amount of ₹${currentDueAmount}`)
+        }
+
+        const newPaidAmount = currentPaidAmount + data.amount
+        const newDueAmount = Math.max(totalAmount - newPaidAmount, 0)
+
+        let newStatus: string
+
+        if (newDueAmount === 0) {
+            newStatus = 'paid'
+        } else if (newPaidAmount > 0) {
+            newStatus = 'partial'
+        } else {
+            newStatus = 'unpaid'
+        }
+
+        const paymentData = {
+            organizationId: data.organizationId,
+            branchId: data.branchId,
+            customerId: data.customerId,
+            bookingId: data.bookingId,
+            paymentNumber: data.paymentNumber,
+            amount: data.amount,
+            paymentDate: data.paymentDate,
+            paymentMethod: data.paymentMethod,
+            status: data.status ?? 'completed',
+            createdAt: now,
+            updatedAt: now,
+            ...(data.invoiceId ? { invoiceId: data.invoiceId } : {}),
+            ...(data.referenceNumber ? { referenceNumber: data.referenceNumber } : {}),
+            ...(data.notes ? { notes: data.notes } : {})
+        }
+
+        transaction.set(paymentRef, paymentData)
+
+        transaction.update(invoiceRef, {
+            paidAmount: newPaidAmount,
+            dueAmount: newDueAmount,
+            status: newStatus,
+            updatedAt: now
+        })
+
+    })
+
     return paymentRef.id
+
 }
 
 export async function getPayments(): Promise<Payment[]> {
@@ -88,8 +139,8 @@ export async function updatePayment(paymentId: string, data: UpdatePaymentInput)
     }
 
     Object.keys(updateData).forEach((key) => {
-        if (updateData[key as keyof typeof updateData] === undefined) {
-            delete updateData[key as keyof typeof updateData]
+        if (updateData[key] === undefined) {
+            delete updateData[key]
         }
     })
 
