@@ -1,10 +1,10 @@
-export type PaymentMethod = | 'cash' | 'upi' | 'card' | 'back_transfer'
+ type PaymentMethod = | 'cash' | 'upi' | 'card' | 'back_transfer'
 
-export type PaymentStatus = | 'paid' | 'pending' | 'failed' | 'refunded'
+ type PaymentStatus = | 'paid' | 'pending' | 'failed' | 'refunded'
 
-export type PaymentType = | 'rent' | 'advance' | 'deposit' | 'other'
+ type PaymentType = | 'rent' | 'advance' | 'deposit' | 'other'
 
-export interface Payment {
+interface Payment {
     id: string,
     paymentNumber: string
     organizationId: string
