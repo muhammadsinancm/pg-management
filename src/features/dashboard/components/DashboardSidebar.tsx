@@ -9,7 +9,9 @@ import {
   UsersRound,
   Building2,
   UserRound,
-  Receipt
+  Receipt,
+  Utensils,
+  Settings
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 
@@ -29,7 +31,9 @@ const navItems: NavItem[] = [
   { label: 'Customers', to: '/pg/customers', icon: UsersRound, enabled: true },
   { label: 'Branches', to: '/pg/branches', icon: Building2, enabled: true },
   { label: 'Staff', to: '/pg/staff', icon: UserRound, enabled: true },
-  {label: 'Expenses', to: '/pg/expenses', icon: Receipt, enabled: true}
+  { label: 'Expenses', to: '/pg/expenses', icon: Receipt, enabled: true },
+  { label: 'Meals', to: '/pg/meals', icon: Utensils, enabled: true },
+  {label: 'Settings', to: '/pg/settings', icon: Settings, enabled: true}
 ]
 
 export function DashboardSidebar(): React.JSX.Element {
