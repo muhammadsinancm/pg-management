@@ -1,4 +1,4 @@
-import { BookingReportData } from "../types/report.types";
+import type { BookingReportData } from "../types/report.types";
 
 interface BookingReportProps {
     bookings: BookingReportData
@@ -12,7 +12,7 @@ export function BookingReport({ bookings }: BookingReportProps) {
                 Booking Report
             </h2>
 
-            <div className="mt-5 grid grid-cols-2 gap-4">
+            <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
 
                 <Stat
                     label="Total"
@@ -45,11 +45,13 @@ export function BookingReport({ bookings }: BookingReportProps) {
     )
 }
 
-function Stat({ label, value }: {
+interface StatProps {
     label: string
     value: number
-}) {
-    return (
+}
+
+function Stat({ label, value }: StatProps) {
+     return (
         <div className="rounded-lg bg-gray-50 p-4">
 
             <p className="text-sm text-gray-500">

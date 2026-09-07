@@ -1,4 +1,4 @@
-import { OccupancyReportData } from "../types/report.types";
+import type { OccupancyReportData } from "../types/report.types";
 
 interface OccupancyReportProps {
     occupancy: OccupancyReportData

@@ -4,8 +4,12 @@ import { RevenueReport } from "../components/RevenueReport";
 import { OccupancyReport } from "../components/OccupancyReport";
 import { BookingReport } from "../components/BookingReport";
 import { PaymentReport } from "../components/PaymentReport";
-import { ReportSummaray } from "../components/ReportSummary";
 import { ReportFilters } from "../components/ReportFilters";
+import { ReportHeader } from "../components/ReportHeader";
+import { ReportSummary } from "../components/ReportSummary";
+import { MealReport } from "../components/MealReport";
+import { IncomeReport } from "../components/IncomeReport";
+import { ExpenseReport } from "../components/ExpenseReport";
 
 export function ReportsPage() {
     const [startDate, setStartDate] = useState<Date | undefined>()
@@ -64,21 +68,13 @@ export function ReportsPage() {
         <div className="space-y-6">
 
             {/* Header */}
+            <ReportHeader
+                title="Reports"
+                description="View your PG performance and financial reports."
+            />
 
-            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-
-                <div>
-
-                    <h1 className="text-2xl font-bold text-gray-900">
-                        Reports
-                    </h1>
-
-                    <p className="mt-1 text-sm text-gray-500">
-                        View your PG performance and financial reports.
-                    </p>
-
-                </div>
-
+            {/* Refresh */}
+            <div className="flex justify-end">
                 <button
                     type="button"
                     onClick={refresh}
@@ -86,45 +82,84 @@ export function ReportsPage() {
                 >
                     Refresh
                 </button>
-
             </div>
 
             {/* Filters */}
-
             <ReportFilters
                 onFilterChange={handleFilterChange}
             />
 
             {/* Summary */}
-
-            <ReportSummaray
+            <ReportSummary
                 summary={reports.summary}
             />
 
-            {/* Reports */}
+            {/* Financial Reports */}
+            <div>
+                <h2 className="mb-4 text-lg font-semibold text-gray-900">
+                    Financial Reports
+                </h2>
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                    <RevenueReport
+                        revenue={reports.revenue}
+                    />
 
-                <RevenueReport
-                    revenue={reports.revenue}
-                />
+                    <IncomeReport
+                        income={reports.income}
+                    />
+                </div>
+            </div>
+
+            {/* Occupancy */}
+            <div>
+                <h2 className="mb-4 text-lg font-semibold text-gray-900">
+                    Occupancy Report
+                </h2>
 
                 <OccupancyReport
                     occupancy={reports.occupancy}
                 />
+            </div>
 
-                <BookingReport
-                    bookings={reports.bookings}
+            {/* Booking & Payment */}
+            <div>
+                <h2 className="mb-4 text-lg font-semibold text-gray-900">
+                    Booking & Payment Reports
+                </h2>
+
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                    <BookingReport
+                        bookings={reports.bookings}
+                    />
+
+                    <PaymentReport
+                        payments={reports.payments}
+                    />
+                </div>
+            </div>
+
+                        <div>
+                <h2 className="mb-4 text-lg font-semibold text-gray-900">
+                    Meal Report
+                </h2>
+
+                <MealReport
+                    meals={reports.meals}
                 />
+            </div>
 
-                <PaymentReport
-                    payments={reports.payments}
+            <div>
+                <h2 className="mb-4 text-lg font-semibold text-gray-900">
+                    Expense Report
+                </h2>
+
+                <ExpenseReport
+                    expenses={reports.expenses}
                 />
-
             </div>
 
         </div>
-
     )
 
 }

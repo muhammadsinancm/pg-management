@@ -1,4 +1,4 @@
-import { PaymentReportData } from "../types/report.types";
+import type { PaymentReportData } from "../types/report.types";
 
 interface PaymentReportProps {
     payments: PaymentReportData

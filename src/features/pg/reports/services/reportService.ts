@@ -1,13 +1,16 @@
-import { collection, getDocs, query, QueryConstraint, Timestamp, where } from "firebase/firestore"
-import { BookingReportData, PaymentReportData, ReportFilters, ReportsData, RevenueReportData } from "../types/report.types"
+import { collection, getDoc, getDocs, query, QueryConstraint, Timestamp, where } from "firebase/firestore"
+import { BookingReportData, ExpenseReportData, IncomeReportData, MealReportData, PaymentReportData, ReportFilters, ReportsData, RevenueReportData } from "../types/report.types"
 import { firestoreDb } from "@/services/firebase/config"
 import { Room } from "../../rooms/types/room.types"
-import { Payment } from "../../payments/types/payment.types"
 import { Booking } from "../../bookings/types/booking.types"
+import { Meal } from "../../meals/types/meal.types"
+import { Expense } from "../types/expense.types"
 
 const ROOMS_COLLECTION = 'rooms'
 const PAYMENTS_COLLECTION = 'payments'
 const BOOKINGS_COLLECTION = 'bookings'
+const MEALS_COLLECTION = 'meals'
+const EXPENSES_COLLECTION = 'expenses'
 
 function convertTimestamp(value: unknown): Date | null {
     if (value instanceof Timestamp) {
@@ -15,6 +18,14 @@ function convertTimestamp(value: unknown): Date | null {
     }
     if (value instanceof Date) {
         return value
+    }
+    if (typeof value === 'string') {
+        const date = new Date(value)
+
+        if (!Number.isNaN(date.getTime())) {
+            return date
+        }
+
     }
 
     return null
@@ -38,21 +49,25 @@ function isDateInRange(value: unknown, startDate?: Date, endDate?: Date): Boolea
     return true
 }
 
+function createQuery(collectionName: string, branchId?: string) {
+    const constraints: QueryConstraint[] = []
+
+    if (branchId) {
+        constraints.push(where('branchId', '==', branchId))
+    }
+
+    return query(collection(firestoreDb, collectionName), ...constraints)
+}
+
 export async function getReports(filters: ReportFilters = {}): Promise<ReportsData> {
     const { branchId, startDate, endDate } = filters
 
-    const roomConstraints: QueryConstraint[] = []
-    if (branchId) {
-        roomConstraints.push(where('branchId', '==', branchId))
-    }
-
-    const roomsQuery = query(collection(firestoreDb, ROOMS_COLLECTION), ...roomConstraints)
-
+    const roomsQuery = createQuery(ROOMS_COLLECTION, branchId)
     const roomsSnapshot = await getDocs(roomsQuery)
 
-    const rooms: Room[] = roomsSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data()
+    const rooms: Room[] = roomsSnapshot.docs.map((document) => ({
+        id: document.id,
+        ...document.data()
     } as Room))
 
     const totalRooms = rooms.length
@@ -63,14 +78,7 @@ export async function getReports(filters: ReportFilters = {}): Promise<ReportsDa
 
     const occupancyRate = totalRooms > 0 ? (occupiedRooms / totalRooms) * 100 : 0
 
-    const paymentConstraints: QueryConstraint[] = []
-
-    if (branchId) {
-        paymentConstraints.push(where('branchId', '==', branchId))
-    }
-
-
-    const paymentsQuery = query(collection(firestoreDb, PAYMENTS_COLLECTION), ...paymentConstraints)
+    const paymentsQuery = createQuery(PAYMENTS_COLLECTION, branchId)
     const paymentsSnapshot = await getDocs(paymentsQuery)
 
     const payments: Payment[] = paymentsSnapshot.docs.map((doc) => ({
@@ -114,14 +122,46 @@ export async function getReports(filters: ReportFilters = {}): Promise<ReportsDa
         totalAmount: totalAmount
     }
 
+    const rentIncome = rentRevenue
 
-    const bookingConstraints: QueryConstraint[] = []
+    const otherIncome = advanceRevenue + depositRevenue + otherRevenue
 
-    if (branchId) {
-        bookingConstraints.push(where('branchId', '==', branchId))
+    const mealsQuery = createQuery(MEALS_COLLECTION, branchId)
+
+    const mealsSnapshot = await getDocs(mealsQuery)
+
+    const meals: Meal[] = mealsSnapshot.docs.map((document)=> ({
+        id: document.id,
+        ...document.data()
+    } as Meal)).filter((meal) => isDateInRange(meal.mealDate, startDate, endDate))
+
+    const breakfast = meals.filter((meal) => meal.mealType === 'breakfast').length
+    const lunch = meals.filter((meal) => meal.mealType === 'lunch').length
+    const dinner = meals.filter((meal) => meal.mealType === 'dinner').length
+    const snacks = meals.filter((meal) => meal.mealType === 'snacks').length
+    const servedMeals = meals.filter((meal) => meal.status === 'served')
+
+    const totalMealAmount = servedMeals.reduce((total, meal) => total + Number(meal.amount || 0), 0)
+    const mealReport: MealReportData = {
+        totalMeals: meals.length,
+        breakfast,
+        lunch,
+        dinner,
+        snacks,
+        totalAmount: totalMealAmount
     }
 
-    const bookingsQuery = query(collection(firestoreDb, BOOKINGS_COLLECTION), ...bookingConstraints)
+    const mealIncome = totalMealAmount
+
+    const income: IncomeReportData = {
+        totalIncome: rentIncome + mealIncome + otherIncome,
+        rentIncome,
+        mealIncome,
+        otherIncome
+    }
+
+
+    const bookingsQuery = createQuery(BOOKINGS_COLLECTION, branchId)
 
     const bookingsSnapshot = await getDocs(bookingsQuery)
     
@@ -145,6 +185,28 @@ export async function getReports(filters: ReportFilters = {}): Promise<ReportsDa
         completedBookings
     }
 
+    const expensesQuery = createQuery(EXPENSES_COLLECTION, branchId)
+    const expensesSnapshot = await getDocs(expensesQuery)
+
+    const expenses: Expense[] = expensesSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data()
+    } as Expense)).filter((expense) => isDateInRange(expense.expenseDate, startDate, endDate))
+
+    const paidExpenses = expenses.filter((expense) => expense.status === 'paid')
+    const pendingExpenses = expenses.filter((expense) => expense.status === 'pending')
+    const cancelledExpenses = expenses.filter((expense) => expense.status === 'cancelled')
+
+    const totalExpenseAmount = paidExpenses.reduce((total, expense) => total + Number(expense.amount || 0), 0)
+
+    const expenseReport: ExpenseReportData = {
+        totalExpenses: expenses.length,
+        paidExpenses: paidExpenses.length,
+        pendingExpenses: pendingExpenses.length,
+        cancelledExpenses: cancelledExpenses.length,
+        totalAmount: totalExpenseAmount
+    }
+
     return {
         summary: {
             totalRevenue: totalAmount,
@@ -166,7 +228,10 @@ export async function getReports(filters: ReportFilters = {}): Promise<ReportsDa
         },
 
         bookings: bookingReport,
-        payments: paymentReport
+        payments: paymentReport,
+        income,
+        meals: mealReport,
+        expenses: expenseReport
     }
 
 }

@@ -37,6 +37,15 @@ export interface BookingReportData {
     cancelledBookings: number
     completedBookings: number
 }
+
+export interface ExpenseReportData {
+    totalExpenses: number
+    paidExpenses: number
+    pendingExpenses: number
+    cancelledExpenses: number
+    totalAmount: number
+}
+
 export interface PaymentReportData {
     totalPayments: number
     paidPayments: number
@@ -52,4 +61,23 @@ export interface ReportsData {
     occupancy: OccupancyReportData
     bookings: BookingReportData
     payments: PaymentReportData
+    income: IncomeReportData
+    meals: MealReportData
+    expenses: ExpenseReportData
+}
+
+export interface IncomeReportData {
+    totalIncome: number
+    rentIncome: number
+    mealIncome: number
+    otherIncome: number
+}
+
+export interface MealReportData {
+    totalMeals: number
+    breakfast: number
+    lunch: number
+    dinner: number
+    snacks: number
+    totalAmount: number
 }

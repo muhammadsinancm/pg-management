@@ -1,4 +1,4 @@
-import { RevenueReportData } from "../types/report.types";
+import type{ RevenueReportData } from "../types/report.types";
 
 interface RevenueReportProps {
     revenue: RevenueReportData
