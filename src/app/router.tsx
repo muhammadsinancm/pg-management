@@ -1,7 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { DashboardShell } from '@/features/dashboard/components/DashboardShell'
-import { DashboardPage } from '@/features/dashboard/pages/DashboardPage'
 import { ProtectedRoute } from './ProtectedRoute'
 import { RoomDetailsPage } from '@/features/pg/rooms/pages/RoomDetailsPage'
 import { PaymentDetailsPage } from '@/features/pg/payments/pages/PaymentDetailsPage'
@@ -37,6 +36,7 @@ import CreateMealPage from '@/features/pg/meals/pages/CreateMealPage'
 import EditMealPage from '@/features/pg/meals/pages/EditMealPage'
 import MealDetailsPage from '@/features/pg/meals/pages/MealDetailsPage'
 import SettingsPage from '@/features/pg/settings/pages/SettingsPage'
+import DashboardPage from '@/features/pg/dashboard/pages/DashboardPage'
 
 export function AppRouter(): React.JSX.Element {
   return (
