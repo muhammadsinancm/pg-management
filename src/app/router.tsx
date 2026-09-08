@@ -37,6 +37,9 @@ import EditMealPage from '@/features/pg/meals/pages/EditMealPage'
 import MealDetailsPage from '@/features/pg/meals/pages/MealDetailsPage'
 import SettingsPage from '@/features/pg/settings/pages/SettingsPage'
 import DashboardPage from '@/features/pg/dashboard/pages/DashboardPage'
+import EditInvoicePage from '@/features/pg/billing/pages/EditInvoicePage'
+import CustomerMealsPage from '@/features/pg/meals/pages/CustomerMealsPage'
+import CreateCustomerMealPage from '@/features/pg/meals/pages/CreateCustomerMealPage'
 
 export function AppRouter(): React.JSX.Element {
   return (
@@ -57,6 +60,8 @@ export function AppRouter(): React.JSX.Element {
             <Route path='/pg/bookings' element={<BookingsPage />} />
             <Route path='/pg/bookings/create' element={<BookingCreatePage />} />
             <Route path='/pg/bookings/:bookingId' element={<BookingDetailsPage />} />
+            <Route path='/pg/bookings/:bookingId/meals' element={<CustomerMealsPage/>}/>
+            <Route path='/pg/bookings/:bookingId/meals/create' element={<CreateCustomerMealPage/>}/>
             <Route path='/pg/reports' element={<ReportsPage />} />
             <Route path='/pg/customers' element={<GuestsPage />} />
             <Route path='/pg/customers/:guestId' element={<GuestDetailsPage />} />
@@ -73,6 +78,7 @@ export function AppRouter(): React.JSX.Element {
             <Route path='/pg/billing/invoices/:invoiceId' element={<InvoiceDetailsPage />} />
             <Route path='/pg/billing/payments/:paymentId' element={<PaymentDetailsPage />} />
             <Route path='/pg/billing/payments/create' element={<CreatePaymentPage />} />
+            <Route path='/pg/billing/invoices/:invoiceId/edit' element={<EditInvoicePage />} />
             <Route path='/pg/expenses' element={<ExpensesPage />} />
             <Route path='/pg/expenses/create' element={<CreateExpensePage />} />
             <Route path='/pg/expenses/edit/:expenseId' element={<EditExpensePage />} />
@@ -81,7 +87,8 @@ export function AppRouter(): React.JSX.Element {
             <Route path='/pg/meals/create' element={<CreateMealPage />} />
             <Route path='/pg/meals/edit/:mealId' element={<EditMealPage />} />
             <Route path='/pg/meals/:mealId' element={<MealDetailsPage />} />
-            <Route path='/pg/settings' element={<SettingsPage/>}/>
+            <Route path='/pg/meals/customer' element={<CustomerMealsPage/>}/>
+            <Route path='/pg/settings' element={<SettingsPage />} />
 
           </Route>
         </Route>
