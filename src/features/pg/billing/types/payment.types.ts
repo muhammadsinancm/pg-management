@@ -1,6 +1,6 @@
 export type PaymentStatus = | 'completed' | 'pending' | 'failed' | 'refunded'
 
-export type PaymentMethod = | 'cash' | 'upi' | 'card' | 'bacnk_transfer' | 'other'
+export type PaymentMethod = | 'cash' | 'upi' | 'card' | 'bank_transfer' | 'other'
 
 export interface Payment {
     id: string,

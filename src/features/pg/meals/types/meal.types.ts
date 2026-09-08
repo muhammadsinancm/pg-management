@@ -35,3 +35,31 @@ export interface UpdateMealInput {
     status?: MealStatus
     description?: string
 }
+
+export interface CustomerMeal {
+    id: string
+    organizationId: string
+    branchId: string
+    customerId: string
+    bookingId: string
+    mealId: string
+    mealType: MealType
+    mealDate: string
+    amount: number
+    status: 'served' | 'cancelled'
+    invoiceId?: string
+    createdAt?: string
+    updatedAt?: string
+}
+
+export interface CreateCustomerMealInput {
+    organizationId: string
+    branchId: string
+    customerId: string
+    bookingId: string
+    mealId: string
+    mealType: MealType
+    mealDate: string
+    amount: number
+    status: 'served' | 'cancelled'
+}

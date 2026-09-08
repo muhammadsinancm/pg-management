@@ -5,6 +5,9 @@ import { firestoreDb } from "@/services/firebase/config"
 const COLLECTION = 'invoices'
 
 function convertDate(value: unknown): string | undefined {
+    if (value instanceof Timestamp) {
+        return value.toDate().toISOString()
+    }
     if (value instanceof Date) {
         return value.toISOString()
     }
@@ -59,7 +62,7 @@ export async function createInvoice(data: CreateInvoiceInput): Promise<string> {
         totalAmount: data.totalAmount,
         paidAmount: data.paidAmount ?? 0,
         dueAmount: data.dueAmount,
-        status: data.status ?? 'unpaid',
+        status: data.status ?? 'issued',
         notes: data.notes ?? '',
         createdAt: now,
         updatedAt: now

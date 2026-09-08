@@ -75,8 +75,6 @@ export async function createPayment(data: CreatePaymentInput): Promise<string> {
 
         if (newDueAmount === 0) {
             newStatus = 'paid'
-        } else if (newPaidAmount > 0) {
-            newStatus = 'partial'
         } else {
             newStatus = 'unpaid'
         }

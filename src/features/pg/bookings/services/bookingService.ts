@@ -1,5 +1,5 @@
 import { firestoreDb } from "@/services/firebase/config"
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, QueryDocumentSnapshot, serverTimestamp, Timestamp, updateDoc, where } from "firebase/firestore"
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, QueryDocumentSnapshot, runTransaction, serverTimestamp, Timestamp, updateDoc, where } from "firebase/firestore"
 import { Booking, BookingStatus, CreateBookingInput, UpdateBookingInput } from "../types/booking.types"
 
 
@@ -31,7 +31,7 @@ export function mapBooking(document: QueryDocumentSnapshot): Booking {
         bedNumber: data.bedNumber !== undefined && data.bedNumber !== null ? String(data.bedNumber) : null,
         bookingNumber: String(data.bookingNumber ?? ''),
         checkInDate: convertTimestamp(data.checkInDate) ?? new Date(),
-        checkOutDate: convertTimestamp(data.checkOutDate) ?? new Date(),
+        checkOutDate: data.checkOutDate ? convertTimestamp(data.checkOutDate) : null,
         status: data.status,
         rentAmount: Number(data.rentAmount ?? 0),
         advanceAmount: Number(data.advanceAmount ?? 0),
@@ -98,4 +98,162 @@ export async function updateBookingStatus(bookingId: string, status: BookingStat
         status,
         updatedAt: new Date().toISOString()
     })
+}
+
+export async function checkInBooking(bookingId: string, customerName: string): Promise<void> {
+    const bookingRef = doc(firestoreDb, 'bookings', bookingId)
+
+    await runTransaction(firestoreDb, async (transaction) => {
+        const bookingSnapshot = await transaction.get(bookingRef)
+
+        if (!bookingSnapshot.exists()) {
+            throw new Error('Booking not found')
+        }
+
+        const booking = bookingSnapshot.data()
+
+        if (booking.status !== 'confirmed') {
+            throw new Error('Only confirmed bookings can be checked in')
+        }
+
+        if (!booking.roomId) {
+            throw new Error('Room is not assigned to this booking')
+        }
+
+        if (!booking.bedId) {
+            throw new Error('Bed is not assigned to this booking')
+        }
+
+        const roomRef = doc(firestoreDb, 'rooms', booking.roomId)
+        const roomSnapshot = await transaction.get(roomRef)
+
+        if (!roomSnapshot.exists()) {
+            throw new Error('Room not found')
+        }
+
+        const room = roomSnapshot.data()
+
+        const beds = Array.isArray(room.beds) ? room.beds : []
+        const bedIndex = beds.findIndex((bed: { id: string }) => bed.id === booking.bedId)
+
+        if (bedIndex === -1) {
+            throw new Error('Bed not found in the room')
+        }
+
+        const bed = beds[bedIndex]
+
+        if (bed.status !== 'available') {
+            throw new Error('This bed is no longer available')
+        }
+
+        const updatedBeds = beds.map((bed: {
+            id: string
+            bedNumber: string
+            status: string
+            guestId?: string | null
+            guestName?: string | null
+        }) => {
+            if (bed.id !== booking.bedId) {
+                return bed
+            }
+
+            return {
+                ...bed,
+                status: 'occupied',
+                guestId: booking.customerId,
+                guestName: customerName
+            }
+        })
+
+        const occupiedBeds = updatedBeds.filter((bed: { status: string }) => bed.status === 'occupied')
+
+        transaction.update(roomRef, {
+            beds: updatedBeds,
+            status: occupiedBeds.length > 0 ? 'occupied' : 'available',
+            updatedAt: serverTimestamp()
+        })
+
+        transaction.update(bookingRef, {
+            status: 'checked_in',
+            updatedAt: serverTimestamp()
+        })
+    })
+
+}
+
+export async function checkOutBooking(bookingId: string): Promise<void> {
+    const bookingRef = doc(firestoreDb, 'bookings', bookingId)
+
+    await runTransaction(firestoreDb, async (transaction) => {
+        const bookingSnapshot = await transaction.get(bookingRef)
+
+        if (!bookingSnapshot.exists()) {
+            throw new Error('Booking not found')
+        }
+
+        const booking = bookingSnapshot.data()
+
+        if (booking.status !== 'checked_in') {
+            throw new Error('Only checked-in bookings can be checked out')
+        }
+
+        if (!booking.roomId) {
+            throw new Error('Room is not assigned to this booking')
+        }
+
+        if (!booking.bedId) {
+            throw new Error('Bed is not assigned to this booking')
+        }
+
+        const roomRef = doc(firestoreDb, 'rooms', booking.roomId)
+        const roomSnapshot = await transaction.get(roomRef)
+
+        if (!roomSnapshot.exists()) {
+            throw new Error('Room not found')
+        }
+
+        const room = roomSnapshot.data()
+        const beds = Array.isArray(room.beds) ? room.beds : []
+        const bedIndex = beds.findIndex((bed: { id: string }) => bed.id === booking.bedId)
+
+        if (bedIndex === -1) {
+            throw new Error('Bed not found in the room')
+        }
+
+        const updatedBeds = beds.map((bed:
+            {
+                id: string,
+                bedNumber: string,
+                status: string,
+                guestId?: string | null
+                guestName?: string | null
+            }) => {
+            if (bed.id !== booking.bedId) {
+                return bed
+            }
+
+            return {
+                ...bed,
+                status: 'available',
+                guestId: null,
+                guestName: null
+            }
+        })
+
+        const occupiedBeds = updatedBeds.filter((bed: { status: string }) => bed.status === 'occupied')
+
+        transaction.update(roomRef, {
+            beds: updatedBeds,
+            status: occupiedBeds.length > 0 ? 'occupied' : 'available',
+            updatedAt: serverTimestamp()
+        })
+
+        transaction.update(bookingRef, {
+            status: 'checked_out',
+            checkOutDate: new Date(),
+            updatedAt: serverTimestamp()
+        })
+
+    })
+
 }

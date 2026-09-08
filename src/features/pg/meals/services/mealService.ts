@@ -28,7 +28,7 @@ function mapMeal(id: string, data: Record<string, unknown>): Meal {
         menu: typeof data.menu === 'string' ? data.menu : '',
         amount: Number(data.amount ?? 0),
         status: data.status as Meal['status'],
-        description: data.description === 'string' ? data.description : undefined,
+        description: typeof data.description === 'string' ? data.description : undefined,
         createdAt: convertData(data.createdAt),
         updatedAt: convertData(data.updatedAt)
     }
@@ -39,7 +39,7 @@ export async function createMeal(data: CreateMealInput): Promise<string> {
         throw new Error('Meal amount can not be negative')
     }
     if (!data.menu.trim()) {
-        throw new Error('Meal menu in required')
+        throw new Error('Meal menu is required')
     }
 
     const now = Timestamp.now()
@@ -51,7 +51,7 @@ export async function createMeal(data: CreateMealInput): Promise<string> {
         mealDate: data.mealDate,
         menu: data.menu.trim(),
         amount: data.amount,
-        status: data.status ?? 'sheduled',
+        status: data.status ?? 'scheduled',
         createdAt: now,
         updatedAt: now
     }

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { Booking } from "../types/booking.types";
-import { getBooking } from "../services/bookingService";
+import { checkInBooking, checkOutBooking, getBooking } from "../services/bookingService";
 import { BookingDetails } from "../components/BookingDetails";
 import { useBookings } from "../hooks/useBookings";
+import { getGuest } from "../../guests/services/guestService";
 
 export function BookingDetailsPage() {
     const { bookingId } = useParams<{ bookingId: string }>()
@@ -12,14 +13,15 @@ export function BookingDetailsPage() {
     const navigate = useNavigate()
 
     const [booking, setBooking] = useState<Booking | null>(null)
-    const [loading, setLoaidng] = useState(true)
+    const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const [customerName, setCustomerName] = useState('')
 
     useEffect(() => {
         async function loadBooking() {
             if (!bookingId) {
                 setError('Booking ID is missing.')
-                setLoaidng(false)
+                setLoading(false)
                 return
             }
 
@@ -31,16 +33,45 @@ export function BookingDetailsPage() {
                 }
                 setBooking(data)
 
+                const guest = await getGuest(data.customerId)
+
+                if (guest) {
+                    setCustomerName(guest.fullName)
+                }
+
             } catch (error) {
                 console.error('Failed to load booking', error)
                 setError(error instanceof Error ? error.message : 'Failed to load booking.')
 
             } finally {
-                setLoaidng(false)
+                setLoading(false)
             }
         }
         loadBooking()
     }, [bookingId])
+
+    const handleCheckOut = async () => {
+        if (!booking) return
+
+        try {
+            setLoading(true)
+
+            await checkOutBooking(booking.id)
+
+            setBooking({
+                ...booking,
+                status: 'checked_out',
+                checkOutDate: new Date()
+            })
+
+        } catch (error) {
+            console.error(error)
+
+        } finally {
+            setLoading(false)
+        }
+
+    }
 
     if (loading) {
         return (
@@ -114,7 +145,7 @@ export function BookingDetailsPage() {
                                     status: "confirmed",
                                 })
                             } catch (error) {
-                                console.error(error)
+                                console.error("Failed to confirm booking", error)
                             }
                         }}
                         className="rounded-lg bg-green-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-green-700"
@@ -136,13 +167,121 @@ export function BookingDetailsPage() {
                                     status: "cancelled",
                                 })
                             } catch (error) {
-                                console.error(error)
+                                console.error("Failed to cancel booking", error)
                             }
                         }}
                         className="rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-700"
                     >
                         Cancel Booking
                     </button>
+                </div>
+            )}
+
+            {booking.status === "confirmed" && (
+                <div className="flex gap-3">
+                    <button
+                        type="button"
+                        onClick={async () => {
+                            try {
+                                if (!customerName) {
+                                    throw new Error(
+                                        "Customer name could not be found."
+                                    )
+                                }
+
+                                await checkInBooking(
+                                    booking.id,
+                                    customerName
+                                )
+
+                                setBooking({
+                                    ...booking,
+                                    status: "checked_in",
+                                })
+                            } catch (error) {
+                                console.error(
+                                    "Failed to check in",
+                                    error
+                                )
+
+                                setError(
+                                    error instanceof Error
+                                        ? error.message
+                                        : "Failed to check in."
+                                )
+                            }
+                        }}
+                        className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+                    >
+                        Check In
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={async () => {
+                            try {
+                                await changeBookingStatus(
+                                    booking.id,
+                                    "cancelled"
+                                )
+
+                                setBooking({
+                                    ...booking,
+                                    status: "cancelled",
+                                })
+                            } catch (error) {
+                                console.error(
+                                    "Failed to cancel booking",
+                                    error
+                                )
+                            }
+                        }}
+                        className="rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-700"
+                    >
+                        Cancel Booking
+                    </button>
+                </div>
+            )}
+
+            {booking.status === "checked_in" && (
+                <div className="flex flex-wrap gap-3">
+
+                    {/* Record Meal */}
+                    <button
+                        type="button"
+                        onClick={() =>
+                            navigate(
+                                `/pg/bookings/${booking.id}/meals`
+                            )
+                        }
+                        className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800"
+                    >
+                        Record Meal
+                    </button>
+
+                    {/* Create Invoice */}
+                    <button
+                        type="button"
+                        onClick={() =>
+                            navigate(
+                                `/pg/billing/invoices/create?bookingId=${booking.id}`
+                            )
+                        }
+                        className="rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800"
+                    >
+                        Create Invoice
+                    </button>
+
+                    {/* Check Out */}
+                    <button
+                        type="button"
+                        onClick={handleCheckOut}
+                        disabled={loading}
+                        className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        {loading ? "Checking Out..." : "Check Out"}
+                    </button>
+
                 </div>
             )}
 

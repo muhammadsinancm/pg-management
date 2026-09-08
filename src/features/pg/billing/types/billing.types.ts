@@ -56,7 +56,7 @@ export interface UpdateBillingInput {
     mealAmount?: number
     additionalCharges?: number
     discountAmount?: number
-    totalAmunt?: number
+    totalAmount?: number
     paidAmount?: number
     dueAmount?: number
     status?: BillingStatus

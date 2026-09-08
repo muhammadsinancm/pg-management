@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { CreateInvoiceInput, Invoice } from "../types/invoice.types";
+import { CustomerMeal } from "../../meals/types/meal.types";
 
 interface InvoiceFormProps {
     invoice?: Invoice
@@ -7,11 +8,14 @@ interface InvoiceFormProps {
     branchId: string
     customerId: string
     bookingId: string
+    rentAmount?: number;
+    mealAmount?: number;
+    customerMeals: CustomerMeal[];
     onSubmit: (data: CreateInvoiceInput) => Promise<void>
     onCancel?: () => void
 }
 
-export function InvoiceForm({ invoice, organizationId, branchId, customerId, bookingId, onSubmit, onCancel }: InvoiceFormProps) {
+export function InvoiceForm({ invoice, organizationId, branchId, customerId, bookingId, onSubmit, onCancel, rentAmount: bookingRentAmount = 0, mealAmount: bookingMealAmount = 0, customerMeals }: InvoiceFormProps) {
     const [invoiceNumber, setInvoiceNumber] = useState(invoice?.invoiceNumber ?? '')
     const [issueDate, setIssueDate] = useState(invoice?.issueDate ? invoice.issueDate.slice(0, 10) : new Date().toISOString().slice(0, 10))
     const [dueDate, setDueDate] = useState(invoice?.dueDate ? invoice.dueDate.slice(0, 10) : '')
@@ -23,21 +27,34 @@ export function InvoiceForm({ invoice, organizationId, branchId, customerId, boo
     const [notes, setNotes] = useState(invoice?.notes ?? '')
     const [submitting, setSubmitting] = useState(false)
 
+    const [status, setStatus] = useState<Invoice['status']>(invoice?.status ?? 'draft')
+
+    useEffect(()=> {
+        if (!invoice) {
+        setRentAmount(bookingRentAmount.toString())
+        setMealAmount(bookingMealAmount.toString())
+       }
+    }, [invoice, bookingRentAmount, bookingMealAmount])
+
+    useEffect(() => {
+       if (invoice) {
+        setStatus(invoice.status)
+       }
+    }, [invoice])
+
     const subtotal = Number(rentAmount || 0) + Number(mealAmount || 0) + Number(additionalCharges || 0)
 
     const totalAmount = subtotal - Number(discountAmount || 0)
-    const dueAmount = totalAmount - Number(paidAmount || 0)
-
-    const [status, setStatus] = useState<Invoice['status']>(invoice?.status ?? 'draft')
-
-    useEffect(() => {
-        if (!invoice) return
-
-        setStatus(invoice.status)
-    }, [invoice])
+    const paid = Number(paidAmount || 0)
+    const dueAmount = Math.max(totalAmount - paid, 0)
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
+
+        if (paid > totalAmount) {
+            alert('Paid amount can not be greater than total amount')
+            return
+        }
 
         try {
             setSubmitting(true)
@@ -69,11 +86,12 @@ export function InvoiceForm({ invoice, organizationId, branchId, customerId, boo
         }
     }
 
-    return (
+     return (
         <form
             onSubmit={handleSubmit}
             className="space-y-6 rounded-lg border bg-white p-6"
         >
+
             {/* Invoice Information */}
             <div>
                 <h2 className="mb-4 text-lg font-semibold">
@@ -82,6 +100,7 @@ export function InvoiceForm({ invoice, organizationId, branchId, customerId, boo
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 
+                    {/* Invoice Number */}
                     <div>
                         <label className="mb-1 block text-sm font-medium">
                             Invoice Number
@@ -99,6 +118,7 @@ export function InvoiceForm({ invoice, organizationId, branchId, customerId, boo
                         />
                     </div>
 
+                    {/* Status */}
                     <div>
                         <label className="mb-1 block text-sm font-medium">
                             Status
@@ -139,6 +159,7 @@ export function InvoiceForm({ invoice, organizationId, branchId, customerId, boo
                         </select>
                     </div>
 
+                    {/* Issue Date */}
                     <div>
                         <label className="mb-1 block text-sm font-medium">
                             Issue Date
@@ -155,6 +176,7 @@ export function InvoiceForm({ invoice, organizationId, branchId, customerId, boo
                         />
                     </div>
 
+                    {/* Due Date */}
                     <div>
                         <label className="mb-1 block text-sm font-medium">
                             Due Date
@@ -173,6 +195,7 @@ export function InvoiceForm({ invoice, organizationId, branchId, customerId, boo
                 </div>
             </div>
 
+
             {/* Charges */}
             <div>
                 <h2 className="mb-4 text-lg font-semibold">
@@ -181,6 +204,7 @@ export function InvoiceForm({ invoice, organizationId, branchId, customerId, boo
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 
+                    {/* Rent */}
                     <div>
                         <label className="mb-1 block text-sm font-medium">
                             Rent Amount
@@ -190,14 +214,17 @@ export function InvoiceForm({ invoice, organizationId, branchId, customerId, boo
                             type="number"
                             min="0"
                             value={rentAmount}
-                            onChange={(e) =>
-                                setRentAmount(e.target.value)
-                            }
-                            required
-                            className="w-full rounded-md border px-3 py-2"
+                            readOnly
+                            className="w-full cursor-not-allowed rounded-md border bg-gray-100 px-3 py-2"
                         />
+
+                        <p className="mt-1 text-xs text-gray-500">
+                            Taken from the booking.
+                        </p>
                     </div>
 
+
+                    {/* Meal */}
                     <div>
                         <label className="mb-1 block text-sm font-medium">
                             Meal Amount
@@ -207,13 +234,17 @@ export function InvoiceForm({ invoice, organizationId, branchId, customerId, boo
                             type="number"
                             min="0"
                             value={mealAmount}
-                            onChange={(e) =>
-                                setMealAmount(e.target.value)
-                            }
-                            className="w-full rounded-md border px-3 py-2"
+                            readOnly
+                            className="w-full cursor-not-allowed rounded-md border bg-gray-100 px-3 py-2"
                         />
+
+                        <p className="mt-1 text-xs text-gray-500">
+                            Calculated from served customer meals.
+                        </p>
                     </div>
 
+
+                    {/* Additional Charges */}
                     <div>
                         <label className="mb-1 block text-sm font-medium">
                             Additional Charges
@@ -224,14 +255,14 @@ export function InvoiceForm({ invoice, organizationId, branchId, customerId, boo
                             min="0"
                             value={additionalCharges}
                             onChange={(e) =>
-                                setAdditionalCharges(
-                                    e.target.value
-                                )
+                                setAdditionalCharges(e.target.value)
                             }
                             className="w-full rounded-md border px-3 py-2"
                         />
                     </div>
 
+
+                    {/* Discount */}
                     <div>
                         <label className="mb-1 block text-sm font-medium">
                             Discount
@@ -242,15 +273,94 @@ export function InvoiceForm({ invoice, organizationId, branchId, customerId, boo
                             min="0"
                             value={discountAmount}
                             onChange={(e) =>
-                                setDiscountAmount(
-                                    e.target.value
-                                )
+                                setDiscountAmount(e.target.value)
                             }
                             className="w-full rounded-md border px-3 py-2"
                         />
                     </div>
                 </div>
             </div>
+
+
+            {/* Customer Meal Details */}
+            {customerMeals.length > 0 && (
+                <div>
+                    <h2 className="mb-4 text-lg font-semibold">
+                        Meal Details
+                    </h2>
+
+                    <div className="overflow-hidden rounded-lg border">
+                        <table className="w-full text-sm">
+
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-4 py-3 text-left">
+                                        Date
+                                    </th>
+
+                                    <th className="px-4 py-3 text-left">
+                                        Meal
+                                    </th>
+
+                                    <th className="px-4 py-3 text-right">
+                                        Amount
+                                    </th>
+
+                                    <th className="px-4 py-3 text-center">
+                                        Status
+                                    </th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {customerMeals.map((meal) => (
+                                    <tr
+                                        key={meal.id}
+                                        className="border-t"
+                                    >
+                                        <td className="px-4 py-3">
+                                            {meal.mealDate}
+                                        </td>
+
+                                        <td className="px-4 py-3 capitalize">
+                                            {meal.mealType}
+                                        </td>
+
+                                        <td className="px-4 py-3 text-right">
+                                            ₹{meal.amount.toFixed(2)}
+                                        </td>
+
+                                        <td className="px-4 py-3 text-center">
+                                            <span className="rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700">
+                                                {meal.status}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+
+                            <tfoot className="bg-gray-50">
+                                <tr>
+                                    <td
+                                        colSpan={2}
+                                        className="px-4 py-3 font-semibold"
+                                    >
+                                        Total Meals
+                                    </td>
+
+                                    <td className="px-4 py-3 text-right font-semibold">
+                                        ₹{Number(mealAmount).toFixed(2)}
+                                    </td>
+
+                                    <td />
+                                </tr>
+                            </tfoot>
+
+                        </table>
+                    </div>
+                </div>
+            )}
+
 
             {/* Payment */}
             <div>
@@ -276,38 +386,100 @@ export function InvoiceForm({ invoice, organizationId, branchId, customerId, boo
                 </div>
             </div>
 
+
             {/* Summary */}
             <div className="rounded-md bg-gray-50 p-4">
                 <div className="space-y-2">
+
                     <div className="flex justify-between">
-                        <span>Subtotal</span>
-                        <span>₹{subtotal.toFixed(2)}</span>
+                        <span>
+                            Rent
+                        </span>
+
+                        <span>
+                            ₹{Number(rentAmount || 0).toFixed(2)}
+                        </span>
                     </div>
 
-                    <div className="flex justify-between font-semibold">
-                        <span>Total</span>
+                    <div className="flex justify-between">
+                        <span>
+                            Meals
+                        </span>
+
+                        <span>
+                            ₹{Number(mealAmount || 0).toFixed(2)}
+                        </span>
+                    </div>
+
+                    <div className="flex justify-between">
+                        <span>
+                            Additional Charges
+                        </span>
+
+                        <span>
+                            ₹{Number(
+                                additionalCharges || 0
+                            ).toFixed(2)}
+                        </span>
+                    </div>
+
+                    <div className="flex justify-between">
+                        <span>
+                            Discount
+                        </span>
+
+                        <span>
+                            -₹{Number(
+                                discountAmount || 0
+                            ).toFixed(2)}
+                        </span>
+                    </div>
+
+                    <div className="border-t pt-2" />
+
+                    <div className="flex justify-between">
+                        <span>
+                            Subtotal
+                        </span>
+
+                        <span>
+                            ₹{subtotal.toFixed(2)}
+                        </span>
+                    </div>
+
+                    <div className="flex justify-between text-lg font-semibold">
+                        <span>
+                            Total
+                        </span>
+
                         <span>
                             ₹{totalAmount.toFixed(2)}
                         </span>
                     </div>
 
                     <div className="flex justify-between">
-                        <span>Paid</span>
                         <span>
-                            ₹{Number(
-                                paidAmount || 0
-                            ).toFixed(2)}
+                            Paid
+                        </span>
+
+                        <span>
+                            ₹{paid.toFixed(2)}
                         </span>
                     </div>
 
-                    <div className="flex justify-between font-semibold">
-                        <span>Due</span>
+                    <div className="flex justify-between text-lg font-semibold">
+                        <span>
+                            Due
+                        </span>
+
                         <span>
                             ₹{dueAmount.toFixed(2)}
                         </span>
                     </div>
+
                 </div>
             </div>
+
 
             {/* Notes */}
             <div>
@@ -326,8 +498,10 @@ export function InvoiceForm({ invoice, organizationId, branchId, customerId, boo
                 />
             </div>
 
+
             {/* Actions */}
             <div className="flex justify-end gap-3">
+
                 {onCancel && (
                     <button
                         type="button"
@@ -350,7 +524,9 @@ export function InvoiceForm({ invoice, organizationId, branchId, customerId, boo
                             ? "Update Invoice"
                             : "Create Invoice"}
                 </button>
+
             </div>
+
         </form>
-    )
+    );
 }

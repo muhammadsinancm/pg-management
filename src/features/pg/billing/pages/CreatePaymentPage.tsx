@@ -150,6 +150,9 @@ export default function CreatePaymentPage() {
                         `/pg/billing/invoices/${invoice.id}`
                     )
                 }
+                totalAmount={invoice.totalAmount}
+                paidAmount={invoice.paidAmount}
+                dueAmount={invoice.dueAmount}
             />
 
         </div>

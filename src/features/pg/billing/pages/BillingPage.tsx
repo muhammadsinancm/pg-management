@@ -208,10 +208,6 @@ export function BillingPage() {
                                 Draft
                             </option>
 
-                            <option value="unpaid">
-                                Unpaid
-                            </option>
-
                             <option value="partial">
                                 Partial
                             </option>

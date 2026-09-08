@@ -8,11 +8,14 @@ interface PaymentFormProps {
     customerId: string
     bookingId: string
     invoiceId?: string
+    totalAmount: number
+    paidAmount: number
+    dueAmount: number
     onSubmit: (data: CreatePaymentInput) => Promise<void>
     onCancel?: () => void
 }
 
-export function PaymentForm({ payment, organizationId, branchId, customerId, bookingId, invoiceId, onSubmit, onCancel }: PaymentFormProps) {
+export function PaymentForm({ payment, organizationId, branchId, customerId, bookingId, invoiceId, totalAmount, paidAmount, dueAmount, onSubmit, onCancel }: PaymentFormProps) {
     const [paymentNumber, setPaymentNumber] = useState(payment?.paymentNumber ?? '')
     const [amount, setAmount] = useState(payment?.amount?.toString() ?? '')
     const [paymentDate, setPaymentDate] = useState(payment?.paymentDate ? payment.paymentDate.slice(0, 10) : new Date().toISOString().slice(0, 10))
@@ -24,6 +27,18 @@ export function PaymentForm({ payment, organizationId, branchId, customerId, boo
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
+
+        const paymentAmount =Number(amount)
+
+        if (paymentAmount <= 0) {
+            alert('Payment amount must be greater than 0')
+            return
+        }
+
+        if (paymentAmount > dueAmount) {
+            alert(`Payment can not exceed due amount of ₹${dueAmount.toLocaleString('en-IN')}`)
+            return
+        }
 
         try {
             setSubmitting(true)
@@ -42,11 +57,14 @@ export function PaymentForm({ payment, organizationId, branchId, customerId, boo
                 referenceNumber: referenceNumber || undefined,
                 notes: notes || undefined
             }
-console.log(data);
 
             await onSubmit(data)
 
-        } finally {
+        } catch(error) {
+            console.error('Payment submission failed', error)
+            alert(error instanceof Error ? error.message : 'Failed to create payment')
+
+        }  finally {
             setSubmitting(false)
         }
 
@@ -55,89 +73,166 @@ console.log(data);
     return (
         <form
             onSubmit={handleSubmit}
-            className="space-y-6 rounded-lg border bg-white p-6"
+            className="space-y-6"
         >
+            {/* Invoice Summary */}
+            <div className="rounded-lg border bg-gray-50 p-4">
+                <h2 className="mb-4 text-lg font-semibold text-gray-800">
+                    Invoice Summary
+                </h2>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    {/* Total */}
+                    <div>
+                        <p className="text-sm text-gray-500">
+                            Total Amount
+                        </p>
+
+                        <p className="text-lg font-semibold text-gray-900">
+                            ₹
+                            {totalAmount.toLocaleString(
+                                "en-IN"
+                            )}
+                        </p>
+                    </div>
+
+                    {/* Paid */}
+                    <div>
+                        <p className="text-sm text-gray-500">
+                            Paid Amount
+                        </p>
+
+                        <p className="text-lg font-semibold text-green-600">
+                            ₹
+                            {paidAmount.toLocaleString(
+                                "en-IN"
+                            )}
+                        </p>
+                    </div>
+
+                    {/* Due */}
+                    <div>
+                        <p className="text-sm text-gray-500">
+                            Due Amount
+                        </p>
+
+                        <p className="text-lg font-semibold text-red-600">
+                            ₹
+                            {dueAmount.toLocaleString(
+                                "en-IN"
+                            )}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             {/* Payment Information */}
-            <div>
-                <h2 className="mb-4 text-lg font-semibold">
+            <div className="rounded-lg border bg-white p-6">
+                <h2 className="mb-6 text-lg font-semibold text-gray-800">
                     Payment Information
                 </h2>
 
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                     {/* Payment Number */}
                     <div>
-                        <label className="mb-1 block text-sm font-medium">
+                        <label
+                            htmlFor="paymentNumber"
+                            className="mb-1 block text-sm font-medium text-gray-700"
+                        >
                             Payment Number
                         </label>
 
                         <input
+                            id="paymentNumber"
                             type="text"
                             value={paymentNumber}
-                            onChange={(e) =>
+                            onChange={(event) =>
                                 setPaymentNumber(
-                                    e.target.value
+                                    event.target.value
                                 )
                             }
-                            placeholder="PAY-0001"
+                            placeholder="PAY-001"
                             required
-                            className="w-full rounded-md border px-3 py-2"
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-blue-500"
                         />
                     </div>
 
-                    {/* Amount */}
+                    {/* Payment Amount */}
                     <div>
-                        <label className="mb-1 block text-sm font-medium">
-                            Amount
+                        <label
+                            htmlFor="amount"
+                            className="mb-1 block text-sm font-medium text-gray-700"
+                        >
+                            Payment Amount
                         </label>
 
                         <input
+                            id="amount"
                             type="number"
-                            min="0"
+                            min="0.01"
+                            max={dueAmount}
                             step="0.01"
                             value={amount}
-                            onChange={(e) =>
-                                setAmount(e.target.value)
+                            onChange={(event) =>
+                                setAmount(
+                                    event.target.value
+                                )
                             }
-                            placeholder="0.00"
+                            placeholder="Enter payment amount"
                             required
-                            className="w-full rounded-md border px-3 py-2"
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-blue-500"
                         />
+
+                        <p className="mt-1 text-sm text-gray-500">
+                            Maximum payment: ₹
+                            {dueAmount.toLocaleString(
+                                "en-IN"
+                            )}
+                        </p>
                     </div>
 
                     {/* Payment Date */}
                     <div>
-                        <label className="mb-1 block text-sm font-medium">
+                        <label
+                            htmlFor="paymentDate"
+                            className="mb-1 block text-sm font-medium text-gray-700"
+                        >
                             Payment Date
                         </label>
 
                         <input
+                            id="paymentDate"
                             type="date"
                             value={paymentDate}
-                            onChange={(e) =>
+                            onChange={(event) =>
                                 setPaymentDate(
-                                    e.target.value
+                                    event.target.value
                                 )
                             }
                             required
-                            className="w-full rounded-md border px-3 py-2"
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-blue-500"
                         />
                     </div>
 
                     {/* Payment Method */}
                     <div>
-                        <label className="mb-1 block text-sm font-medium">
+                        <label
+                            htmlFor="paymentMethod"
+                            className="mb-1 block text-sm font-medium text-gray-700"
+                        >
                             Payment Method
                         </label>
 
                         <select
+                            id="paymentMethod"
                             value={paymentMethod}
-                            onChange={(e) =>
+                            onChange={(event) =>
                                 setPaymentMethod(
-                                    e.target.value as PaymentMethod
+                                    event.target
+                                        .value as PaymentMethod
                                 )
                             }
-                            className="w-full rounded-md border px-3 py-2"
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-blue-500"
                         >
                             <option value="cash">
                                 Cash
@@ -161,27 +256,55 @@ console.log(data);
                         </select>
                     </div>
 
+                    {/* Reference Number */}
+                    <div>
+                        <label
+                            htmlFor="referenceNumber"
+                            className="mb-1 block text-sm font-medium text-gray-700"
+                        >
+                            Reference Number
+                        </label>
+
+                        <input
+                            id="referenceNumber"
+                            type="text"
+                            value={referenceNumber}
+                            onChange={(event) =>
+                                setReferenceNumber(
+                                    event.target.value
+                                )
+                            }
+                            placeholder="UPI / transaction reference"
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-blue-500"
+                        />
+                    </div>
+
                     {/* Status */}
                     <div>
-                        <label className="mb-1 block text-sm font-medium">
+                        <label
+                            htmlFor="status"
+                            className="mb-1 block text-sm font-medium text-gray-700"
+                        >
                             Status
                         </label>
 
                         <select
+                            id="status"
                             value={status}
-                            onChange={(e) =>
+                            onChange={(event) =>
                                 setStatus(
-                                    e.target.value as Payment["status"]
+                                    event.target
+                                        .value as Payment["status"]
                                 )
                             }
-                            className="w-full rounded-md border px-3 py-2"
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-blue-500"
                         >
-                            <option value="pending">
-                                Pending
-                            </option>
-
                             <option value="completed">
                                 Completed
+                            </option>
+
+                            <option value="pending">
+                                Pending
                             </option>
 
                             <option value="failed">
@@ -193,53 +316,69 @@ console.log(data);
                             </option>
                         </select>
                     </div>
+                </div>
 
-                    {/* Reference Number */}
-                    <div>
-                        <label className="mb-1 block text-sm font-medium">
-                            Reference Number
-                        </label>
+                {/* Notes */}
+                <div className="mt-5">
+                    <label
+                        htmlFor="notes"
+                        className="mb-1 block text-sm font-medium text-gray-700"
+                    >
+                        Notes
+                    </label>
 
-                        <input
-                            type="text"
-                            value={referenceNumber}
-                            onChange={(e) =>
-                                setReferenceNumber(
-                                    e.target.value
-                                )
-                            }
-                            placeholder="UPI / transaction reference"
-                            className="w-full rounded-md border px-3 py-2"
-                        />
-                    </div>
+                    <textarea
+                        id="notes"
+                        value={notes}
+                        onChange={(event) =>
+                            setNotes(event.target.value)
+                        }
+                        rows={4}
+                        placeholder="Add payment notes..."
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-blue-500"
+                    />
                 </div>
             </div>
 
-            {/* Notes */}
-            <div>
-                <label className="mb-1 block text-sm font-medium">
-                    Notes
-                </label>
+            {/* Payment Preview */}
+            <div className="rounded-lg border bg-blue-50 p-4">
+                <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">
+                        Payment Amount
+                    </span>
 
-                <textarea
-                    value={notes}
-                    onChange={(e) =>
-                        setNotes(e.target.value)
-                    }
-                    rows={3}
-                    placeholder="Payment notes..."
-                    className="w-full rounded-md border px-3 py-2"
-                />
+                    <span className="text-lg font-semibold text-gray-900">
+                        ₹
+                        {(
+                            Number(amount) || 0
+                        ).toLocaleString("en-IN")}
+                    </span>
+                </div>
+
+                <div className="mt-2 flex items-center justify-between">
+                    <span className="text-sm text-gray-600">
+                        Remaining Due
+                    </span>
+
+                    <span className="text-lg font-semibold text-red-600">
+                        ₹
+                        {Math.max(
+                            dueAmount -
+                                (Number(amount) || 0),
+                            0
+                        ).toLocaleString("en-IN")}
+                    </span>
+                </div>
             </div>
 
-            {/* Actions */}
+            {/* Buttons */}
             <div className="flex justify-end gap-3">
                 {onCancel && (
                     <button
                         type="button"
                         onClick={onCancel}
                         disabled={submitting}
-                        className="rounded-md border px-4 py-2"
+                        className="rounded-lg border border-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         Cancel
                     </button>
@@ -247,16 +386,16 @@ console.log(data);
 
                 <button
                     type="submit"
-                    disabled={submitting}
-                    className="rounded-md bg-black px-4 py-2 text-white disabled:opacity-50"
+                    disabled={submitting || dueAmount <= 0}
+                    className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     {submitting
                         ? "Saving..."
                         : payment
-                            ? "Update Payment"
-                            : "Record Payment"}
+                        ? "Update Payment"
+                        : "Record Payment"}
                 </button>
             </div>
         </form>
-    )
+    );
 }
