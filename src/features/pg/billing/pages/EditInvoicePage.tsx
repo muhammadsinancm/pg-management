@@ -3,19 +3,22 @@ import { useInvoices } from "../hooks/useInvoices";
 import { useEffect, useState } from "react";
 import { Invoice } from "../types/invoice.types";
 import { InvoiceForm } from "../components/InvoiceForm";
+import { CustomerMeal } from "../../meals/types/meal.types";
+import { getCustomerMealsByBooking } from "../../meals/services/customerMealServie";
 
 export default function EditInvoicePage() {
-    const {invoiceId} = useParams<{invoiceId: string}>()
+    const { invoiceId } = useParams<{ invoiceId: string }>()
 
     const navigate = useNavigate()
 
-    const {getInvoiceById, editInvoice} = useInvoices()
+    const { getInvoiceById, editInvoice } = useInvoices()
 
     const [invoice, setInvoice] = useState<Invoice | null>(null)
     const [loading, setLoading] = useState(true)
+    const [customerMeals, setCustomerMeals] = useState<CustomerMeal[]>([])
     const [error, setError] = useState<string | null>(null)
 
-    useEffect(()=> {
+    useEffect(() => {
         if (!invoiceId) {
             setError('Invoice Id is missing')
             setLoading(false)
@@ -36,6 +39,10 @@ export default function EditInvoicePage() {
 
                 setInvoice(data)
 
+                const meals = await getCustomerMealsByBooking(data.bookingId)
+                const servedMeals = meals.filter((meal) => meal.status === 'served')
+                setCustomerMeals(servedMeals)
+
             } catch (error) {
                 console.error('Failed to load invoice', error)
                 setError(error instanceof Error ? error.message : 'Failed to load invoice')
@@ -44,11 +51,11 @@ export default function EditInvoicePage() {
                 setLoading(false)
             }
         }
-loadInvoice()
+        loadInvoice()
     }, [invoiceId, getInvoiceById])
 
     const handleSubmit = async (data: Parameters<typeof editInvoice>[1]) => {
-        if(!invoiceId) return
+        if (!invoiceId) return
 
         await editInvoice(invoiceId, data)
 
@@ -56,7 +63,7 @@ loadInvoice()
     }
 
     if (loading) {
-         return (
+        return (
             <div className="p-6">
                 <p className="text-gray-500">
                     Loading invoice...
@@ -66,7 +73,7 @@ loadInvoice()
     }
 
     if (error || !invoice) {
-         return (
+        return (
             <div className="p-6">
                 <div className="rounded-lg border border-red-200 bg-red-50 p-4">
                     <p className="text-red-600">
@@ -87,6 +94,7 @@ loadInvoice()
 
     return (
         <div className="p-6">
+
             <div className="mb-6">
                 <h1 className="text-2xl font-semibold">
                     Edit Invoice
@@ -103,11 +111,13 @@ loadInvoice()
                 branchId={invoice.branchId}
                 customerId={invoice.customerId}
                 bookingId={invoice.bookingId}
+                customerMeals={customerMeals}
                 onSubmit={handleSubmit}
                 onCancel={() =>
                     navigate(`/pg/billing/invoices/${invoice.id}`)
                 }
             />
+
         </div>
     );
 
