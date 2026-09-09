@@ -20,7 +20,7 @@ const categories: ExpenseCategory[] = [
     'salary',
     'rent',
     'supplies',
-    'ohter'
+    'other'
 ]
 
 const paymentMethods: ExpensePaymentMethod[] = [
@@ -36,7 +36,7 @@ const statuses: ExpenseStatus[] = [
     'cancelled'
 ]
 
-function getTody(): string {
+function getToday(): string {
     return new Date().toISOString().split('T')[0]
 }
 
@@ -45,9 +45,10 @@ export function ExpenseForm({ expense, organizationId, branchId, onSubmit, onCan
 
     const [category, setCategory] = useState<ExpenseCategory>(expense?.category ?? 'electricity')
     const [amount, setAmount] = useState<string>(expense?.amount?.toString() ?? '')
-    const [expenseDate, setExpenseDate] = useState<string>(expense?.expenseDate ? expense.expenseDate.split('T')[0] : getTody())
+    const [expenseDate, setExpenseDate] = useState<string>(expense?.expenseDate ? expense.expenseDate.split('T')[0] : getToday())
     const [paymentMethod, setPaymentMethod] = useState<ExpensePaymentMethod>(expense?.paymentMethod ?? 'cash')
     const [status, setStatus] = useState<ExpenseStatus>(expense?.status ?? 'paid')
+    const [vendorName, setVendorName] = useState<string>(expense?.vendorName ?? '')
     const [description, setDescription] = useState<string>(expense?.description ?? '')
     const [referenceNumber, setReferenceNumber] = useState<string>(expense?.referenceNumber ?? '')
     const [formError, setFormError] = useState<string | null>(null)
@@ -62,6 +63,7 @@ export function ExpenseForm({ expense, organizationId, branchId, onSubmit, onCan
         setExpenseDate(expense.expenseDate.split('T')[0])
         setPaymentMethod(expense.paymentMethod)
         setStatus(expense.status)
+        setVendorName(expense.vendorName ?? '')
         setDescription(expense.description ?? '')
         setReferenceNumber(expense.referenceNumber ?? '')
     }, [expense])
@@ -90,6 +92,7 @@ export function ExpenseForm({ expense, organizationId, branchId, onSubmit, onCan
                     expenseDate,
                     paymentMethod,
                     status,
+                    vendorName: vendorName.trim() || undefined,
                     description: description.trim() || undefined,
                     referenceNumber: referenceNumber.trim() || undefined
                 }
@@ -106,6 +109,7 @@ export function ExpenseForm({ expense, organizationId, branchId, onSubmit, onCan
                     expenseDate,
                     paymentMethod,
                     status,
+                    vendorName: vendorName.trim() || undefined,
                     description: description.trim() || undefined,
                     referenceNumber: referenceNumber.trim() || undefined
                 }
@@ -138,27 +142,43 @@ export function ExpenseForm({ expense, organizationId, branchId, onSubmit, onCan
                     id="category"
                     value={category}
                     onChange={(event) =>
-                        setCategory(
-                            event.target.value as ExpenseCategory
-                        )
+                        setCategory(event.target.value as ExpenseCategory)
                     }
                     className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-black"
                     disabled={loading}
                 >
                     {categories.map((item) => (
-                        <option
-                            key={item}
-                            value={item}
-                        >
+                        <option key={item} value={item}>
                             {item
-                                .replace("_", " ")
-                                .replace(/\b\w/g, (char) =>
-                                    char.toUpperCase()
-                                )}
+                                .replaceAll("_", " ")
+                                .replace(/\b\w/g, (char) => char.toUpperCase())}
                         </option>
                     ))}
                 </select>
             </div>
+
+
+            {/* Vendor / Supplier */}
+
+            <div>
+                <label
+                    htmlFor="vendorName"
+                    className="mb-2 block text-sm font-medium text-gray-700"
+                >
+                    Vendor / Supplier
+                </label>
+
+                <input
+                    id="vendorName"
+                    type="text"
+                    value={vendorName}
+                    onChange={(event) => setVendorName(event.target.value)}
+                    placeholder="Enter vendor or supplier name"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-black"
+                    disabled={loading}
+                />
+            </div>
+
 
             {/* Amount */}
 
@@ -176,15 +196,12 @@ export function ExpenseForm({ expense, organizationId, branchId, onSubmit, onCan
                     min="0"
                     step="0.01"
                     value={amount}
-                    onChange={(event) =>
-                        setAmount(event.target.value)
-                    }
+                    onChange={(event) => setAmount(event.target.value)}
                     placeholder="Enter amount"
                     className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-black"
                     disabled={loading}
                 />
             </div>
-
             {/* Date */}
 
             <div>
@@ -234,7 +251,7 @@ export function ExpenseForm({ expense, organizationId, branchId, onSubmit, onCan
                             value={method}
                         >
                             {method
-                                .replace("_", " ")
+                                .replaceAll("_", " ")
                                 .replace(/\b\w/g, (char) =>
                                     char.toUpperCase()
                                 )}
@@ -270,7 +287,7 @@ export function ExpenseForm({ expense, organizationId, branchId, onSubmit, onCan
                             value={item}
                         >
                             {item
-                                .replace("_", " ")
+                                .replaceAll("_", " ")
                                 .replace(/\b\w/g, (char) =>
                                     char.toUpperCase()
                                 )}

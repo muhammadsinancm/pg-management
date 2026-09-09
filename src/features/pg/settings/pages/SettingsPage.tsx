@@ -6,12 +6,25 @@ import GeneralSettings from "../components/GeneralSettings";
 import BranchSettings from "../components/BranchSettings";
 import MealSettings from "../components/MealSettings";
 import BillingSettings from "../components/BillingSettings";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export default function SettingsPage() {
     const [activeSection, setActiveSection] = useState<SettingsSection>('general')
 
-    const organizationId = 'organization-id'
-    const branchId = 'branch-id'
+    const {user} = useAuth()
+
+    if (!user) {
+        return (
+        <div className="p-6">
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                Please login to access settings.
+            </div>
+        </div>
+    )
+    }
+
+    const organizationId = user.organizationId
+    const branchId = user.branchId
 
     const { generalSettings, branchSettings, billingSettings, mealSettings, loading, error, saveGeneralSettings, saveBranchSettings, saveBillingSettings, saveMealSettings } = useSettings(organizationId, branchId)
 

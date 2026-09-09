@@ -6,10 +6,24 @@ import RecentPayments from "../components/RecentPayment"
 import RevenueSummary from "../components/RevenueSummary"
 import { useDashboard } from "../hooks/useDashboard"
 import DashboardHeader from "../components/DashboardHeader"
+import { useAuth } from "@/features/auth/hooks/useAuth"
 
 export default function DashboardPage() {
-    const organizationId = 'organization-id'
-    const branchId = 'branch-id'
+
+    const {user} = useAuth()
+
+    if (!user) {
+         return (
+        <div className="p-6">
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                Please login to view the dashboard.
+            </div>
+        </div>
+    );
+    }
+
+    const organizationId = user.organizationId
+    const branchId = user.branchId ?? ''
 
     const { data, loading, error, loadDashboard } = useDashboard(organizationId, branchId)
 

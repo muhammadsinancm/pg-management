@@ -14,7 +14,7 @@ const categoryLabels: Record<ExpenseCategory, string> = {
     salary: 'Salary',
     rent: 'Rent',
     supplies: 'Supplies',
-    ohter: 'Other'
+    other: 'Other'
 }
 
 export function ExpenseCategoryBadge({ category }: ExpenseCategoryBadgeProps) {

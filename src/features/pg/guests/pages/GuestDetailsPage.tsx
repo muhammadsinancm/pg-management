@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { Guest } from "../types/guests.types";
-import { getGuest, updateGuest } from "../services/guestService";
+import { getGuest } from "../services/guestService";
 import { GuestStatusBadge } from "../components/GuestStatusBadge";
 
 export function GuestDetailsPage() {
@@ -10,7 +10,6 @@ export function GuestDetailsPage() {
 
   const [guest, setGuest] = useState<Guest | null>(null)
   const [loading, setLoading] = useState(true)
-  const [actionLoading, setActionLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {

@@ -19,7 +19,8 @@ export default function ExpensesPage() {
         return expenses.filter((expense) => {
             const searchValue = search.trim().toLowerCase()
 
-            const matchesSearch = !searchValue || expense.description?.toLowerCase().includes(searchValue) ||
+            const matchesSearch = !searchValue || expense.expenseNumber.toLowerCase().includes(searchValue) ||
+                expense
                 expense.referenceNumber?.toLowerCase().includes(searchValue) ||
                 expense.category.toLowerCase().includes(searchValue)
 

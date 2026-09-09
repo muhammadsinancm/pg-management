@@ -3,13 +3,36 @@ import { usePayments } from "../hooks/usePayments";
 import { useEffect, useState } from "react";
 import { Payment } from "../types/payment.types";
 import { PaymentDetails } from "../components/PaymentDetails";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export function PaymentDetailsPage() {
     const { paymentId } = useParams<{ paymentId: string }>()
 
     const navigate = useNavigate()
 
-    const branchId = 'branch001'
+    const {user} = useAuth()
+
+    if (!user) {
+      return (
+            <div className="p-6">
+                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                    Please login to view payment details.
+                </div>
+            </div>
+        );
+    }
+
+    const branchId = user.branchId ?? ''
+
+    if (!branchId) {
+      return (
+            <div className="p-6">
+                <div className="rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-700">
+                    Your account is not assigned to a branch.
+                </div>
+            </div>
+        );
+    }
 
     const { getPayment } = usePayments(branchId)
 
@@ -46,7 +69,7 @@ export function PaymentDetailsPage() {
             }
         }
         loadPayment()
-    }, [paymentId])
+    }, [paymentId, getPayment])
 
     if (loading) {
            return (

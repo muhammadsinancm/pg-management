@@ -30,7 +30,7 @@ function formatAmount(amount: number) {
 function formatDate(date: string) {
     const parsedDate = new Date(date)
 
-    if (Number.isNaN(parsedDate.getDate())) {
+    if (Number.isNaN(parsedDate.getTime())) {
         return '-'
     }
 
@@ -41,9 +41,9 @@ function formatDate(date: string) {
     })
 }
 
-export function ExpenseTable({expenses, loading = false, onEdit, onDelete}: ExpenseTableProps) {
+export function ExpenseTable({ expenses, loading = false, onEdit, onDelete }: ExpenseTableProps) {
     if (loading) {
-         return (
+        return (
             <div className="rounded-lg border border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
                 Loading expenses...
             </div>
@@ -51,7 +51,7 @@ export function ExpenseTable({expenses, loading = false, onEdit, onDelete}: Expe
     }
 
     if (expenses.length === 0) {
-         return (
+        return (
             <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
                 <p className="text-sm font-medium text-gray-700">
                     No expenses found
@@ -67,37 +67,65 @@ export function ExpenseTable({expenses, loading = false, onEdit, onDelete}: Expe
     return (
         <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
             <div className="overflow-x-auto">
-                <table className="w-full min-w-[900px] text-left text-sm">
+                <table className="w-full min-w-[1100px] text-left text-sm">
 
                     <thead className="border-b border-gray-200 bg-gray-50">
                         <tr>
+
+                            {/* Expense Number */}
+
+                            <th className="px-4 py-3 font-medium text-gray-600">
+                                Expense No.
+                            </th>
+
+                            {/* Category */}
+
                             <th className="px-4 py-3 font-medium text-gray-600">
                                 Category
                             </th>
+
+                            {/* Vendor */}
+
+                            <th className="px-4 py-3 font-medium text-gray-600">
+                                Vendor / Supplier
+                            </th>
+
+                            {/* Amount */}
 
                             <th className="px-4 py-3 font-medium text-gray-600">
                                 Amount
                             </th>
 
+                            {/* Date */}
+
                             <th className="px-4 py-3 font-medium text-gray-600">
                                 Date
                             </th>
+
+                            {/* Payment Method */}
 
                             <th className="px-4 py-3 font-medium text-gray-600">
                                 Payment Method
                             </th>
 
+                            {/* Description */}
+
                             <th className="px-4 py-3 font-medium text-gray-600">
                                 Description
                             </th>
+
+                            {/* Status */}
 
                             <th className="px-4 py-3 font-medium text-gray-600">
                                 Status
                             </th>
 
+                            {/* Actions */}
+
                             <th className="px-4 py-3 text-right font-medium text-gray-600">
                                 Actions
                             </th>
+
                         </tr>
                     </thead>
 
@@ -109,6 +137,14 @@ export function ExpenseTable({expenses, loading = false, onEdit, onDelete}: Expe
                                 className="hover:bg-gray-50"
                             >
 
+                                {/* Expense Number */}
+
+                                <td className="px-4 py-4">
+                                    <span className="font-medium text-gray-900">
+                                        {expense.expenseNumber}
+                                    </span>
+                                </td>
+
                                 {/* Category */}
 
                                 <td className="px-4 py-4">
@@ -116,6 +152,17 @@ export function ExpenseTable({expenses, loading = false, onEdit, onDelete}: Expe
                                         {formatCategory(
                                             expense.category
                                         )}
+                                    </span>
+                                </td>
+
+                                {/* Vendor */}
+
+                                <td className="px-4 py-4 text-gray-600">
+                                    <span
+                                        className="block max-w-[180px] truncate"
+                                        title={expense.vendorName ?? ""}
+                                    >
+                                        {expense.vendorName || "-"}
                                     </span>
                                 </td>
 
@@ -149,12 +196,10 @@ export function ExpenseTable({expenses, loading = false, onEdit, onDelete}: Expe
                                     <span
                                         className="block truncate"
                                         title={
-                                            expense.description ??
-                                            ""
+                                            expense.description ?? ""
                                         }
                                     >
-                                        {expense.description ||
-                                            "-"}
+                                        {expense.description || "-"}
                                     </span>
                                 </td>
 
@@ -162,14 +207,12 @@ export function ExpenseTable({expenses, loading = false, onEdit, onDelete}: Expe
 
                                 <td className="px-4 py-4">
                                     <span
-                                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
-                                            expense.status === "paid"
+                                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${expense.status === "paid"
                                                 ? "bg-green-100 text-green-700"
-                                                : expense.status ===
-                                                  "pending"
-                                                ? "bg-yellow-100 text-yellow-700"
-                                                : "bg-red-100 text-red-700"
-                                        }`}
+                                                : expense.status === "pending"
+                                                    ? "bg-yellow-100 text-yellow-700"
+                                                    : "bg-red-100 text-red-700"
+                                            }`}
                                     >
                                         {formatStatus(
                                             expense.status
@@ -186,9 +229,7 @@ export function ExpenseTable({expenses, loading = false, onEdit, onDelete}: Expe
                                             <button
                                                 type="button"
                                                 onClick={() =>
-                                                    onEdit(
-                                                        expense
-                                                    )
+                                                    onEdit(expense)
                                                 }
                                                 className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100"
                                             >
@@ -200,9 +241,7 @@ export function ExpenseTable({expenses, loading = false, onEdit, onDelete}: Expe
                                             <button
                                                 type="button"
                                                 onClick={() =>
-                                                    onDelete(
-                                                        expense.id
-                                                    )
+                                                    onDelete(expense.id)
                                                 }
                                                 className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
                                             >

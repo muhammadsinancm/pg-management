@@ -9,7 +9,7 @@ function formatCategory(category: Expense['category']) {
 }
 
 function formatPaymentMethod(method: Expense['paymentMethod']) {
-    return method.replace('_', '').replace(/\b\w/g, (char) => char.toUpperCase())
+    return method.replace('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase())
 }
 
 function formatStatus(status: Expense['status']) {
@@ -27,7 +27,7 @@ function formatAmount(amount: number) {
 function formatDate(date: string) {
     const parsedDate = new Date(date)
 
-    if (Number.isNaN(parsedDate.getDate())) {
+    if (Number.isNaN(parsedDate.getTime())) {
         return '-'
     }
 
@@ -38,8 +38,8 @@ function formatDate(date: string) {
     })
 }
 
-export function ExpenseDetails({expense}: ExpenseDetailsProps) {
-     return (
+export function ExpenseDetails({ expense }: ExpenseDetailsProps) {
+    return (
         <div className="space-y-6">
 
             {/* Summary */}
@@ -84,13 +84,12 @@ export function ExpenseDetails({expense}: ExpenseDetailsProps) {
                     </p>
 
                     <span
-                        className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
-                            expense.status === "paid"
+                        className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${expense.status === "paid"
                                 ? "bg-green-100 text-green-700"
                                 : expense.status === "pending"
-                                ? "bg-yellow-100 text-yellow-700"
-                                : "bg-red-100 text-red-700"
-                        }`}
+                                    ? "bg-yellow-100 text-yellow-700"
+                                    : "bg-red-100 text-red-700"
+                            }`}
                     >
                         {formatStatus(expense.status)}
                     </span>
@@ -99,9 +98,7 @@ export function ExpenseDetails({expense}: ExpenseDetailsProps) {
             </div>
 
             {/* Details */}
-
             <div className="rounded-lg border border-gray-200 bg-white">
-
                 <div className="border-b border-gray-200 px-6 py-4">
                     <h2 className="text-base font-semibold text-gray-900">
                         Expense Details
@@ -110,6 +107,18 @@ export function ExpenseDetails({expense}: ExpenseDetailsProps) {
 
                 <div className="grid gap-6 p-6 sm:grid-cols-2">
 
+                    {/* Expense Number */}
+                    <div>
+                        <p className="text-sm text-gray-500">
+                            Expense Number
+                        </p>
+
+                        <p className="mt-1 text-sm font-medium text-gray-900">
+                            {expense.expenseNumber}
+                        </p>
+                    </div>
+
+                    {/* Expense ID */}
                     <div>
                         <p className="text-sm text-gray-500">
                             Expense ID
@@ -120,18 +129,31 @@ export function ExpenseDetails({expense}: ExpenseDetailsProps) {
                         </p>
                     </div>
 
+                    {/* Vendor / Supplier */}
+                    {expense.vendorName && (
+                        <div>
+                            <p className="text-sm text-gray-500">
+                                Vendor / Supplier
+                            </p>
+
+                            <p className="mt-1 text-sm font-medium text-gray-900">
+                                {expense.vendorName}
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Expense Date */}
                     <div>
                         <p className="text-sm text-gray-500">
                             Expense Date
                         </p>
 
                         <p className="mt-1 text-sm font-medium text-gray-900">
-                            {formatDate(
-                                expense.expenseDate
-                            )}
+                            {formatDate(expense.expenseDate)}
                         </p>
                     </div>
 
+                    {/* Organization ID */}
                     <div>
                         <p className="text-sm text-gray-500">
                             Organization ID
@@ -142,6 +164,7 @@ export function ExpenseDetails({expense}: ExpenseDetailsProps) {
                         </p>
                     </div>
 
+                    {/* Branch ID */}
                     <div>
                         <p className="text-sm text-gray-500">
                             Branch ID
@@ -152,30 +175,29 @@ export function ExpenseDetails({expense}: ExpenseDetailsProps) {
                         </p>
                     </div>
 
+                    {/* Category */}
                     <div>
                         <p className="text-sm text-gray-500">
                             Category
                         </p>
 
                         <p className="mt-1 text-sm font-medium text-gray-900">
-                            {formatCategory(
-                                expense.category
-                            )}
+                            {formatCategory(expense.category)}
                         </p>
                     </div>
 
+                    {/* Payment Method */}
                     <div>
                         <p className="text-sm text-gray-500">
                             Payment Method
                         </p>
 
                         <p className="mt-1 text-sm font-medium text-gray-900">
-                            {formatPaymentMethod(
-                                expense.paymentMethod
-                            )}
+                            {formatPaymentMethod(expense.paymentMethod)}
                         </p>
                     </div>
 
+                    {/* Reference Number */}
                     {expense.referenceNumber && (
                         <div>
                             <p className="text-sm text-gray-500">
@@ -188,25 +210,25 @@ export function ExpenseDetails({expense}: ExpenseDetailsProps) {
                         </div>
                     )}
 
+                    {/* Status */}
                     <div>
                         <p className="text-sm text-gray-500">
                             Status
                         </p>
 
                         <p className="mt-1 text-sm font-medium text-gray-900">
-                            {formatStatus(
-                                expense.status
-                            )}
+                            {formatStatus(expense.status)}
                         </p>
                     </div>
 
+                    {/* Description */}
                     {expense.description && (
                         <div className="sm:col-span-2">
                             <p className="text-sm text-gray-500">
                                 Description
                             </p>
 
-                            <p className="mt-1 whitespace-pre-wrap text-sm text-gray-900">
+                            <p className="mt-1 text-sm font-medium text-gray-900">
                                 {expense.description}
                             </p>
                         </div>
@@ -219,45 +241,45 @@ export function ExpenseDetails({expense}: ExpenseDetailsProps) {
 
             {(expense.createdAt ||
                 expense.updatedAt) && (
-                <div className="rounded-lg border border-gray-200 bg-white p-6">
+                    <div className="rounded-lg border border-gray-200 bg-white p-6">
 
-                    <h2 className="text-base font-semibold text-gray-900">
-                        Record Information
-                    </h2>
+                        <h2 className="text-base font-semibold text-gray-900">
+                            Record Information
+                        </h2>
 
-                    <div className="mt-4 grid gap-6 sm:grid-cols-2">
+                        <div className="mt-4 grid gap-6 sm:grid-cols-2">
 
-                        {expense.createdAt && (
-                            <div>
-                                <p className="text-sm text-gray-500">
-                                    Created At
-                                </p>
+                            {expense.createdAt && (
+                                <div>
+                                    <p className="text-sm text-gray-500">
+                                        Created At
+                                    </p>
 
-                                <p className="mt-1 text-sm text-gray-900">
-                                    {formatDate(
-                                        expense.createdAt
-                                    )}
-                                </p>
-                            </div>
-                        )}
+                                    <p className="mt-1 text-sm text-gray-900">
+                                        {formatDate(
+                                            expense.createdAt
+                                        )}
+                                    </p>
+                                </div>
+                            )}
 
-                        {expense.updatedAt && (
-                            <div>
-                                <p className="text-sm text-gray-500">
-                                    Updated At
-                                </p>
+                            {expense.updatedAt && (
+                                <div>
+                                    <p className="text-sm text-gray-500">
+                                        Updated At
+                                    </p>
 
-                                <p className="mt-1 text-sm text-gray-900">
-                                    {formatDate(
-                                        expense.updatedAt
-                                    )}
-                                </p>
-                            </div>
-                        )}
+                                    <p className="mt-1 text-sm text-gray-900">
+                                        {formatDate(
+                                            expense.updatedAt
+                                        )}
+                                    </p>
+                                </div>
+                            )}
 
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
 
         </div>
     )

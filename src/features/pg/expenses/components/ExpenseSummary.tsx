@@ -13,10 +13,14 @@ function formatAmount(amount: number) {
 }
 
 export function ExpenseSummary({ expenses }: ExpenseSummaryProps) {
-    const totalExpenses = expenses.reduce((total, expense) => total + expense.amount, 0)
-    const paidExpenses = expenses.filter((expense) => expense.status === 'paid').reduce((total, expense) => total + expense.amount, 0)
-    const pendingExpenses = expenses.filter((expense) => expense.status === 'pending').reduce((total, expense) => total + expense.amount, 0)
-    const cancelledExpenses = expenses.filter((expense) => expense.status === 'cancelled').reduce((total, expense) => total + expense.amount, 0)
+    const totalExpenses = expenses.filter((expense) => expense.status !== 'cancelled')
+        .reduce((total, expense) => total + expense.amount, 0)
+    const paidExpenses = expenses.filter((expense) => expense.status === 'paid')
+        .reduce((total, expense) => total + expense.amount, 0)
+    const pendingExpenses = expenses.filter((expense) => expense.status === 'pending')
+        .reduce((total, expense) => total + expense.amount, 0)
+    const cancelledExpenses = expenses.filter((expense) => expense.status === 'cancelled')
+        .reduce((total, expense) => total + expense.amount, 0)
 
     return (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -33,8 +37,13 @@ export function ExpenseSummary({ expenses }: ExpenseSummaryProps) {
                 </p>
 
                 <p className="mt-1 text-xs text-gray-500">
-                    {expenses.length} expense
-                    {expenses.length !== 1 ? "s" : ""}
+                    {expenses.filter(
+                        (expense) => expense.status !== 'cancelled'
+                    ).length}{" "}
+                    expense
+                    {expenses.filter(
+                        (expense) => expense.status !== 'cancelled'
+                    ).length !== 1 ? "s" : ""}
                 </p>
             </div>
 

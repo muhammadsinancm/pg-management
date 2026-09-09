@@ -20,7 +20,7 @@ const categories: ExpenseCategory[] = [
     'salary',
     'rent',
     'supplies',
-    'ohter'
+    'other'
 ]
 
 const statuses: ExpenseStatus[] = [
@@ -59,7 +59,7 @@ export function ExpenseFilters({ search, category, status, onSearchChange, onCat
                                 event.target.value
                             )
                         }
-                        placeholder="Search by description or reference..."
+                        placeholder="Search by expense number, vendor, description or reference..."
                         className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-black"
                     />
                 </div>

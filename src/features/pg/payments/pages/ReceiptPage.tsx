@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { usePayments } from "../hooks/usePayments";
 import { Payment } from "../types/payment.types";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export function ReceiptPage() {
     const {paymentId} = useParams<{
@@ -10,7 +11,29 @@ export function ReceiptPage() {
 
     const navigate = useNavigate()
 
-    const branchId = 'branch001'
+    const {user} = useAuth()
+
+    if (!user) {
+      return (
+        <div className="flex min-h-[500px] items-center justify-center">
+            <p className="text-sm text-slate-500">
+                Please login to view the receipt.
+            </p>
+        </div>
+    )
+    }
+
+    const branchId = user.branchId ?? ''
+
+    if (!branchId) {
+      return (
+        <div className="flex min-h-[500px] items-center justify-center">
+            <p className="text-sm text-yellow-700">
+                Your account is not assigned to a branch.
+            </p>
+        </div>
+    )
+    }
 
     const {getPayment} = usePayments(branchId)
 

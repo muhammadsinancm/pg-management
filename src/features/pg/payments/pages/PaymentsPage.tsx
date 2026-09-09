@@ -5,11 +5,35 @@ import { PaymentStatus, PaymentType } from "../types/payment.types";
 import { PaymentTable } from "../components/PaymentTable";
 import { PaymentFilters } from "../components/PaymentFilters";
 import { PaymentSummary } from "../components/PaymentSummary";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export function PaymentsPage() {
   const navigate = useNavigate()
 
-  const branchId = 'branch001'
+  const {user} = useAuth()
+
+  if (!user) {
+     return (
+      <div className="p-6">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+          Please login to view payments.
+        </div>
+      </div>
+    )
+  }
+
+  const branchId = user.branchId ?? ''
+
+  if (!branchId) {
+     return (
+      <div className="p-6">
+        <div className="rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-700">
+          Your account is not assigned to a branch.
+        </div>
+      </div>
+    )
+  }
+
   const { payments, loading, error, refresh } = usePayments(branchId)
 
   const [search, setSearch] = useState('')

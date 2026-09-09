@@ -1,18 +1,15 @@
 import { useNavigate } from "react-router";
 import { useRooms } from "../hooks/useRooms";
 import { useState } from "react";
-import { CreateRoomInput, Room } from "../types/room.types";
-import { RoomForm } from "../components/RoomForm";
+import { Room } from "../types/room.types";
 import { RoomCard } from "../components/RoomCard";
 import { RoomTable } from "../components/RoomTable";
 
 export function RoomsPage() {
 
     const navigate = useNavigate()
-    const { rooms, isLoading, error, addRoom, editRoom, removeRoom } = useRooms()
+    const { rooms, isLoading, error, removeRoom } = useRooms()
 
-    const [showForm, setShowForm] = useState(false)
-    const [editingRoom, setEditingRoom] = useState<Room | undefined>()
     const [search, setSearch] = useState('')
     const [view, setView] = useState<'table' | 'card'>('table')
 
@@ -30,22 +27,9 @@ export function RoomsPage() {
         )
     })
 
-    async function handleSubmit(data: CreateRoomInput) {
-        console.log(data);
-        
-        if (editingRoom) {
-            await editRoom(editingRoom.id, data)
-        } else {
-            await addRoom(data)
-        }
 
-        setEditingRoom(undefined)
-        setShowForm(false)
-    }
-
-    async function handleEdit(room: Room) {
-        setEditingRoom(room)
-        setShowForm(true)
+    function handleEdit(room: Room) {
+       navigate(`/pg/floors/${room.floorId}/rooms`)
     }
 
     async function handleDelete(room: Room) {
@@ -61,54 +45,9 @@ export function RoomsPage() {
     }
 
     function handleAdd() {
-        setEditingRoom(undefined)
-        setShowForm(true)
+       navigate('/pg/floors')
     }
 
-    if (showForm) {
-        return (
-            <div className="mx-auto max-w-4xl">
-                <div className="mb-6">
-                    <button
-                        type="button"
-                        onClick={() => {
-                            setShowForm(false)
-                            setEditingRoom(
-                                undefined
-                            )
-                        }}
-                        className="text-sm text-muted-foreground hover:text-foreground"
-                    >
-                        ← Back to rooms
-                    </button>
-
-                    <h1 className="mt-3 text-3xl font-semibold">
-                        {editingRoom
-                            ? 'Edit Room'
-                            : 'Add Room'}
-                    </h1>
-
-                    <p className="mt-1 text-sm text-muted-foreground">
-                        Configure room and bed
-                        information.
-                    </p>
-                </div>
-
-                <div className="rounded-xl border bg-card p-6">
-                    <RoomForm
-                        room={editingRoom}
-                        onSubmit={handleSubmit}
-                        onCancel={() => {
-                            setShowForm(false)
-                            setEditingRoom(
-                                undefined
-                            )
-                        }}
-                    />
-                </div>
-            </div>
-        )
-    }
     return (
         <div className="mx-auto max-w-7xl space-y-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">

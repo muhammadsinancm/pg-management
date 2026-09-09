@@ -17,7 +17,7 @@ export function FloorRoomsPage() {
 
     const { rooms, isLoading, error, addRoom, editRoom, removeRoom } = useRooms(floorId ?? '')
 
-    const branchId = floor?.branchId ?? 'branch-001'
+    const branchId = floor?.branchId ?? ''
 
     useEffect(() => {
         async function loadFloor() {

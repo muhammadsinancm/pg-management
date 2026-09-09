@@ -19,7 +19,6 @@ export function RoomForm({ branchId, floorId, room, onSubmit, onCancel }: RoomFo
     const [status, setStatus] = useState<Room['status']>(room?.status ?? 'available')
     const [description, setDescription] = useState(room?.description ?? '')
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [loading, setLoading] = useState(false)
     const [errors, setErrors] = useState({
         roomNumber: '',
         capacity: '',

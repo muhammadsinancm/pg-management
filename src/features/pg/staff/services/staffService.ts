@@ -42,7 +42,7 @@ export async function createStaff(data: CreateStaffInput): Promise<Staff> {
         id: staffRef.id,
         ...data,
         createdAt: now,
-        updatedAT: now
+        updatedAt: now
     }
 
     await setDoc(staffRef, staff)
