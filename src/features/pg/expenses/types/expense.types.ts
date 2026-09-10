@@ -1,5 +1,4 @@
-export type ExpenseCategory = | 'electricity' | 'water' | 'internet' | 'maintenance' | 'food' | 'cleaning' | 'salary' | 'rent' | 'supplies' | 'other'
-
+export type ExpenseCategory = string
 export type ExpensePaymentMethod = | 'cash' | 'upi' | 'bank_transfer' | 'card'
 
 export type ExpenseStatus = | 'pending' | 'paid' | 'cancelled'

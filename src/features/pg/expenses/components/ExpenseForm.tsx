@@ -51,6 +51,7 @@ export function ExpenseForm({ expense, organizationId, branchId, onSubmit, onCan
     const [vendorName, setVendorName] = useState<string>(expense?.vendorName ?? '')
     const [description, setDescription] = useState<string>(expense?.description ?? '')
     const [referenceNumber, setReferenceNumber] = useState<string>(expense?.referenceNumber ?? '')
+    const [customCategory, setCustomCategory] = useState<string>('')
     const [formError, setFormError] = useState<string | null>(null)
 
     useEffect(() => {
@@ -73,6 +74,14 @@ export function ExpenseForm({ expense, organizationId, branchId, onSubmit, onCan
 
         setFormError(null)
 
+        if (category === 'other' && !customCategory.trim()) {
+            setFormError('Please enter the expense category')
+            return
+        }
+
+        const finalCategory: ExpenseCategory =
+         category === 'other' ? customCategory.trim() : category
+
         const numericAmount = Number(amount)
 
         if (!amount || numericAmount <= 0) {
@@ -87,7 +96,7 @@ export function ExpenseForm({ expense, organizationId, branchId, onSubmit, onCan
         try {
             if (isEditMode && expense) {
                 const updateData: UpdateExpenseInput = {
-                    category,
+                    category: finalCategory,
                     amount: numericAmount,
                     expenseDate,
                     paymentMethod,
@@ -104,7 +113,7 @@ export function ExpenseForm({ expense, organizationId, branchId, onSubmit, onCan
                 const createData: CreateExpenseInput = {
                     organizationId,
                     branchId,
-                    category,
+                    category: finalCategory,
                     amount: numericAmount,
                     expenseDate,
                     paymentMethod,
@@ -141,9 +150,13 @@ export function ExpenseForm({ expense, organizationId, branchId, onSubmit, onCan
                 <select
                     id="category"
                     value={category}
-                    onChange={(event) =>
+                    onChange={(event) => {
                         setCategory(event.target.value as ExpenseCategory)
-                    }
+
+                        if (event.target.value !== 'other') {
+                            setCustomCategory('')
+                        }
+                    }}
                     className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-black"
                     disabled={loading}
                 >
@@ -155,6 +168,17 @@ export function ExpenseForm({ expense, organizationId, branchId, onSubmit, onCan
                         </option>
                     ))}
                 </select>
+
+                {category === 'other' && (
+                    <input
+                        type="text"
+                        value={customCategory}
+                        onChange={(event) => setCustomCategory(event.target.value)}
+                        placeholder="Enter custom expense category"
+                        className="mt-3 w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-black"
+                        disabled={loading}
+                    />
+                )}
             </div>
 
 
