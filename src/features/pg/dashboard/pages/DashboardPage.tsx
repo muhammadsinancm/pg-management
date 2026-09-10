@@ -12,6 +12,13 @@ export default function DashboardPage() {
 
     const {user} = useAuth()
 
+
+    const organizationId = user?.organizationId ?? ''
+    const branchId = user?.branchId
+
+    const { data, loading, error, loadDashboard } = useDashboard(organizationId, branchId)
+
+    
     if (!user) {
          return (
         <div className="p-6">
@@ -21,11 +28,6 @@ export default function DashboardPage() {
         </div>
     );
     }
-
-    const organizationId = user.organizationId
-    const branchId = user.branchId ?? ''
-
-    const { data, loading, error, loadDashboard } = useDashboard(organizationId, branchId)
 
     if (loading && !data) {
         return (
@@ -77,7 +79,7 @@ export default function DashboardPage() {
 
     const { stats, revenue, occupancy, recentPayments, recentCustomers } = data
 
-    return (
+  return (
         <div className="min-h-screen bg-gray-50 p-6">
             <div className="mx-auto max-w-7xl space-y-6">
 
@@ -96,6 +98,7 @@ export default function DashboardPage() {
 
                 {/* Main Stats */}
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
                     <DashboardStatCard
                         title="Total Customers"
                         value={stats.totalCustomers}
@@ -130,10 +133,12 @@ export default function DashboardPage() {
                         description={`${occupancy.occupancyPercentage}% occupancy`}
                         icon={Building2}
                     />
+
                 </div>
 
                 {/* Secondary Stats */}
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
                     <DashboardStatCard
                         title="Total Beds"
                         value={stats.totalBeds}
@@ -168,10 +173,12 @@ export default function DashboardPage() {
                         description="Total expenses"
                         icon={Receipt}
                     />
+
                 </div>
 
                 {/* Revenue + Occupancy */}
                 <div className="grid gap-6 lg:grid-cols-2">
+
                     <RevenueSummary
                         revenue={revenue}
                     />
@@ -179,10 +186,12 @@ export default function DashboardPage() {
                     <OccupancySummary
                         occupancy={occupancy}
                     />
+
                 </div>
 
                 {/* Recent Data */}
                 <div className="grid gap-6 lg:grid-cols-2">
+
                     <RecentPayments
                         payments={recentPayments}
                     />
@@ -190,6 +199,7 @@ export default function DashboardPage() {
                     <RecentCustomers
                         customers={recentCustomers}
                     />
+
                 </div>
 
             </div>

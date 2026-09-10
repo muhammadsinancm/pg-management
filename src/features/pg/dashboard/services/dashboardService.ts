@@ -1,13 +1,16 @@
 import { collection, getDocs, Timestamp } from "firebase/firestore"
 import type { DashboardData, DashboardStats, OccupancyData, RecentCustomer, RecentPayment, RevenueData } from "../types/dahsboard.types"
 import { firestoreDb } from "@/services/firebase/config"
+import { getRooms } from "../../rooms/services/roomService"
 
 const COLLECTIONS = {
     guests: 'guests',
+    bookings: 'bookings',
     rooms: 'rooms',
     payments: 'payments',
     expenses: 'expenses',
-    invoices: 'invoices'
+    invoices: 'invoices',
+    branches: 'branches'
 } as const
 
 function convertDate(value: unknown): Date | null {
@@ -102,15 +105,19 @@ export async function getDashboardData(organizationId: string, branchId?: string
     }
 
     const [guestsSnapshot,
-        roomsSnapshot,
+        bookingsSnapshot,
         paymentsSnapshot,
+        rooms,
         expensesSnapshot,
-        invoicesSnapshot] = await Promise.all([
+        invoicesSnapshot,
+        branchesSnapshot] = await Promise.all([
             getDocs(collection(firestoreDb, COLLECTIONS.guests)),
-            getDocs(collection(firestoreDb, COLLECTIONS.rooms)),
+            getDocs(collection(firestoreDb, COLLECTIONS.bookings)),
             getDocs(collection(firestoreDb, COLLECTIONS.payments)),
+            getRooms(),
             getDocs(collection(firestoreDb, COLLECTIONS.expenses)),
-            getDocs(collection(firestoreDb, COLLECTIONS.invoices))
+            getDocs(collection(firestoreDb, COLLECTIONS.invoices)),
+            getDocs(collection(firestoreDb, COLLECTIONS.branches))
         ])
 
     const guests = guestsSnapshot.docs.map((doc) => ({
@@ -130,37 +137,43 @@ export async function getDashboardData(organizationId: string, branchId?: string
 
     const activeGuests = guests.filter((guest) => isActiveCustomer(guest as Record<string, unknown>))
 
-    const rooms = roomsSnapshot.docs.map((doc) => ({
+    const organizationBranchIds = new Set(branchesSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data()
-    })).filter((room) => {
-        const data = room as Record<string, unknown>
+    })).filter((branch) => {
+        const data = branch as Record<string, unknown>
 
-        if (data.organizationId !== organizationId) {
+        return data.organizationId === organizationId
+
+    }).map((branch) => String(branch.id)))
+    const filteredRooms = rooms.filter((room) => {
+        const roomBranchId = String(room.branchId ?? '')
+
+        if (!organizationBranchIds.has(roomBranchId)) {
             return false
         }
-
-        if (branchId && data.branchId !== undefined && data.branchId !== branchId) {
+        if (branchId && roomBranchId !== branchId) {
             return false
         }
 
         return true
+        
     })
 
-    const vacantRooms = rooms.filter((room) => {
-        const status = normalizeStatus((room as Record<string, unknown>).status)
+    const vacantRooms = filteredRooms.filter((room) => {
+        const status = normalizeStatus(room.status)
 
         return status === 'available' || status === 'vacant'
     })
 
-    const occupiedRooms = rooms.filter((room) => {
-        const status = normalizeStatus((room as Record<string, unknown>).status)
+    const occupiedRooms = filteredRooms.filter((room) => {
+        const status = normalizeStatus(room.status)
 
         return status === 'occupied'
     })
 
-    const maintenanceRooms = rooms.filter((room) => {
-        const status = normalizeStatus((room as Record<string, unknown>).status)
+    const maintenanceRooms = filteredRooms.filter((room) => {
+        const status = normalizeStatus(room.status)
         return status === 'maintenance'
     })
 
@@ -168,22 +181,13 @@ export async function getDashboardData(organizationId: string, branchId?: string
     let occupiedBeds = 0
     let availableBeds = 0
 
-    rooms.forEach((room) => {
-        const data = room as Record<string, unknown>
-
-        if (!Array.isArray(data.beds)) {
-            return
-        }
-
-        data.beds.forEach((bed) => {
-            if (!bed || typeof bed !== 'object') {
-                return
-            }
-
+    filteredRooms.forEach((room) => {
+        const beds = room.beds ?? []
+        
+        beds.forEach((bed) => {
             totalBeds++
 
-            const bedData = bed as Record<string, unknown>
-            const status = normalizeStatus(bedData.status)
+            const status = normalizeStatus(bed.status)
 
             if (status === 'occupied' || status === 'booked') {
                 occupiedBeds++
@@ -193,7 +197,7 @@ export async function getDashboardData(organizationId: string, branchId?: string
             }
         })
     })
-
+ 
     const payments = paymentsSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data()
@@ -288,7 +292,37 @@ export async function getDashboardData(organizationId: string, branchId?: string
         }
     })
 
-    const recentCustomers: RecentCustomer[] = [...guests].sort((a, b) => {
+       const bookings = bookingsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data()
+    })).filter((booking) => {
+        const data = booking as Record<string, unknown>
+
+        if (data.organizationId !== organizationId) {
+            return false
+        }
+        if (branchId && data.branchId !== branchId) {
+            return false
+        }
+
+        return true
+    })
+
+    const guestMap = new Map(guests.map((guest) => [
+        String(guest.id),
+        guest as Record<string, unknown>
+    ]))
+
+    const recentCustomers: RecentCustomer[] = [...bookings].filter((booking) => {
+        const data = booking as Record<string, unknown>
+
+        return [
+            'pending',
+            'confirmed',
+            'checked_in'
+        ].includes(normalizeStatus(data.status))
+
+    }).sort((a, b) => {
         const aData = a as Record<string, unknown>
         const bData = b as Record<string, unknown>
 
@@ -296,26 +330,30 @@ export async function getDashboardData(organizationId: string, branchId?: string
         const bDate = convertDate(bData.createdAt ?? bData.joinedDate ?? bData.checkInDate)?.getTime() ?? 0
 
         return bDate - aDate
-    }).slice(0, 5).map((guest) => {
-        const data = guest as Record<string, unknown>
+
+    }).slice(0, 5).map((booking) => {
+        const data = booking as Record<string, unknown>
+
+        const customerId = String(data.customerId ?? '')
+        const guest = guestMap.get(customerId)
 
         return {
-            id: String(guest.id),
-            name: getCustomerName(data),
-            roomNumber: getRoomNumber(data),
-            status: typeof data.status === 'string' ? data.status : 'active',
-            joinedDate: formatDate(data.joinedDate ?? data.checkInDate ?? data.createdAt)
+            id: customerId,
+            name: guest ? getCustomerName(guest) : 'Unknown Customer',
+            roomNumber: String(data.roomNumber ?? '-'),
+            status: typeof data.status === 'string' ? data.status : 'confirmed',
+            joinedDate: formatDate(data.checkInDate ?? data.createdAt)
         }
     })
 
     const netIncome = totalIncome - totalExpenses
 
-    const occupancyPercentage = rooms.length > 0 ? Math.round((occupiedRooms.length / rooms.length) * 100) : 0
+    const occupancyPercentage = filteredRooms.length > 0 ? Math.round((occupiedRooms.length / filteredRooms.length) * 100) : 0
 
     const stats: DashboardStats = {
         totalCustomers: guests.length,
         activeCustomers: activeGuests.length,
-        totalRooms: rooms.length,
+        totalRooms: filteredRooms.length,
         vacantRooms: vacantRooms.length,
         occupiedRooms: occupiedRooms.length,
         maintenanceRooms: maintenanceRooms.length,
@@ -335,7 +373,7 @@ export async function getDashboardData(organizationId: string, branchId?: string
     }
 
     const occupancy: OccupancyData = {
-        totalRooms: rooms.length,
+        totalRooms: filteredRooms.length,
         occupiedRooms: occupiedRooms.length,
         vacantRooms: vacantRooms.length,
         maintenanceRooms: maintenanceRooms.length,
