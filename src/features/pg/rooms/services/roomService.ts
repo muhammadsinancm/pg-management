@@ -17,20 +17,29 @@ function createBeds(capacity: number): Bed[] {
 export async function getRooms(floorId?: string): Promise<Room[]> {
     const rooms = await roomRepository.list(COLLECTION)
 
+    const roomsWithBeds = await Promise.all(rooms.map((room) => ensureRoomBeds(room)))
+
     if (!floorId) {
-        return rooms
+        return roomsWithBeds
     }
 
-    return rooms.filter((room) => room.floorId === floorId)
+    return roomsWithBeds.filter((room) => room.floorId === floorId)
 }
 
 export async function getRoom(id: string): Promise<Room | null> {
-    return roomRepository.get(COLLECTION, id)
+    const room = await roomRepository.get(COLLECTION, id)
+
+    if (!room) {
+        return null
+    }
+
+    return ensureRoomBeds(room)
 }
 
 export async function getRoomsByFloor(floorId: string): Promise<Room[]> {
-    const rooms = await roomRepository.list(COLLECTION)
-    return rooms.filter(room => room.floorId == floorId)
+    const rooms = await getRooms(floorId)
+    
+    return rooms
 }
 
 export async function createRoom(room: CreateRoomInput): Promise<Room> {
@@ -44,12 +53,41 @@ export async function createRoom(room: CreateRoomInput): Promise<Room> {
     return roomRepository.create(COLLECTION, data)
 }
 
+export async function addMissingGedsToRooms(): Promise<void> {
+    const rooms = await roomRepository.list(COLLECTION)
+
+    for (const room of rooms) {
+        if (room.beds && room.beds.length > 0) {
+            continue
+        }
+
+        const beds = createBeds(room.capacity)
+        
+        await roomRepository.update(COLLECTION, room.id, {
+            beds
+        })
+
+    }
+
+}
+
 export async function updateRoom(id: string, data: Partial<Omit<Room, 'id'>>): Promise<Room> {
     return roomRepository.update(COLLECTION, id, data)
 }
 
 export async function deleteRoom(id: string): Promise<void> {
     return roomRepository.remove(COLLECTION, id)
+}
+
+async function ensureRoomBeds(room: Room): Promise<Room> {
+    if (room.beds && room.beds.length > 0) {
+        return room
+    }
+    const beds = createBeds(room.capacity)
+
+    return roomRepository.update(COLLECTION, room.id, {
+        beds
+    })
 }
 
 export async function updateBed(roomId: string, bedId: string, data: Partial<Bed>): Promise<Room> {

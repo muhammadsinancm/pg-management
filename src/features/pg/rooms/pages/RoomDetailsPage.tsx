@@ -55,7 +55,8 @@ export function RoomDetailsPage() {
         if (!roomId || !allocationBed) {
             return
         }
-        const updated = await allocateBed(roomId, allocationBed?.id, customerId, customerName)
+        const updated = await allocateBed(roomId, allocationBed.id, customerId, customerName)
+
         setRoom(updated)
         setAllocationBed(null)
     }

@@ -32,11 +32,11 @@ export function FloorForm({ branchId, floor, onSubmit, onCancel }: FloorFormProp
         if (!floorNumber.trim()) {
             newErrors.floorNumber = 'Floor number is required'
         } else if (!Number.isInteger(Number(floorNumber))) {
-            newErrors.name = 'Floor name is required'
+            newErrors.floorNumber = 'Floor name is required'
         }
 
         if (!name.trim()) {
-            newErrors.floorNumber = 'Floor name is required'
+            newErrors.name = 'Floor name is required'
         }
 
         setErrors(newErrors)

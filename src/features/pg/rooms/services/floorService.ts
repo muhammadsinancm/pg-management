@@ -8,6 +8,9 @@ const floorRepository = new FirebaseFirestoreRepository<Floor>()
 export async function getFloors(branchId?: string): Promise<Floor[]> {
     const floors = await floorRepository.list(COLLECTION)
     if (!floors) {
+        return []
+    }
+    if (!branchId) {
         return floors
     }
 

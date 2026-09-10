@@ -14,7 +14,7 @@ export function useRooms(floorId?: string) {
             setLoading(true)
             setError(null)
 
-            const data = await getRooms()
+            const data = await getRooms(floorId)
 
             const filteredRooms = floorId ? data.filter((room) => room.floorId === floorId) : data
 

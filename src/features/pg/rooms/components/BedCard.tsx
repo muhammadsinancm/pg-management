@@ -53,7 +53,7 @@ export function BedCard({ bed, onAllocate, onVacate, onMaintenance, onMakeAvaila
     {/* AVAILABLE */}
     {bed.status === 'available' && (
         <>
-            <button
+            {/* <button
                 type="button"
                 onClick={() => onAllocate(bed)}
                 className="rounded-md bg-primary px-3 py-2 text-xs font-medium text-primary-foreground"
@@ -67,14 +67,14 @@ export function BedCard({ bed, onAllocate, onVacate, onMaintenance, onMakeAvaila
                 className="rounded-md border px-3 py-2 text-xs font-medium"
             >
                 Maintenance
-            </button>
+            </button> */}
         </>
     )}
 
     {/* OCCUPIED */}
     {bed.status === 'occupied' && (
         <>
-            <button
+            {/* <button
                 type="button"
                 onClick={() => onVacate(bed)}
                 className="rounded-md border px-3 py-2 text-xs font-medium"
@@ -88,7 +88,7 @@ export function BedCard({ bed, onAllocate, onVacate, onMaintenance, onMakeAvaila
                 className="rounded-md border px-3 py-2 text-xs font-medium"
             >
                 Maintenance
-            </button>
+            </button> */}
         </>
     )}
 

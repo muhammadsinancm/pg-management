@@ -29,7 +29,7 @@ export function RoomsPage() {
 
 
     function handleEdit(room: Room) {
-       navigate(`/pg/floors/${room.floorId}/rooms`)
+       navigate(`/pg/floors/${room.floorId}`)
     }
 
     async function handleDelete(room: Room) {
