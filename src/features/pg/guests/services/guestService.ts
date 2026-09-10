@@ -26,20 +26,21 @@ export async function getGuest(guestId: string): Promise<Guest> {
     } as Guest
 }
 
-export async function createGuest(data: CreateGuestInput): Promise<string> {
+export async function createGuest(data: CreateGuestInput, organizationId: string): Promise<string> {
 
-    const guestData: CreateGuestInput = {
+    const guestData = {
         ...data,
+        organizationId,
         status: data.status ?? 'active'
     }
 
-    const docRef = addDoc(collection(firestoreDb, COLLECTION), {
+    const docRef = await addDoc(collection(firestoreDb, COLLECTION), {
         ...guestData,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
     })
 
-    return (await docRef).id
+    return docRef.id
 
 
 }

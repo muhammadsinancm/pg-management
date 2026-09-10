@@ -99,6 +99,10 @@ export function GuestForm({ guest, onSubmit, onCancel }: GuestFormProps) {
             className="space-y-5"
         >
 
+
+
+
+
             {/* =============================== */}
             {/* PERSONAL INFORMATION */}
             {/* =============================== */}
@@ -450,10 +454,10 @@ export function GuestForm({ guest, onSubmit, onCancel }: GuestFormProps) {
 
             </div>
 
-
             {/* =============================== */}
             {/* BUTTONS */}
             {/* =============================== */}
+
 
             <div className="flex justify-end gap-3">
 
@@ -495,6 +499,7 @@ export function GuestForm({ guest, onSubmit, onCancel }: GuestFormProps) {
                 </button>
 
             </div>
+
 
         </form>
     )

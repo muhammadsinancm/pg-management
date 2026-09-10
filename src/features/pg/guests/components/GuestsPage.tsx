@@ -4,24 +4,41 @@ import { CreateGuestInput, Guest } from "../types/guests.types"
 import { GuestForm } from "./GuestForm"
 import { GuestTable } from "./GuestTable"
 import { useNavigate } from "react-router"
+import { useAuth } from "@/features/auth/hooks/useAuth"
 
 export function GuestsPage() {
     const navigate = useNavigate()
 
+    const { user } = useAuth()
+
     const { guests, loading, error, addGuest, editGuest } = useGuests()
+
     const [showForm, setShowForm] = useState(false)
     const [editingGuest, setEditingGuest] = useState<Guest | undefined>()
 
     async function handleSubmit(data: CreateGuestInput) {
         try {
+            if (!user) {
+                alert('User is not logged in')
+                return
+            }
+            if (!user.organizationId) {
+                alert('Organization ID is missing')
+                return
+            }
+
             if (editingGuest) {
                 await editGuest(editingGuest.id, data)
             } else {
-                await addGuest(data)
+                await addGuest(
+                    data,
+                    user.organizationId,
+                )
             }
 
             setEditingGuest(undefined)
             setShowForm(false)
+
         } catch (error) {
             console.error(error)
             alert(editingGuest ? 'Failed to update guest' : 'Failed to add guest')
