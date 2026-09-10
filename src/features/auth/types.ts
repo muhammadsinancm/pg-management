@@ -6,7 +6,7 @@ export interface AuthUser {
   displayName: string
   role: UserRole
   organizationId: string
-  branchId?: string
+  branchId: string
 }
 
 export interface LoginCredentials {

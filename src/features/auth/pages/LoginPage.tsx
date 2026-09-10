@@ -4,10 +4,13 @@ import { LoginForm } from '../components/LoginForm'
 import { useAuth } from '../hooks/useAuth'
 
 export function LoginPage(): React.JSX.Element {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
 
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />
+  if (isAuthenticated && user) {
+    if (user.role === 'super_admin') {
+        return <Navigate to="/dashboard" replace />
+    }
+   return <Navigate to='/pg/rooms' replace/>
   }
 
   return (

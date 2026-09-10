@@ -8,7 +8,7 @@ interface AuthState {
   isAuthenticated: boolean
   isLoading: boolean
   error: string | null
-  login: (credentials: LoginCredentials) => Promise<void>
+  login: (credentials: LoginCredentials) => Promise<AuthUser>
   logout: () => Promise<void>
   clearError: () => void
 }
@@ -47,6 +47,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   error: null,
 
   login: async (credentials) => {
+    
     set({ isLoading: true, error: null })
     try {
       const session = await authService.signIn(credentials)
@@ -58,6 +59,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         isLoading: false,
         error: null
       })
+      console.log(session);
+      
+      return session.user
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Sign in failed'
       set({ isLoading: false, error: message, isAuthenticated: false, user: null, token: null })
