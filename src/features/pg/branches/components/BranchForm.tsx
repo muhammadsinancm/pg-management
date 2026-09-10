@@ -8,6 +8,7 @@ interface BranchFormProps {
 }
 
 const initialForm: CreateBranchInput = {
+    organizationId: '',
     name: '',
     code: '',
     address: '',
@@ -28,6 +29,7 @@ export function BranchForm({ branch, onSubmit, onCancel }: BranchFormProps) {
     useEffect(() => {
         if (branch) {
             setFromData({
+                organizationId: branch.organizationId,
                 name: branch.name,
                 code: branch.code,
                 address: branch.address,
