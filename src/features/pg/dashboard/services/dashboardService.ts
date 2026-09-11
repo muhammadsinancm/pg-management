@@ -272,6 +272,11 @@ export async function getDashboardData(organizationId: string, branchId?: string
 
     }, 0)
 
+    const guestMap = new Map(guests.map((guest)=> [
+        String(guest.id),
+    guest as Record<string, unknown>
+    ]))
+
     const recentPayments: RecentPayment[] = [...payments].sort((a, b) => {
         const aData = a as Record<string, unknown>
         const bData = b as Record<string, unknown>
@@ -282,10 +287,13 @@ export async function getDashboardData(organizationId: string, branchId?: string
         return bDate - aDate
     }).slice(0, 5).map((payment) => {
         const data = payment as Record<string, unknown>
+        console.log("PAYMENT DATA:", data)
+        console.log("PAYMENT CUSTOMER ID:", data.customerId)
+console.log("GUEST MAP:", guestMap)
 
         return {
             id: String(payment.id),
-            customerName: typeof data.customerName === 'string' ? data.customerName : 'Unknown Customer',
+            customerName: guestMap.has(String(data.customerId)) ? getCustomerName(guestMap.get(String(data.customerId))!) : 'Unknown Customer',
             amount: getNumber(data.amount),
             status: typeof data.status === 'string' ? data.status : 'completed',
             paymentDate: formatDate(data.paymentDate ?? data.createdAt)
@@ -307,11 +315,6 @@ export async function getDashboardData(organizationId: string, branchId?: string
 
         return true
     })
-
-    const guestMap = new Map(guests.map((guest) => [
-        String(guest.id),
-        guest as Record<string, unknown>
-    ]))
 
     const recentCustomers: RecentCustomer[] = [...bookings].filter((booking) => {
         const data = booking as Record<string, unknown>
