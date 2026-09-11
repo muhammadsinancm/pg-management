@@ -17,7 +17,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps): React.JS
   }
 
   return (
-    <header className="flex min-h-14 shrink-0 items-center justify-between gap-3 border-b border-border bg-card/80 px-4 pt-[env(safe-area-inset-top)] backdrop-blur-sm sm:px-6">
+    <header className="sticky top-0 z-30 flex min-h-14 shrink-0 items-center justify-between gap-3 border-b border-border bg-card/90 px-4 pt-[env(safe-area-inset-top)] backdrop-blur-md sm:px-6">
       <div className="flex min-w-0 items-center gap-2">
         <Button
           type="button"
