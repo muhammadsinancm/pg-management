@@ -118,7 +118,7 @@ export function GuestDetailsPage() {
           Personal Information
         </h2>
 
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
 
           <DetailItem
             label="Full Name"
@@ -156,7 +156,7 @@ export function GuestDetailsPage() {
           Identification
         </h2>
 
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
 
           <DetailItem
             label="ID Type"
@@ -186,7 +186,7 @@ export function GuestDetailsPage() {
             value={guest.address}
           />
 
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
 
             <DetailItem
               label="City"
@@ -218,7 +218,7 @@ export function GuestDetailsPage() {
 
         {guest.emergencyContact ? (
 
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
 
             <DetailItem
               label="Name"

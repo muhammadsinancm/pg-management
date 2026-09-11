@@ -31,8 +31,8 @@ export default function DashboardPage() {
 
     if (loading && !data) {
         return (
-            <div className="min-h-screen bg-gray-50 p-6">
-                <div className="mx-auto max-w-7xl">
+            <div className="w-full">
+                <div className="mx-auto w-full max-w-7xl">
                     <div className="flex min-h-[400px] items-center justify-center">
                         <div className="text-center">
                             <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-gray-900" />
@@ -49,8 +49,8 @@ export default function DashboardPage() {
 
     if (error && !data) {
         return (
-            <div className="min-h-screen bg-gray-50 p-6">
-                <div className="mx-auto max-w-7xl">
+            <div className="w-full">
+                <div className="mx-auto w-full max-w-7xl">
                     <div className="rounded-xl border border-red-200 bg-red-50 p-6">
                         <h2 className="font-semibold text-red-800">
                             Failed to load dashboard
@@ -80,8 +80,8 @@ export default function DashboardPage() {
     const { stats, revenue, occupancy, recentPayments, recentCustomers } = data
 
   return (
-        <div className="min-h-screen bg-gray-50 p-6">
-            <div className="mx-auto max-w-7xl space-y-6">
+        <div className="w-full">
+            <div className="mx-auto w-full max-w-7xl space-y-6">
 
                 {/* Header */}
                 <DashboardHeader

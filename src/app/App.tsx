@@ -4,7 +4,9 @@ import { AppRouter } from './router'
 export function App(): React.JSX.Element {
   return (
     <AppProviders>
-      <AppRouter />
+      <div className="flex min-h-0 w-full flex-1 flex-col">
+        <AppRouter />
+      </div>
     </AppProviders>
   )
 }

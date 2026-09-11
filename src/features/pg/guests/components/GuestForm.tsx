@@ -184,7 +184,7 @@ export function GuestForm({ guest, onSubmit, onCancel }: GuestFormProps) {
             {/* GENDER + ID TYPE */}
             {/* =============================== */}
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
                 <div>
 
@@ -311,7 +311,7 @@ export function GuestForm({ guest, onSubmit, onCancel }: GuestFormProps) {
             {/* CITY / STATE / PINCODE */}
             {/* =============================== */}
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 
                 <div>
 
@@ -392,7 +392,7 @@ export function GuestForm({ guest, onSubmit, onCancel }: GuestFormProps) {
             </div>
 
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
                 <div>
 
