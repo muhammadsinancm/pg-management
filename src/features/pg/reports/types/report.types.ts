@@ -4,6 +4,12 @@ export interface ReportFilters {
     endDate?: Date
 }
 
+export interface MonthlyOccupancyData {
+    month: string
+    occupancy: number
+    rooms: number
+}
+
 export interface ReportSummaryData {
     totalRevenue: number
     totalPayments: number
@@ -12,6 +18,7 @@ export interface ReportSummaryData {
     availableRooms: number
     maintenanceRooms: number
     totalRooms: number
+    occupancyRate?: number
 }
 
 export interface RevenueReportData {
@@ -28,6 +35,7 @@ export interface OccupancyReportData {
     availableRooms: number
     maintenanceRooms: number
     occupancyRate: number
+    monthlyHistory?: MonthlyOccupancyData[]
 }
 
 export interface BookingReportData {
