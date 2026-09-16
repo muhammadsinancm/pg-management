@@ -1,17 +1,22 @@
+import { RefreshCw } from "lucide-react";
+
 interface DashboardHeaderProps {
-    onRefresh: () => void
-    loading?: boolean
+    onRefresh: () => void;
+    loading?: boolean;
 }
 
-export default function DashboardHeader({ onRefresh, loading = false }: DashboardHeaderProps) {
+export default function DashboardHeader({
+    onRefresh,
+    loading = false,
+}: DashboardHeaderProps) {
     return (
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <h1 className="text-2xl font-bold text-gray-900">
+        <div className="flex items-center justify-between py-0.5">
+            <div className="min-w-0">
+                <h1 className="text-lg font-bold tracking-tight text-neutral-900 sm:text-xl">
                     Dashboard
                 </h1>
 
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="text-[11px] text-neutral-500 font-normal sm:text-xs">
                     Overview of your PG management system.
                 </p>
             </div>
@@ -20,10 +25,20 @@ export default function DashboardHeader({ onRefresh, loading = false }: Dashboar
                 type="button"
                 onClick={onRefresh}
                 disabled={loading}
-                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-[11px] font-medium text-neutral-700 shadow-2xs transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50 sm:px-3 sm:text-xs"
             >
-                {loading ? "Refreshing..." : "Refresh"}
+                <RefreshCw
+                    className={`h-3.5 w-3.5 ${
+                        loading
+                            ? "animate-spin text-neutral-400"
+                            : "text-neutral-500"
+                    }`}
+                />
+
+                <span>
+                    {loading ? "Refreshing..." : "Refresh"}
+                </span>
             </button>
         </div>
-    )
+    );
 }
