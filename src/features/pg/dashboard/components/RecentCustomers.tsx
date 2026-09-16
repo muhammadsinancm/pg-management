@@ -17,7 +17,7 @@ function CustomerStatusBadge({ status }: { status: string }) {
 
     if (s === "checked_in" || s === "active") {
         return (
-            <span className="inline-flex h-6 items-center justify-center whitespace-nowrap rounded-full bg-black px-2.5 text-[11px] font-semibold leading-tight text-white">
+            <span className="inline-flex h-5 sm:h-6 items-center justify-center whitespace-nowrap rounded-full bg-black px-1.5 sm:px-2.5 text-[10px] sm:text-[11px] font-semibold leading-none text-white">
                 Checked In
             </span>
         );
@@ -25,7 +25,7 @@ function CustomerStatusBadge({ status }: { status: string }) {
 
     if (s === "confirmed") {
         return (
-            <span className="inline-flex h-6 items-center justify-center whitespace-nowrap rounded-full bg-neutral-100 px-2.5 text-[11px] font-semibold leading-tight text-neutral-700">
+            <span className="inline-flex h-5 sm:h-6 items-center justify-center whitespace-nowrap rounded-full bg-neutral-100 px-1.5 sm:px-2.5 text-[10px] sm:text-[11px] font-semibold leading-none text-neutral-700">
                 Confirmed
             </span>
         );
@@ -33,7 +33,7 @@ function CustomerStatusBadge({ status }: { status: string }) {
 
     if (s === "pending") {
         return (
-            <span className="inline-flex h-6 items-center justify-center whitespace-nowrap rounded-full bg-neutral-100 px-2.5 text-[11px] font-semibold leading-tight text-neutral-700">
+            <span className="inline-flex h-5 sm:h-6 items-center justify-center whitespace-nowrap rounded-full bg-neutral-100 px-1.5 sm:px-2.5 text-[10px] sm:text-[11px] font-semibold leading-none text-neutral-700">
                 Pending
             </span>
         );
@@ -41,7 +41,7 @@ function CustomerStatusBadge({ status }: { status: string }) {
 
     if (s === "checked_out" || s === "inactive") {
         return (
-            <span className="inline-flex h-6 items-center justify-center whitespace-nowrap rounded-full bg-neutral-100 px-2.5 text-[11px] font-semibold leading-tight text-neutral-700">
+            <span className="inline-flex h-5 sm:h-6 items-center justify-center whitespace-nowrap rounded-full bg-neutral-100 px-1.5 sm:px-2.5 text-[10px] sm:text-[11px] font-semibold leading-none text-neutral-700">
                 Checked Out
             </span>
         );
@@ -49,14 +49,14 @@ function CustomerStatusBadge({ status }: { status: string }) {
 
     if (s === "cancelled") {
         return (
-            <span className="inline-flex h-6 items-center justify-center whitespace-nowrap rounded-full bg-neutral-100 px-2.5 text-[11px] font-semibold leading-tight text-neutral-700">
+            <span className="inline-flex h-5 sm:h-6 items-center justify-center whitespace-nowrap rounded-full bg-neutral-100 px-1.5 sm:px-2.5 text-[10px] sm:text-[11px] font-semibold leading-none text-neutral-700">
                 Cancelled
             </span>
         );
     }
 
     return (
-        <span className="inline-flex h-6 items-center justify-center whitespace-nowrap rounded-full bg-neutral-100 px-2.5 text-[11px] font-semibold capitalize leading-tight text-neutral-700">
+        <span className="inline-flex h-5 sm:h-6 items-center justify-center whitespace-nowrap rounded-full bg-neutral-100 px-1.5 sm:px-2.5 text-[10px] sm:text-[11px] font-semibold capitalize leading-none text-neutral-700">
             {status.replace(/_/g, " ")}
         </span>
     );
@@ -110,22 +110,22 @@ export default function RecentCustomers({
                 </div>
             ) : (
                 <div className="w-full overflow-hidden">
-                    <table className="w-full text-left text-xs sm:text-sm">
+                    <table className="w-full table-fixed text-left text-xs sm:text-sm">
                         <thead>
-                            <tr className="border-b border-neutral-100 bg-neutral-50/50 text-[11px] font-semibold text-neutral-500">
-                                <th className="py-2.5 pl-3.5 pr-2 font-semibold sm:pl-4 sm:pr-3 sm:py-2">
+                            <tr className="border-b border-neutral-100 bg-neutral-50/50 text-[10px] sm:text-[11px] font-semibold text-neutral-500">
+                                <th className="w-[34%] sm:w-[32%] py-2 pl-3.5 pr-1 font-semibold sm:pl-4 sm:pr-2">
                                     Customer
                                 </th>
 
-                                <th className="px-2 py-2.5 font-semibold sm:px-2.5 sm:py-2">
+                                <th className="w-[20%] sm:w-[22%] py-2 px-1 font-semibold sm:px-2">
                                     Room
                                 </th>
 
-                                <th className="px-2 py-2.5 font-semibold sm:px-2.5 sm:py-2 text-right sm:text-left">
+                                <th className="w-[24%] sm:w-[22%] py-2 px-1 font-semibold sm:px-2">
                                     Status
                                 </th>
 
-                                <th className="hidden py-2 pl-2 pr-3.5 font-semibold sm:table-cell sm:pl-3 sm:pr-4">
+                                <th className="w-[22%] sm:w-[24%] py-2 pl-1 pr-3.5 font-semibold sm:pl-2 sm:pr-4">
                                     Joined
                                 </th>
                             </tr>
@@ -138,49 +138,40 @@ export default function RecentCustomers({
                                     className="transition-colors hover:bg-neutral-50/50"
                                 >
                                     {/* Customer */}
-                                    <td className="py-2.5 pl-3.5 pr-2 sm:pl-4 sm:pr-3 sm:py-2.5">
-                                        <div className="flex min-w-0 items-center gap-2">
-                                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-neutral-100 text-[10px] font-bold text-neutral-800">
+                                    <td className="py-2 pl-3.5 pr-1 sm:pl-4 sm:pr-2 sm:py-2.5">
+                                        <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
+                                            <div className="flex h-6 w-6 sm:h-7 sm:w-7 shrink-0 items-center justify-center rounded-lg bg-neutral-100 text-[9px] sm:text-[10px] font-bold text-neutral-800">
                                                 {getInitials(customer.name)}
                                             </div>
 
-                                            <div className="min-w-0 flex-1">
-                                                <p className="truncate text-xs sm:text-sm font-semibold text-neutral-900 leading-tight">
-                                                    {customer.name}
-                                                </p>
-                                                {customer.joinedDate && (
-                                                    <p className="mt-0.5 truncate text-[10px] text-neutral-400 sm:hidden">
-                                                        {customer.joinedDate}
-                                                    </p>
-                                                )}
-                                            </div>
+                                            <span className="truncate text-[11px] sm:text-xs md:text-sm font-semibold text-neutral-900 leading-tight">
+                                                {customer.name}
+                                            </span>
                                         </div>
                                     </td>
 
                                     {/* Room */}
-                                    <td className="px-2 py-2.5 sm:px-2.5 sm:py-2.5 whitespace-nowrap">
-                                        <div className="flex items-center gap-1 text-xs font-medium text-neutral-700">
-                                            <DoorOpen className="h-3.5 w-3.5 shrink-0 text-neutral-400" />
-
-                                            <span>
+                                    <td className="py-2 px-1 sm:px-2 sm:py-2.5">
+                                        <div className="flex items-center gap-1 text-[11px] sm:text-xs font-medium text-neutral-700 truncate">
+                                            <DoorOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 text-neutral-400" />
+                                            <span className="truncate">
                                                 Room {customer.roomNumber}
                                             </span>
                                         </div>
                                     </td>
 
                                     {/* Status */}
-                                    <td className="px-2 py-2.5 sm:px-2.5 sm:py-2.5 text-right sm:text-left">
+                                    <td className="py-2 px-1 sm:px-2 sm:py-2.5">
                                         <CustomerStatusBadge
                                             status={customer.status}
                                         />
                                     </td>
 
-                                    {/* Joined (Desktop/Tablet) */}
-                                    <td className="hidden py-2 pl-2 pr-3.5 sm:table-cell sm:pl-3 sm:pr-4 sm:py-2.5">
-                                        <div className="flex items-center gap-1.5 whitespace-nowrap text-[11px] sm:text-xs text-neutral-400">
-                                            <Calendar className="h-3.5 w-3.5 shrink-0 text-neutral-400" />
-
-                                            <span>
+                                    {/* Joined */}
+                                    <td className="py-2 pl-1 pr-3.5 sm:pl-2 sm:pr-4 sm:py-2.5">
+                                        <div className="flex items-center gap-1 text-[10px] sm:text-[11px] md:text-xs text-neutral-400 truncate">
+                                            <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 text-neutral-400" />
+                                            <span className="truncate">
                                                 {customer.joinedDate || "—"}
                                             </span>
                                         </div>
