@@ -16,6 +16,137 @@ import RevenueSummary from "../components/RevenueSummary";
 import { useDashboard } from "../hooks/useDashboard";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
+function DashboardSkeleton() {
+    return (
+        <div className="w-full space-y-2 sm:space-y-2.5 animate-pulse">
+            {/* Header Skeleton */}
+            <div className="flex items-center justify-between py-0.5">
+                <div className="space-y-1">
+                    <div className="h-5 sm:h-6 w-28 sm:w-32 rounded-md bg-neutral-200" />
+                    <div className="h-3 sm:h-3.5 w-44 sm:w-48 rounded bg-neutral-100" />
+                </div>
+                <div className="h-7 sm:h-8 w-20 sm:w-24 rounded-lg bg-neutral-100" />
+            </div>
+
+            {/* 8 Stat Cards Skeletons */}
+            <div className="grid grid-cols-2 gap-2 sm:gap-2.5 lg:grid-cols-4">
+                {Array.from({ length: 8 }).map((_, i) => (
+                    <div
+                        key={i}
+                        className="flex min-h-[76px] sm:min-h-[82px] items-center justify-between rounded-2xl border border-neutral-100 bg-white px-3.5 py-2.5 shadow-2xs sm:px-4 sm:py-3"
+                    >
+                        <div className="min-w-0 flex-1 space-y-1.5">
+                            <div className="h-3 w-16 sm:w-20 rounded bg-neutral-100" />
+                            <div className="h-5 sm:h-6 w-12 sm:w-16 rounded-md bg-neutral-200" />
+                            <div className="h-2.5 w-14 rounded bg-neutral-100" />
+                        </div>
+                        <div className="ml-2.5 h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-neutral-100 shrink-0" />
+                    </div>
+                ))}
+            </div>
+
+            {/* Revenue & Occupancy Skeletons */}
+            <div className="grid grid-cols-1 gap-2 sm:gap-2.5 lg:grid-cols-2">
+                {/* Revenue Summary Skeleton */}
+                <div className="flex h-[132px] flex-col justify-between overflow-hidden rounded-2xl border border-neutral-100 bg-white shadow-2xs">
+                    <div className="flex items-center gap-2.5 border-b border-neutral-100 px-3.5 py-2.5 sm:px-4 sm:py-3">
+                        <div className="h-8 w-8 shrink-0 rounded-xl bg-neutral-100" />
+                        <div className="space-y-1">
+                            <div className="h-3.5 w-28 rounded bg-neutral-200" />
+                            <div className="h-2.5 w-20 rounded bg-neutral-100" />
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-3 divide-x divide-neutral-100">
+                        {Array.from({ length: 3 }).map((_, i) => (
+                            <div key={i} className="space-y-1.5 px-3 py-2.5 sm:px-4 sm:py-3">
+                                <div className="h-3 w-12 rounded bg-neutral-100" />
+                                <div className="h-5 w-20 rounded bg-neutral-200" />
+                                <div className="h-2.5 w-14 rounded bg-neutral-100" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Occupancy Summary Skeleton */}
+                <div className="flex h-[132px] flex-col justify-between overflow-hidden rounded-2xl border border-neutral-100 bg-white shadow-2xs">
+                    <div className="flex items-center justify-between border-b border-neutral-100 px-3.5 py-2.5 sm:px-4 sm:py-3">
+                        <div className="space-y-1">
+                            <div className="h-3.5 w-32 rounded bg-neutral-200" />
+                            <div className="h-2.5 w-24 rounded bg-neutral-100" />
+                        </div>
+                        <div className="space-y-1 text-right">
+                            <div className="h-5 w-12 rounded bg-neutral-200 ml-auto" />
+                            <div className="h-2.5 w-10 rounded bg-neutral-100 ml-auto" />
+                        </div>
+                    </div>
+                    <div className="flex items-end justify-around h-[80px] sm:h-[86px] px-6 pb-2">
+                        <div className="h-12 w-12 rounded-t-md bg-neutral-200" />
+                        <div className="h-8 w-12 rounded-t-md bg-neutral-100" />
+                        <div className="h-4 w-12 rounded-t-md bg-neutral-100" />
+                    </div>
+                </div>
+            </div>
+
+            {/* Recent Payments & Customers Skeletons */}
+            <div className="grid grid-cols-1 gap-2 sm:gap-2.5 lg:grid-cols-2">
+                {/* Payments Skeleton */}
+                <div className="w-full overflow-hidden rounded-2xl border border-neutral-100 bg-white shadow-2xs">
+                    <div className="flex items-center justify-between border-b border-neutral-100 px-3.5 py-3 sm:px-4 sm:py-3.5">
+                        <div className="flex items-center gap-2.5">
+                            <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-neutral-100 shrink-0" />
+                            <div className="space-y-1">
+                                <div className="h-3.5 w-28 rounded bg-neutral-200" />
+                                <div className="h-2.5 w-24 rounded bg-neutral-100" />
+                            </div>
+                        </div>
+                        <div className="h-4 w-12 rounded bg-neutral-100" />
+                    </div>
+                    <div className="divide-y divide-neutral-100">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <div key={i} className="flex items-center justify-between px-3.5 py-2.5 sm:px-4 sm:py-3">
+                                <div className="flex items-center gap-2">
+                                    <div className="h-7 w-7 rounded-lg bg-neutral-100 shrink-0" />
+                                    <div className="h-3.5 w-24 rounded bg-neutral-200" />
+                                </div>
+                                <div className="h-3.5 w-14 rounded bg-neutral-200" />
+                                <div className="h-5 w-14 rounded-full bg-neutral-100" />
+                                <div className="h-3 w-16 rounded bg-neutral-100 hidden sm:block" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Customers Skeleton */}
+                <div className="w-full overflow-hidden rounded-2xl border border-neutral-100 bg-white shadow-2xs">
+                    <div className="flex items-center justify-between border-b border-neutral-100 px-3.5 py-3 sm:px-4 sm:py-3.5">
+                        <div className="flex items-center gap-2.5">
+                            <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-neutral-100 shrink-0" />
+                            <div className="space-y-1">
+                                <div className="h-3.5 w-28 rounded bg-neutral-200" />
+                                <div className="h-2.5 w-24 rounded bg-neutral-100" />
+                            </div>
+                        </div>
+                        <div className="h-5 w-16 rounded-full bg-neutral-100" />
+                    </div>
+                    <div className="divide-y divide-neutral-100">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <div key={i} className="flex items-center justify-between px-3.5 py-2.5 sm:px-4 sm:py-3">
+                                <div className="flex items-center gap-2">
+                                    <div className="h-7 w-7 rounded-lg bg-neutral-100 shrink-0" />
+                                    <div className="h-3.5 w-24 rounded bg-neutral-200" />
+                                </div>
+                                <div className="h-3.5 w-14 rounded bg-neutral-100" />
+                                <div className="h-5 w-16 rounded-full bg-neutral-100" />
+                                <div className="h-3 w-16 rounded bg-neutral-100 hidden sm:block" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function DashboardPage() {
     const { user } = useAuth();
 
@@ -44,16 +175,7 @@ export default function DashboardPage() {
     }
 
     if (loading && !data) {
-        return (
-            <div className="flex min-h-[300px] items-center justify-center">
-                <div className="text-center">
-                    <div className="mx-auto h-7 w-7 animate-spin rounded-full border-3 border-neutral-300 border-t-neutral-900" />
-                    <p className="mt-3 text-xs font-medium text-neutral-500">
-                        Loading dashboard...
-                    </p>
-                </div>
-            </div>
-        );
+        return <DashboardSkeleton />;
     }
 
     if (error && !data) {
