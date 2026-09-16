@@ -28,12 +28,12 @@ export function DashboardShell(): React.JSX.Element {
   }, [sidebarOpen])
 
   return (
-    <div className="relative flex min-h-screen lg:h-screen lg:overflow-hidden w-full bg-background">
+    <div className="relative flex min-h-screen lg:h-screen lg:overflow-hidden w-full bg-[#f5f6f8]">
       <DashboardSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col lg:h-full lg:overflow-hidden">
         <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
-        <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-5 lg:p-6">
+        <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-2 sm:p-3 lg:p-3.5">
           <Outlet />
         </main>
       </div>
