@@ -4,8 +4,8 @@ import { BranchStatusBadge } from "./BranchStatusBadge";
 interface BranchTableProps {
     branches: Branch[]
     onView: (branch: Branch) => void
-    onEdit: (branch: Branch) => void
-    onDelete: (branch: Branch) => Promise<void>
+    onEdit?: (branch: Branch) => void
+    onDelete?: (branch: Branch) => Promise<void>
 }
 
 export function BranchTable({branches, onView, onEdit, onDelete}: BranchTableProps) {
@@ -146,23 +146,25 @@ export function BranchTable({branches, onView, onEdit, onDelete}: BranchTablePro
                                         View
                                     </button>
 
-                                    <button
-                                        onClick={() =>
-                                            onEdit(branch)
-                                        }
-                                        className="rounded-md border px-3 py-1 text-sm"
-                                    >
-                                        Edit
-                                    </button>
+                                    {onEdit && (
+    <button
+        type="button"
+        onClick={() => onEdit(branch)}
+        className="..."
+    >
+        Edit
+    </button>
+)}
 
-                                    <button
-                                        onClick={() =>
-                                            onDelete(branch)
-                                        }
-                                        className="rounded-md border border-red-500 px-3 py-1 text-sm text-red-600 hover:bg-red-50"
-                                    >
-                                        Delete
-                                    </button>
+                                    {onDelete && (
+    <button
+        type="button"
+        onClick={() => onDelete(branch)}
+        className="..."
+    >
+        Delete
+    </button>
+)}
 
                                 </div>
 

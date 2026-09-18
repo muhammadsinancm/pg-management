@@ -38,6 +38,9 @@ export default defineConfig({
         '@': resolve('src')
       }
     },
-    plugins: [react(), tailwindcss()]
+    plugins: [react(), tailwindcss()],
+    server: {
+      host: true
+    }
   }
 })

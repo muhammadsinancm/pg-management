@@ -1,136 +1,121 @@
-import { Room } from "../types/room.types";
+import { Eye, Pencil, Trash2 } from "lucide-react";
+import type { Room } from "../types/room.types";
 import { RoomStatusBadge } from "./RoomStatusBadge";
 
 interface RoomTableProps {
-    rooms: Room[]
-    onView: (room: Room) => void
-    onEdit: (room: Room) => void
-    onDelete: (room: Room) => void
+    rooms: Room[];
+    onView: (room: Room) => void;
+    onEdit: (room: Room) => void;
+    onDelete: (room: Room) => void;
 }
 
-export function RoomTable({rooms, onView, onEdit, onDelete}: RoomTableProps) {
+export function RoomTable({ rooms, onView, onEdit, onDelete }: RoomTableProps) {
+    if (rooms.length === 0) {
+        return (
+            <div className="rounded-2xl border border-dashed border-neutral-200 bg-white p-8 text-center shadow-2xs">
+                <p className="text-xs sm:text-sm font-semibold text-neutral-700">
+                    No rooms found
+                </p>
+                <p className="mt-0.5 text-xs text-neutral-400">
+                    No rooms match your search or this floor has no rooms yet.
+                </p>
+            </div>
+        );
+    }
+
     return (
-        <div className="overflow-x-auto rounded-xl border bg-card">
-      <table className="w-full text-left text-sm">
-        <thead className="border-b bg-muted/30">
-          <tr>
-            <th className="px-4 py-3 font-medium">
-              Room
-            </th>
+        <div className="overflow-x-auto rounded-2xl border border-neutral-100 bg-white shadow-2xs">
+            <table className="w-full text-left text-xs sm:text-sm">
+                <thead className="border-b border-neutral-100 bg-neutral-50/70 text-[11px] font-bold uppercase tracking-wider text-neutral-500">
+                    <tr>
+                        <th className="px-4 py-3">Room</th>
+                        <th className="px-4 py-3">Type</th>
+                        <th className="px-4 py-3">Sharing</th>
+                        <th className="px-4 py-3">Beds</th>
+                        <th className="px-4 py-3">Rent</th>
+                        <th className="px-4 py-3">Status</th>
+                        <th className="px-4 py-3 text-right">Actions</th>
+                    </tr>
+                </thead>
 
-            <th className="px-4 py-3 font-medium">
-              Floor
-            </th>
+                <tbody className="divide-y divide-neutral-100">
+                    {rooms.map((room) => {
+                        const occupied = (room.beds ?? []).filter(
+                            (bed) => bed.status === "occupied"
+                        ).length;
 
-            <th className="px-4 py-3 font-medium">
-              Type
-            </th>
+                        return (
+                            <tr
+                                key={room.id}
+                                className="transition-colors hover:bg-neutral-50/50"
+                            >
+                                <td className="px-4 py-3 font-bold text-neutral-900">
+                                    {room.roomNumber}
+                                </td>
 
-            <th className="px-4 py-3 font-medium">
-              Sharing
-            </th>
+                                <td className="px-4 py-3 text-neutral-600 capitalize">
+                                    {room.type}
+                                </td>
 
-            <th className="px-4 py-3 font-medium">
-              Beds
-            </th>
+                                <td className="px-4 py-3 text-neutral-600 capitalize">
+                                    {room.sharingType}
+                                </td>
 
-            <th className="px-4 py-3 font-medium">
-              Rent
-            </th>
+                                <td className="px-4 py-3">
+                                    <span className="font-bold text-neutral-900">
+                                        {occupied}
+                                    </span>
+                                    <span className="text-neutral-400">
+                                        /{room.capacity} beds
+                                    </span>
+                                </td>
 
-            <th className="px-4 py-3 font-medium">
-              Status
-            </th>
+                                <td className="px-4 py-3 font-semibold text-neutral-900">
+                                    ₹{Number(room.rent || 0).toLocaleString("en-IN")}
+                                </td>
 
-            <th className="px-4 py-3 font-medium">
-              Actions
-            </th>
-          </tr>
-        </thead>
+                                <td className="px-4 py-3">
+                                    <RoomStatusBadge status={room.status} />
+                                </td>
 
-        <tbody>
-          {rooms.map((room) => {
-            const occupied =
-              (room.beds ?? []).filter(
-                (bed) =>
-                  bed.status ===
-                  'occupied'
-              ).length
+                                <td className="px-4 py-3 text-right">
+                                    <div className="inline-flex items-center justify-end gap-1.5">
+                                        <button
+                                            type="button"
+                                            onClick={() => onView(room)}
+                                            title="View Details"
+                                            aria-label={`View details for room ${room.roomNumber}`}
+                                            className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-neutral-200 bg-white text-neutral-600 shadow-2xs transition-colors hover:bg-neutral-50 hover:text-neutral-900 cursor-pointer"
+                                        >
+                                            <Eye className="h-3.5 w-3.5" />
+                                        </button>
 
-            return (
-              <tr
-                key={room.id}
-                className="border-b last:border-0"
-              >
-                <td className="px-4 py-3 font-medium">
-                  {room.roomNumber}
-                </td>
+                                        <button
+                                            type="button"
+                                            onClick={() => onEdit(room)}
+                                            title="Edit Room"
+                                            aria-label={`Edit room ${room.roomNumber}`}
+                                            className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-neutral-200 bg-white text-neutral-600 shadow-2xs transition-colors hover:bg-neutral-50 hover:text-neutral-900 cursor-pointer"
+                                        >
+                                            <Pencil className="h-3.5 w-3.5" />
+                                        </button>
 
-                <td className="px-4 py-3">
-                  {room.floorId || '-'}
-                </td>
-
-                <td className="px-4 py-3">
-                  {room.type}
-                </td>
-
-                <td className="px-4 py-3">
-                  {room.sharingType}
-                </td>
-
-                <td className="px-4 py-3">
-                  {occupied}/{room.capacity}
-                </td>
-
-                <td className="px-4 py-3">
-                  ₹{room.rent}
-                </td>
-
-                <td className="px-4 py-3">
-                  <RoomStatusBadge
-                    status={room.status}
-                  />
-                </td>
-
-                <td className="px-4 py-3">
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        onView(room)
-                      }
-                      className="rounded border px-2 py-1 text-xs"
-                    >
-                      View
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        onEdit(room)
-                      }
-                      className="rounded border px-2 py-1 text-xs"
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        onDelete(room)
-                      }
-                      className="rounded bg-destructive px-2 py-1 text-xs text-destructive-foreground"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
-    </div>
-
-    )
+                                        <button
+                                            type="button"
+                                            onClick={() => onDelete(room)}
+                                            title="Delete Room"
+                                            aria-label={`Delete room ${room.roomNumber}`}
+                                            className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-neutral-200 bg-white text-neutral-400 shadow-2xs transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 cursor-pointer"
+                                        >
+                                            <Trash2 className="h-3.5 w-3.5" />
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        );
+                    })}
+                </tbody>
+            </table>
+        </div>
+    );
 }

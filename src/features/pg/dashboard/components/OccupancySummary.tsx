@@ -1,77 +1,120 @@
-import { OccupancyData } from "../types/dahsboard.types";
+import {
+    Bar,
+    BarChart,
+    CartesianGrid,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
+} from "recharts";
+import type { OccupancyData } from "./dashboard.types";
 
-interface OccupancySummarayProps {
-    occupancy: OccupancyData
+interface OccupancySummaryProps {
+    occupancy: OccupancyData;
 }
 
-export default function OccupancySummary({ occupancy }: OccupancySummarayProps) {
+export default function OccupancySummary({
+    occupancy,
+}: OccupancySummaryProps) {
+    const chartData = [
+        {
+            status: "Occupied",
+            rooms: occupancy.occupiedRooms,
+        },
+        {
+            status: "Vacant",
+            rooms: occupancy.vacantRooms,
+        },
+        {
+            status: "Maintenance",
+            rooms: Math.max(occupancy.maintenanceRooms, occupancy.maintenanceBeds ?? 0),
+        },
+    ];
+
     return (
-        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <div className="mb-5">
-                <h2 className="text-lg font-semibold text-gray-900">
-                    Occupancy
-                </h2>
-
-                <p className="text-sm text-gray-500">
-                    Current room occupancy
-                </p>
-            </div>
-
-            <div className="flex items-center gap-5">
-                <div className="relative flex h-28 w-28 shrink-0 items-center justify-center rounded-full border-8 border-gray-200">
-                    <div className="text-center">
-                        <p className="text-2xl font-bold text-gray-900">
-                            {occupancy.occupancyPercentage}%
-                        </p>
-
-                        <p className="text-xs text-gray-500">
-                            Occupied
-                        </p>
-                    </div>
+        <div className="flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-neutral-100 bg-white shadow-2xs">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-neutral-100 px-3.5 py-2.5 sm:px-4 sm:py-3">
+                <div>
+                    <h2 className="text-xs sm:text-sm font-bold text-neutral-900">
+                        Occupancy Summary
+                    </h2>
+                    <p className="text-[10px] sm:text-[11px] text-neutral-400">
+                        Current room occupancy
+                    </p>
                 </div>
 
-                <div className="flex-1 space-y-3">
-                    <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">
-                            Total Rooms
-                        </span>
+                <div className="text-right">
+                    <p className="text-base sm:text-lg font-bold leading-none text-neutral-900">
+                        {occupancy.occupancyPercentage}%
+                    </p>
+                    <p className="mt-0.5 text-[10px] text-neutral-400">
+                        occupied
+                    </p>
+                </div>
+            </div>
 
-                        <span className="font-medium text-gray-900">
-                            {occupancy.totalRooms}
-                        </span>
-                    </div>
+            {/* Chart */}
+            <div className="px-2 pt-2 pb-1 sm:px-3">
+                <div className="h-[80px] sm:h-[86px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                            data={chartData}
+                            margin={{
+                                top: 4,
+                                right: 8,
+                                left: -24,
+                                bottom: 0,
+                            }}
+                        >
+                            <CartesianGrid
+                                vertical={false}
+                                strokeDasharray="3 3"
+                                stroke="#f5f5f5"
+                            />
 
-                    <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">
-                            Occupied
-                        </span>
+                            <XAxis
+                                dataKey="status"
+                                tickLine={false}
+                                axisLine={false}
+                                tickMargin={4}
+                                fontSize={11}
+                                stroke="#525252"
+                            />
 
-                        <span className="font-medium text-gray-900">
-                            {occupancy.occupiedRooms}
-                        </span>
-                    </div>
+                            <YAxis
+                                tickLine={false}
+                                axisLine={false}
+                                tickMargin={4}
+                                allowDecimals={false}
+                                fontSize={10}
+                                stroke="#a3a3a3"
+                            />
 
-                    <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">
-                            Vacant
-                        </span>
+                            <Tooltip
+                                cursor={false}
+                                contentStyle={{
+                                    backgroundColor: "#18181b",
+                                    borderRadius: "8px",
+                                    border: "none",
+                                    color: "#fff",
+                                    fontSize: "12px",
+                                    padding: "4px 8px",
+                                }}
+                                itemStyle={{ color: "#fff" }}
+                            />
 
-                        <span className="font-medium text-gray-900">
-                            {occupancy.vacantRooms}
-                        </span>
-                    </div>
-
-                    <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">
-                            Maintenance
-                        </span>
-
-                        <span className="font-medium text-gray-900">
-                            {occupancy.maintenanceRooms}
-                        </span>
-                    </div>
+                            <Bar
+                                dataKey="rooms"
+                                name="Rooms"
+                                fill="#000000"
+                                radius={[4, 4, 0, 0]}
+                                maxBarSize={56}
+                            />
+                        </BarChart>
+                    </ResponsiveContainer>
                 </div>
             </div>
         </div>
-    )
+    );
 }

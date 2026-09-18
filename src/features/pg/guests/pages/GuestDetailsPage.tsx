@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { Guest } from "../types/guests.types";
-import { getGuest, updateGuest } from "../services/guestService";
+import { getGuest } from "../services/guestService";
 import { GuestStatusBadge } from "../components/GuestStatusBadge";
 
 export function GuestDetailsPage() {
@@ -10,7 +10,6 @@ export function GuestDetailsPage() {
 
   const [guest, setGuest] = useState<Guest | null>(null)
   const [loading, setLoading] = useState(true)
-  const [actionLoading, setActionLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -119,7 +118,7 @@ export function GuestDetailsPage() {
           Personal Information
         </h2>
 
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
 
           <DetailItem
             label="Full Name"
@@ -157,7 +156,7 @@ export function GuestDetailsPage() {
           Identification
         </h2>
 
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
 
           <DetailItem
             label="ID Type"
@@ -187,7 +186,7 @@ export function GuestDetailsPage() {
             value={guest.address}
           />
 
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
 
             <DetailItem
               label="City"
@@ -219,7 +218,7 @@ export function GuestDetailsPage() {
 
         {guest.emergencyContact ? (
 
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
 
             <DetailItem
               label="Name"

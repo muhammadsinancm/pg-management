@@ -2,15 +2,31 @@ import { useNavigate } from "react-router";
 import { useBranches } from "../hooks/useBranches";
 import { CreateBranchInput } from "../types/branch.types";
 import { BranchForm } from "../components/BranchForm";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export function CreateBranchPage() {
     const navigate = useNavigate()
 
     const {addBranch} = useBranches()
+    
+    const {user} = useAuth()
 
     async function handleSubmit(data: CreateBranchInput) {
         try {
-            await addBranch(data)
+            if (!user) {
+                alert('You must be logged in')
+                return
+            }
+            if (!user.organizationId) {
+                alert('Organization ID is mission')
+                return
+            }
+
+            await addBranch({
+                ...data,
+                organizationId: user.organizationId
+            })
+            
             navigate('/pg/branches')
 
         } catch (error) {

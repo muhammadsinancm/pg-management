@@ -7,7 +7,7 @@ import { useAuth } from '../hooks/useAuth'
 
 export function LoginForm(): React.JSX.Element {
   const navigate = useNavigate()
-  const { login, isLoading, error, clearError } = useAuth()
+  const { login, user, isLoading, error, clearError } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
@@ -15,8 +15,22 @@ export function LoginForm(): React.JSX.Element {
     event.preventDefault()
     clearError()
     try {
-      await login({ email, password })
-      navigate('/dashboard', { replace: true })
+      const loggedUser = await login({
+        email,
+        password
+      })
+
+      if (loggedUser.role === 'super_admin') {
+        navigate('/dashboard', {
+          replace: true
+        }) 
+      } 
+      else {
+        navigate('/pg/rooms', {
+          replace: true
+        })
+      }
+      
     } catch {
       // error is stored in auth store
     }

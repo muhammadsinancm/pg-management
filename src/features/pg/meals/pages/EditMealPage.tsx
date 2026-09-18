@@ -14,9 +14,6 @@ export default function EditMealPage() {
     const [meal, setMeal] = useState<Meal | null>(null)
     const [loadingMeal, setLoadingMeal] = useState(true)
 
-    const organizationId = 'organization-id'
-    const branchId = 'branch-id'
-
     useEffect(() => {
         if (!mealId) {
             setLoadingMeal(false)
@@ -119,8 +116,8 @@ export default function EditMealPage() {
             {/* Form */}
             <MealForm
                 meal={meal}
-                organizationId={organizationId}
-                branchId={branchId}
+                organizationId={meal.organizationId}
+                branchId={meal.branchId}
                 onSubmit={handleSubmit}
                 onCancel={handleCancel}
                 loading={loading}

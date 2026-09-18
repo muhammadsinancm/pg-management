@@ -28,8 +28,11 @@ export function useGuests() {
         loadGuests()
     }, [loadGuests])
 
-    async function addGuest(data: CreateGuestInput) {
-        await createGuest(data)
+    async function addGuest(data: CreateGuestInput, organizationId: string) {
+        await createGuest(
+            data,
+            organizationId,
+        )
         await loadGuests()
     }
 

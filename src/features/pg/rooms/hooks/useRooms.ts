@@ -8,31 +8,23 @@ export function useRooms(floorId?: string) {
     const [isLoading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    const loadRooms = useCallback(async () => {
-
+    const loadRooms = useCallback(async (force = false) => {
         try {
-            setLoading(true)
-            setError(null)
-
-            const data = await getRooms()
-
-            const filteredRooms = floorId ? data.filter((room) => room.floorId === floorId) : data
-
-            setRooms(filteredRooms)
-
+            setError(null);
+            const data = await getRooms(floorId, force);
+            const filteredRooms = floorId ? data.filter((room) => room.floorId === floorId) : data;
+            setRooms(filteredRooms);
         } catch (error) {
-            console.error(error)
-            setError('Faild to load rooms')
-
+            console.error(error);
+            setError(error instanceof Error ? error.message : 'Failed to load rooms');
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-
-    }, [floorId])
+    }, [floorId]);
 
     useEffect(() => {
-        loadRooms()
-    }, [loadRooms])
+        loadRooms();
+    }, [loadRooms]);
 
     async function addRoom(room: Omit<Room, 'id'>) {
         try {

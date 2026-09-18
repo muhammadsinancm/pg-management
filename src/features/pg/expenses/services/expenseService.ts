@@ -22,11 +22,13 @@ function mapExpense(id: string, data: Record<string, unknown>): Expense {
         id,
         organizationId: data.organizationId as string,
         branchId: data.branchId as string,
+        expenseNumber: data.expenseNumber as string,
         category: data.category as Expense['category'],
         amount: Number(data.amount ?? 0),
         expenseDate: convertDate(data.expenseDate) ?? new Date().toISOString(),
         paymentMethod: data.paymentMethod as Expense['paymentMethod'],
         status: data.status as Expense['status'],
+        vendorName: typeof data.vendorName === 'string' ? data.vendorName : undefined,
         description: typeof data.description === 'string' ? data.description : undefined,
         referenceNumber: typeof data.referenceNumber === 'string' ? data.referenceNumber : undefined,
         createdAt: convertDate(data.createdAt),
@@ -37,9 +39,12 @@ function mapExpense(id: string, data: Record<string, unknown>): Expense {
 export async function createExpense(data: CreateExpenseInput): Promise<string> {
     const now = Timestamp.now()
 
+    const expenseNumber = `EXP-${Date.now()}`
+
     const expenseData: Record<string, unknown> = {
         organizationId: data.organizationId,
         branchId: data.branchId,
+        expenseNumber,
         category: data.category,
         amount: data.amount,
         expenseDate: data.expenseDate,
@@ -47,6 +52,10 @@ export async function createExpense(data: CreateExpenseInput): Promise<string> {
         status: data.status ?? 'paid',
         createdAt: now,
         updatedAt: now
+    }
+
+    if (data.vendorName !== undefined) {
+        expenseData.vendorName = data.vendorName
     }
 
     if (data.description !== undefined) {

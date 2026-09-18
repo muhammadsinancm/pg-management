@@ -4,6 +4,7 @@ export interface DashboardStats {
     vacantRooms: number
     occupiedRooms: number
     maintenanceRooms: number
+    maintenanceBeds: number
     totalRooms: number
     totalBeds: number
     occupiedBeds: number
@@ -25,6 +26,7 @@ export interface OccupancyData {
     occupiedRooms: number
     vacantRooms: number
     maintenanceRooms: number
+    maintenanceBeds?: number
     occupancyPercentage: number
 }
 

@@ -7,8 +7,8 @@ export function createMainWindow(): BrowserWindow {
   const mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
-    minWidth: 960,
-    minHeight: 640,
+    minWidth: 360,
+    minHeight: 480,
     show: false,
     title: 'PG Management',
     autoHideMenuBar: true,

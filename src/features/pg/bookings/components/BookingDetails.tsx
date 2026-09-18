@@ -5,168 +5,161 @@ interface BookingDetailsProps {
     booking: Booking
 }
 
-export function BookingDetails({booking}: BookingDetailsProps) {
+export function BookingDetails({ booking }: BookingDetailsProps) {
     return (
-         <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-5">
+            {/* Header */}
+            <div className="flex flex-col justify-between gap-3 rounded-2xl border border-neutral-100 bg-white p-4 sm:p-5 shadow-2xs md:flex-row md:items-center">
+                <div>
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">
+                        Booking Number
+                    </p>
+                    <h2 className="mt-0.5 text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 font-mono">
+                        {booking.bookingNumber}
+                    </h2>
+                </div>
 
-      {/* Header */}
-      <div className="flex flex-col justify-between gap-4 rounded-xl border border-gray-200 bg-white p-6 md:flex-row md:items-center">
-        <div>
-          <p className="text-sm text-gray-500">
-            Booking Number
-          </p>
+                <div>
+                    <BookingStatusBadge status={booking.status} />
+                </div>
+            </div>
 
-          <h2 className="mt-1 text-2xl font-semibold text-gray-900">
-            {booking.bookingNumber}
-          </h2>
-        </div>
+            {/* Customer */}
+            <section className="rounded-2xl border border-neutral-100 bg-white p-4 sm:p-5 shadow-2xs">
+                <h3 className="text-sm sm:text-base font-bold text-neutral-900">
+                    Customer Information
+                </h3>
 
-        <BookingStatusBadge
-          status={booking.status}
-        />
-      </div>
+                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <DetailItem
+                        label="Customer ID"
+                        value={booking.customerId}
+                    />
 
-      {/* Customer */}
-      <section className="rounded-xl border border-gray-200 bg-white p-6">
-        <h3 className="text-lg font-semibold text-gray-900">
-          Customer Information
-        </h3>
+                    <DetailItem
+                        label="Booking ID"
+                        value={booking.id}
+                    />
+                </div>
+            </section>
 
-        <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
-          <DetailItem
-            label="Customer ID"
-            value={booking.customerId}
-          />
+            {/* Room */}
+            <section className="rounded-2xl border border-neutral-100 bg-white p-4 sm:p-5 shadow-2xs">
+                <h3 className="text-sm sm:text-base font-bold text-neutral-900">
+                    Room Information
+                </h3>
 
-          <DetailItem
-            label="Booking ID"
-            value={booking.id}
-          />
-        </div>
-      </section>
+                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <DetailItem
+                        label="Room"
+                        value={booking.roomNumber}
+                    />
 
-      {/* Room */}
-      <section className="rounded-xl border border-gray-200 bg-white p-6">
-        <h3 className="text-lg font-semibold text-gray-900">
-          Room Information
-        </h3>
+                    <DetailItem
+                        label="Room ID"
+                        value={booking.roomId}
+                    />
 
-        <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-3">
-          <DetailItem
-            label="Room"
-            value={booking.roomNumber}
-          />
+                    <DetailItem
+                        label="Bed"
+                        value={booking.bedNumber || "-"}
+                    />
+                </div>
+            </section>
 
-          <DetailItem
-            label="Room ID"
-            value={booking.roomId}
-          />
+            {/* Dates */}
+            <section className="rounded-2xl border border-neutral-100 bg-white p-4 sm:p-5 shadow-2xs">
+                <h3 className="text-sm sm:text-base font-bold text-neutral-900">
+                    Booking Dates
+                </h3>
 
-          <DetailItem
-            label="Bed"
-            value={
-              booking.bedNumber ||
-              "-"
-            }
-          />
-        </div>
-      </section>
+                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <DetailItem
+                        label="Check In"
+                        value={new Date(booking.checkInDate).toLocaleDateString("en-IN", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                        })}
+                    />
 
-      {/* Dates */}
-      <section className="rounded-xl border border-gray-200 bg-white p-6">
-        <h3 className="text-lg font-semibold text-gray-900">
-          Booking Dates
-        </h3>
+                    <DetailItem
+                        label="Check Out"
+                        value={
+                            booking.checkOutDate
+                                ? new Date(booking.checkOutDate).toLocaleDateString("en-IN", {
+                                      day: "numeric",
+                                      month: "short",
+                                      year: "numeric",
+                                  })
+                                : "—"
+                        }
+                    />
+                </div>
+            </section>
 
-        <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
-          <DetailItem
-            label="Check In"
-            value={booking.checkInDate.toLocaleDateString(
-              "en-IN"
+            {/* Financial */}
+            <section className="rounded-2xl border border-neutral-100 bg-white p-4 sm:p-5 shadow-2xs">
+                <h3 className="text-sm sm:text-base font-bold text-neutral-900">
+                    Financial Information
+                </h3>
+
+                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <DetailItem
+                        label="Rent"
+                        value={`₹${booking.rentAmount.toLocaleString("en-IN")}`}
+                    />
+
+                    <DetailItem
+                        label="Advance"
+                        value={`₹${booking.advanceAmount.toLocaleString("en-IN")}`}
+                    />
+
+                    <DetailItem
+                        label="Security Deposit"
+                        value={`₹${booking.securityDeposit.toLocaleString("en-IN")}`}
+                    />
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-neutral-100">
+                    <DetailItem
+                        label="Payment Status"
+                        value={booking.paymentStatus}
+                    />
+                </div>
+            </section>
+
+            {/* Notes */}
+            {booking.notes && (
+                <section className="rounded-2xl border border-neutral-100 bg-white p-4 sm:p-5 shadow-2xs">
+                    <h3 className="text-sm sm:text-base font-bold text-neutral-900">
+                        Notes
+                    </h3>
+
+                    <p className="mt-2 text-xs sm:text-sm leading-relaxed text-neutral-600">
+                        {booking.notes}
+                    </p>
+                </section>
             )}
-          />
-
-          <DetailItem
-            label="Check Out"
-            value={
-              booking.checkOutDate
-                ? booking.checkOutDate.toLocaleDateString(
-                    "en-IN"
-                  )
-                : "-"
-            }
-          />
         </div>
-      </section>
-
-      {/* Financial */}
-      <section className="rounded-xl border border-gray-200 bg-white p-6">
-        <h3 className="text-lg font-semibold text-gray-900">
-          Financial Information
-        </h3>
-
-        <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-3">
-          <DetailItem
-            label="Rent"
-            value={`₹${booking.rentAmount.toLocaleString(
-              "en-IN"
-            )}`}
-          />
-
-          <DetailItem
-            label="Advance"
-            value={`₹${booking.advanceAmount.toLocaleString(
-              "en-IN"
-            )}`}
-          />
-
-          <DetailItem
-            label="Security Deposit"
-            value={`₹${booking.securityDeposit.toLocaleString(
-              "en-IN"
-            )}`}
-          />
-        </div>
-
-        <div className="mt-5">
-          <DetailItem
-            label="Payment Status"
-            value={booking.paymentStatus}
-          />
-        </div>
-      </section>
-
-      {/* Notes */}
-      {booking.notes && (
-        <section className="rounded-xl border border-gray-200 bg-white p-6">
-          <h3 className="text-lg font-semibold text-gray-900">
-            Notes
-          </h3>
-
-          <p className="mt-4 text-sm leading-6 text-gray-600">
-            {booking.notes}
-          </p>
-        </section>
-      )}
-    </div>
-    )
+    );
 }
 
 interface DetailItemProps {
-    label: string
-    value: string
+    label: string;
+    value: string;
 }
 
-function DetailItem({label, value}: DetailItemProps) {
+function DetailItem({ label, value }: DetailItemProps) {
     return (
         <div>
-      <p className="text-sm text-gray-500">
-        {label}
-      </p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+                {label}
+            </p>
 
-      <p className="mt-1 break-all font-medium text-gray-900">
-        {value}
-      </p>
-    </div>
-    )
+            <p className="mt-1 break-all text-xs sm:text-sm font-semibold text-neutral-800">
+                {value}
+            </p>
+        </div>
+    );
 }

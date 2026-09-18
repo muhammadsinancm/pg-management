@@ -1,13 +1,17 @@
 import { collection, getDocs, Timestamp } from "firebase/firestore"
 import type { DashboardData, DashboardStats, OccupancyData, RecentCustomer, RecentPayment, RevenueData } from "../types/dahsboard.types"
 import { firestoreDb } from "@/services/firebase/config"
+import { getRooms } from "../../rooms/services/roomService"
 
 const COLLECTIONS = {
     guests: 'guests',
+    bookings: 'bookings',
     rooms: 'rooms',
     payments: 'payments',
     expenses: 'expenses',
-    invoices: 'invoices'
+    invoices: 'invoices',
+    branches: 'branches',
+    floors: 'floor',
 } as const
 
 function convertDate(value: unknown): Date | null {
@@ -101,99 +105,143 @@ export async function getDashboardData(organizationId: string, branchId?: string
         throw new Error('Organization ID is required')
     }
 
-    const [guestsSnapshot,
-        roomsSnapshot,
+    const [
+        guestsSnapshot,
+        bookingsSnapshot,
         paymentsSnapshot,
+        rooms,
         expensesSnapshot,
-        invoicesSnapshot] = await Promise.all([
-            getDocs(collection(firestoreDb, COLLECTIONS.guests)),
-            getDocs(collection(firestoreDb, COLLECTIONS.rooms)),
-            getDocs(collection(firestoreDb, COLLECTIONS.payments)),
-            getDocs(collection(firestoreDb, COLLECTIONS.expenses)),
-            getDocs(collection(firestoreDb, COLLECTIONS.invoices))
-        ])
+        invoicesSnapshot,
+        branchesSnapshot,
+        floorsSnapshot
+    ] = await Promise.all([
+        getDocs(collection(firestoreDb, COLLECTIONS.guests)),
+        getDocs(collection(firestoreDb, COLLECTIONS.bookings)),
+        getDocs(collection(firestoreDb, COLLECTIONS.payments)),
+        getRooms(),
+        getDocs(collection(firestoreDb, COLLECTIONS.expenses)),
+        getDocs(collection(firestoreDb, COLLECTIONS.invoices)),
+        getDocs(collection(firestoreDb, COLLECTIONS.branches)),
+        getDocs(collection(firestoreDb, COLLECTIONS.floors))
+    ]);
 
-    const guests = guestsSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data()
-    })).filter((guest) => {
-        const data = guest as Record<string, unknown>
-
-        if (data.organizationId !== organizationId) {
-            return false
-        }
-        if (branchId && data.branchId !== undefined && data.branchId !== branchId) {
-            return false
-        }
-        return true
-    })
-
-    const activeGuests = guests.filter((guest) => isActiveCustomer(guest as Record<string, unknown>))
-
-    const rooms = roomsSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data()
-    })).filter((room) => {
-        const data = room as Record<string, unknown>
-
-        if (data.organizationId !== organizationId) {
-            return false
-        }
-
-        if (branchId && data.branchId !== undefined && data.branchId !== branchId) {
-            return false
-        }
-
-        return true
-    })
-
-    const vacantRooms = rooms.filter((room) => {
-        const status = normalizeStatus((room as Record<string, unknown>).status)
-
-        return status === 'available' || status === 'vacant'
-    })
-
-    const occupiedRooms = rooms.filter((room) => {
-        const status = normalizeStatus((room as Record<string, unknown>).status)
-
-        return status === 'occupied'
-    })
-
-    const maintenanceRooms = rooms.filter((room) => {
-        const status = normalizeStatus((room as Record<string, unknown>).status)
-        return status === 'maintenance'
-    })
-
-    let totalBeds = 0
-    let occupiedBeds = 0
-    let availableBeds = 0
-
-    rooms.forEach((room) => {
-        const data = room as Record<string, unknown>
-
-        if (!Array.isArray(data.beds)) {
-            return
-        }
-
-        data.beds.forEach((bed) => {
-            if (!bed || typeof bed !== 'object') {
-                return
+    const guests = guestsSnapshot.docs
+        .map((doc) => ({
+            id: doc.id,
+            ...doc.data()
+        }))
+        .filter((guest) => {
+            const data = guest as Record<string, unknown>;
+            if (organizationId && data.organizationId && data.organizationId !== organizationId) {
+                return false;
             }
+            if (branchId && data.branchId !== undefined && data.branchId !== branchId) {
+                return false;
+            }
+            return true;
+        });
 
-            totalBeds++
+    const activeGuests = guests.filter((guest) => isActiveCustomer(guest as Record<string, unknown>));
 
-            const bedData = bed as Record<string, unknown>
-            const status = normalizeStatus(bedData.status)
+    const floorBranchMap = new Map<string, string>();
+    floorsSnapshot.docs.forEach((doc) => {
+        const data = doc.data() as Record<string, unknown>;
+        if (data.branchId) {
+            floorBranchMap.set(doc.id, String(data.branchId));
+        }
+    });
+
+    const organizationBranchIds = new Set(
+        branchesSnapshot.docs
+            .map((doc) => ({
+                id: doc.id,
+                ...doc.data()
+            }))
+            .filter((branch) => {
+                const data = branch as Record<string, unknown>;
+                return !organizationId || !data.organizationId || data.organizationId === organizationId;
+            })
+            .map((branch) => String(branch.id))
+    );
+
+    const filteredRooms = rooms.filter((room) => {
+        const roomBranchId = String(room.branchId || floorBranchMap.get(room.floorId) || '');
+
+        if (branchId && roomBranchId && roomBranchId !== branchId) {
+            return false;
+        }
+
+        if (organizationId && organizationBranchIds.size > 0 && roomBranchId && !organizationBranchIds.has(roomBranchId)) {
+            return false;
+        }
+
+        return true;
+    });
+
+    let totalBeds = 0;
+    let occupiedBeds = 0;
+    let availableBeds = 0;
+    let maintenanceBeds = 0;
+
+    filteredRooms.forEach((room) => {
+        const beds = room.beds ?? [];
+
+        beds.forEach((bed) => {
+            totalBeds++;
+
+            const status = normalizeStatus(bed.status);
 
             if (status === 'occupied' || status === 'booked') {
-                occupiedBeds++
+                occupiedBeds++;
+            } else if (status === 'maintenance' || status === 'repair') {
+                maintenanceBeds++;
+            } else {
+                availableBeds++;
             }
-            if (status === 'available' || status === 'vacant') {
-                availableBeds++
-            }
-        })
-    })
+        });
+    });
 
+    // Maintenance rooms: Room status is 'maintenance' OR any bed is under maintenance
+    const maintenanceRooms = filteredRooms.filter((room) => {
+        const status = normalizeStatus(room.status);
+        if (status === 'maintenance' || status === 'repair') return true;
+        const beds = room.beds ?? [];
+        return beds.some((b) => {
+            const bs = normalizeStatus(b.status);
+            return bs === 'maintenance' || bs === 'repair';
+        });
+    });
+
+    // Occupied rooms: Room status is 'occupied' OR any bed is occupied
+    const occupiedRooms = filteredRooms.filter((room) => {
+        const status = normalizeStatus(room.status);
+        if (status === 'occupied') return true;
+        const beds = room.beds ?? [];
+        return beds.some((b) => {
+            const bs = normalizeStatus(b.status);
+            return bs === 'occupied' || bs === 'booked';
+        });
+    });
+
+    // Vacant rooms: Available rooms that have available capacity and not in maintenance
+    const vacantRooms = filteredRooms.filter((room) => {
+        const status = normalizeStatus(room.status);
+        if (status === 'maintenance' || status === 'repair') return false;
+        const beds = room.beds ?? [];
+        if (beds.length === 0) {
+            return status === 'available' || status === 'vacant' || !status;
+        }
+        const hasAvailable = beds.some((b) => {
+            const bs = normalizeStatus(b.status);
+            return bs === 'available' || bs === 'vacant' || (!bs && bs !== 'occupied' && bs !== 'maintenance');
+        });
+        const hasOccupied = beds.some((b) => {
+            const bs = normalizeStatus(b.status);
+            return bs === 'occupied' || bs === 'booked';
+        });
+        return hasAvailable || (!hasOccupied && status !== 'occupied');
+    });
+ 
     const payments = paymentsSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data()
@@ -268,6 +316,11 @@ export async function getDashboardData(organizationId: string, branchId?: string
 
     }, 0)
 
+    const guestMap = new Map(guests.map((guest)=> [
+        String(guest.id),
+    guest as Record<string, unknown>
+    ]))
+
     const recentPayments: RecentPayment[] = [...payments].sort((a, b) => {
         const aData = a as Record<string, unknown>
         const bData = b as Record<string, unknown>
@@ -278,17 +331,45 @@ export async function getDashboardData(organizationId: string, branchId?: string
         return bDate - aDate
     }).slice(0, 5).map((payment) => {
         const data = payment as Record<string, unknown>
+        console.log("PAYMENT DATA:", data)
+        console.log("PAYMENT CUSTOMER ID:", data.customerId)
+console.log("GUEST MAP:", guestMap)
 
         return {
             id: String(payment.id),
-            customerName: typeof data.customerName === 'string' ? data.customerName : 'Unknown Customer',
+            customerName: guestMap.has(String(data.customerId)) ? getCustomerName(guestMap.get(String(data.customerId))!) : 'Unknown Customer',
             amount: getNumber(data.amount),
             status: typeof data.status === 'string' ? data.status : 'completed',
             paymentDate: formatDate(data.paymentDate ?? data.createdAt)
         }
     })
 
-    const recentCustomers: RecentCustomer[] = [...guests].sort((a, b) => {
+       const bookings = bookingsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data()
+    })).filter((booking) => {
+        const data = booking as Record<string, unknown>
+
+        if (data.organizationId !== organizationId) {
+            return false
+        }
+        if (branchId && data.branchId !== branchId) {
+            return false
+        }
+
+        return true
+    })
+
+    const recentCustomers: RecentCustomer[] = [...bookings].filter((booking) => {
+        const data = booking as Record<string, unknown>
+
+        return [
+            'pending',
+            'confirmed',
+            'checked_in'
+        ].includes(normalizeStatus(data.status))
+
+    }).sort((a, b) => {
         const aData = a as Record<string, unknown>
         const bData = b as Record<string, unknown>
 
@@ -296,29 +377,34 @@ export async function getDashboardData(organizationId: string, branchId?: string
         const bDate = convertDate(bData.createdAt ?? bData.joinedDate ?? bData.checkInDate)?.getTime() ?? 0
 
         return bDate - aDate
-    }).slice(0, 5).map((guest) => {
-        const data = guest as Record<string, unknown>
+
+    }).slice(0, 5).map((booking) => {
+        const data = booking as Record<string, unknown>
+
+        const customerId = String(data.customerId ?? '')
+        const guest = guestMap.get(customerId)
 
         return {
-            id: String(guest.id),
-            name: getCustomerName(data),
-            roomNumber: getRoomNumber(data),
-            status: typeof data.status === 'string' ? data.status : 'active',
-            joinedDate: formatDate(data.joinedDate ?? data.checkInDate ?? data.createdAt)
+            id: customerId,
+            name: guest ? getCustomerName(guest) : 'Unknown Customer',
+            roomNumber: String(data.roomNumber ?? '-'),
+            status: typeof data.status === 'string' ? data.status : 'confirmed',
+            joinedDate: formatDate(data.checkInDate ?? data.createdAt)
         }
     })
 
     const netIncome = totalIncome - totalExpenses
 
-    const occupancyPercentage = rooms.length > 0 ? Math.round((occupiedRooms.length / rooms.length) * 100) : 0
+    const occupancyPercentage = filteredRooms.length > 0 ? Math.round((occupiedRooms.length / filteredRooms.length) * 100) : 0
 
     const stats: DashboardStats = {
         totalCustomers: guests.length,
         activeCustomers: activeGuests.length,
-        totalRooms: rooms.length,
+        totalRooms: filteredRooms.length,
         vacantRooms: vacantRooms.length,
         occupiedRooms: occupiedRooms.length,
         maintenanceRooms: maintenanceRooms.length,
+        maintenanceBeds,
         totalBeds,
         occupiedBeds,
         availableBeds,
@@ -335,10 +421,11 @@ export async function getDashboardData(organizationId: string, branchId?: string
     }
 
     const occupancy: OccupancyData = {
-        totalRooms: rooms.length,
+        totalRooms: filteredRooms.length,
         occupiedRooms: occupiedRooms.length,
         vacantRooms: vacantRooms.length,
         maintenanceRooms: maintenanceRooms.length,
+        maintenanceBeds,
         occupancyPercentage
     }
 

@@ -5,22 +5,34 @@ import { Branch, CreateBranchInput } from "../types/branch.types";
 import { BranchTable } from "../components/BranchTable";
 import { BranchForm } from "../components/BranchForm";
 import { BranchStats } from "../components/BranchStats";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export function BranchesPage() {
     const navigate = useNavigate()
 
     const { branches, loading, error, addBranch, editBranch, removeBranch } = useBranches()
 
+    const {user} = useAuth()
+
     const [showForm, setShowForm] = useState(false)
     const [editingBranch, setEditingBranch] = useState<Branch | undefined>(undefined)
 
+    const isSuperAdmin = user?.role === 'super_admin'
+
     async function handleSubmit(data: CreateBranchInput) {
         try {
+            if (!isSuperAdmin || !user.organizationId) {
+                return
+            }
+            
             if (editingBranch) {
                 await editBranch(editingBranch.id, data)
 
             } else {
-                await addBranch(data)
+                await addBranch({
+                    ...data,
+                    organizationId: user.organizationId
+                })
             }
 
             setShowForm(false)
@@ -33,11 +45,15 @@ export function BranchesPage() {
     }
 
     function handleCreate() {
+        if(!isSuperAdmin) return
+
         setEditingBranch(undefined)
         setShowForm(true)
     }
 
     function handleEdit(branch: Branch) {
+        if(!isSuperAdmin) return
+
         setEditingBranch(branch)
         setShowForm(true)
     }
@@ -47,6 +63,7 @@ export function BranchesPage() {
     }
 
     async function handleDelete(branch: Branch) {
+        if(!isSuperAdmin) return
 
         const confirmed = window.confirm(`Are you sure you want to delete "${branch.name}"?`)
         if (!confirmed) {
@@ -91,69 +108,57 @@ export function BranchesPage() {
     }
 
     return (
-
         <div className="space-y-6 p-6">
 
             {/* Header */}
-
             <div className="flex items-center justify-between">
 
                 <div>
-
                     <h1 className="text-2xl font-semibold">
                         Branches
                     </h1>
 
                     <p className="text-sm text-muted-foreground">
-                        Manage your PG branches
+                        {isSuperAdmin
+                            ? "Manage your PG branches"
+                            : "Your assigned PG branch"}
                     </p>
-
                 </div>
 
-
-                <button
-                    type="button"
-                    onClick={handleCreate}
-                    className="
-                        rounded-md
-                        bg-primary
-                        px-4
-                        py-2
-                        text-sm
-                        font-medium
-                        text-primary-foreground
-                    "
-                >
-                    Add Branch
-                </button>
+                {isSuperAdmin && (
+                    <button
+                        type="button"
+                        onClick={handleCreate}
+                        className="
+                            rounded-md
+                            bg-primary
+                            px-4
+                            py-2
+                            text-sm
+                            font-medium
+                            text-primary-foreground
+                        "
+                    >
+                        Add Branch
+                    </button>
+                )}
 
             </div>
 
-
-
             {/* Statistics */}
-
             <BranchStats
                 branches={branches}
             />
 
-
-
-            {/* Form */}
-
-            {showForm && (
-
+            {/* Form - Super Admin only */}
+            {isSuperAdmin && showForm && (
                 <div className="rounded-xl border p-6">
 
                     <h2 className="mb-5 text-lg font-semibold">
-
                         {editingBranch
                             ? "Edit Branch"
-                            : "Create Branch"
-                        }
-
+                            : "Create Branch"}
                     </h2>
-
 
                     <BranchForm
                         branch={editingBranch}
@@ -162,51 +167,21 @@ export function BranchesPage() {
                     />
 
                 </div>
-
             )}
 
-
-
             {/* Branch List */}
-
             {!showForm && (
-
                 branches.length === 0 ? (
 
-                    <div
-                        className="
-                            rounded-xl
-                            border
-                            p-10
-                            text-center
-                        "
-                    >
+                    <div className="rounded-xl border p-10 text-center">
 
                         <h2 className="text-lg font-medium">
-                            No branches found
+                            No branch found
                         </h2>
 
-
                         <p className="mt-1 text-sm text-muted-foreground">
-                            Create your first branch to get started.
+                            No branch is assigned to your account.
                         </p>
-
-
-                        <button
-                            type="button"
-                            onClick={handleCreate}
-                            className="
-                                mt-4
-                                rounded-md
-                                bg-primary
-                                px-4
-                                py-2
-                                text-sm
-                                text-primary-foreground
-                            "
-                        >
-                            Add Branch
-                        </button>
 
                     </div>
 
@@ -215,14 +190,17 @@ export function BranchesPage() {
                     <BranchTable
                         branches={branches}
                         onView={handleView}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
+                        onEdit={isSuperAdmin ? handleEdit : undefined}
+                        onDelete={
+                            isSuperAdmin
+                                ? handleDelete
+                                : undefined
+                        }
                     />
 
                 )
-
             )}
 
         </div>
-    );
+    )
 }

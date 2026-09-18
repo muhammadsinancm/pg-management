@@ -12,6 +12,7 @@ interface EmergencyContact {
 
 export interface Guest {
     id: string
+    organizationId: string
     fullName: string
     phone: string
     email?: string

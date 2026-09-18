@@ -1,19 +1,51 @@
 import { useCallback, useEffect, useState } from "react";
 import { Branch, CreateBranchInput } from "../types/branch.types";
-import { createBranch, deleteBranch, getBranches, updateBranch } from "../services/branchService";
+import { createBranch, deleteBranch, getBranch, getBranches, updateBranch } from "../services/branchService";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+
+let cachedBranches: Branch[] | null = null;
 
 export function useBranches() {
-    const [branches, setBranches] = useState<Branch[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    const { user } = useAuth();
+
+    const [branches, setBranches] = useState<Branch[]>(() => cachedBranches || []);
+    const [loading, setLoading] = useState<boolean>(() => !cachedBranches);
+    const [error, setError] = useState<string | null>(null);
 
     const loadBranches = useCallback(async () => {
-        try {
-            setLoading(true)
-            setError(null)
+        if (!user) {
+            setBranches([]);
+            setLoading(false);
+            return;
+        }
 
-            const data = await getBranches()
-            setBranches(data)
+        try {
+            if (!cachedBranches) {
+                setLoading(true);
+            }
+            setError(null);
+
+            if (user.role === 'super_admin') {
+                const data = await getBranches();
+                cachedBranches = data;
+                setBranches(data);
+                return;
+            }
+            if (user.role === 'branch_manager') {
+                if (!user.branchId) {
+                    setBranches([]);
+                    setError('Branch is not assigned to this user');
+                    return;
+                }
+
+                const branch = await getBranch(user.branchId);
+                const list = branch ? [branch] : [];
+                cachedBranches = list;
+                setBranches(list);
+                return;
+            }
+
+            setBranches([]);
 
         } catch (error) {
             console.error(error)
@@ -22,7 +54,7 @@ export function useBranches() {
         } finally {
             setLoading(false)
         }
-    }, [])
+    }, [user])
 
     useEffect(()=> {
         loadBranches()
@@ -38,9 +70,7 @@ export function useBranches() {
         await loadBranches()
     }
 
-    async function removeBranch(id: string) {
-        console.log(id);
-        
+    async function removeBranch(id: string) {        
         await deleteBranch(id)
         await loadBranches()
     }

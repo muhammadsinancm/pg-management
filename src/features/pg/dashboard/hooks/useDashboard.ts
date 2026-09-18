@@ -2,13 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 import { DashboardData } from "../types/dahsboard.types";
 import { getDashboardData } from "../services/dashboardService";
 
-export function useDashboard(organizatinId: string, brnanchId?: string) {
+export function useDashboard(organizationId: string, branchId?: string) {
     const [data, setData] = useState<DashboardData | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
     const loadDashboard = useCallback(async () => {
-        if (!organizatinId) {
+        if (!organizationId) {
             setError('Organization ID is required.')
             setLoading(false)
             return
@@ -18,7 +18,7 @@ export function useDashboard(organizatinId: string, brnanchId?: string) {
             setLoading(true)
             setError(null)
 
-            const dashboardData = await getDashboardData(organizatinId, brnanchId)
+            const dashboardData = await getDashboardData(organizationId, branchId)
             setData(dashboardData)
 
         } catch (error) {
@@ -27,7 +27,7 @@ export function useDashboard(organizatinId: string, brnanchId?: string) {
         } finally {
             setLoading(false)
         }
-    }, [organizatinId, brnanchId])
+    }, [organizationId, branchId])
 
     useEffect(() => {
         loadDashboard()

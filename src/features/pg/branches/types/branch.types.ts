@@ -2,6 +2,7 @@ export type BranchStatus = | 'active' | 'inactive' | 'maintenance'
 
 export interface Branch {
     id: string
+    organizationId: string
     name: string
     code: string
     address: string

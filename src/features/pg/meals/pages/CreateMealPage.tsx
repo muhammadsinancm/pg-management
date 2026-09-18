@@ -2,14 +2,47 @@ import { useNavigate } from "react-router";
 import { useMeals } from "../hooks/useMeals";
 import { CreateMealInput, UpdateMealInput } from "../types/meal.types";
 import { MealForm } from "../components/MealForm";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export default function CreateMealPage() {
     const navigate = useNavigate()
 
     const { addMeal, loading, error } = useMeals()
 
-    const organizationId = 'organization-id'
-    const branchId = 'branch-id'
+    const { user } = useAuth()
+
+    if (!user) {
+        return (
+            <div className="p-6">
+                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                    Please login to create a meal.
+                </div>
+            </div>
+        );
+    }
+
+    const organizationId = user.organizationId
+    const branchId = user.branchId ?? ''
+
+    if (!organizationId) {
+        return (
+            <div className="p-6">
+                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                    Your account is not assigned to an organization.
+                </div>
+            </div>
+        );
+    }
+
+    if (!branchId) {
+        return (
+            <div className="p-6">
+                <div className="rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-700">
+                    Your account is not assigned to a branch.
+                </div>
+            </div>
+        );
+    }
 
     const handleSubmit = async (data: CreateMealInput | UpdateMealInput) => {
         if (!('organizationId' in data)) {

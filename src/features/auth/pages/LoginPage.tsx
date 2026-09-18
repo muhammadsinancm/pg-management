@@ -4,14 +4,17 @@ import { LoginForm } from '../components/LoginForm'
 import { useAuth } from '../hooks/useAuth'
 
 export function LoginPage(): React.JSX.Element {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
 
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />
+  if (isAuthenticated && user) {
+    if (user.role === 'super_admin') {
+        return <Navigate to="/dashboard" replace />
+    }
+   return <Navigate to='/pg/rooms' replace/>
   }
 
   return (
-    <div className="relative flex min-h-full items-center justify-center overflow-hidden px-4 py-10">
+    <div className="relative flex min-h-full w-full flex-1 items-center justify-center overflow-x-hidden px-4 py-10 pt-[max(2.5rem,env(safe-area-inset-top))] pb-[max(2.5rem,env(safe-area-inset-bottom))]">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_#d8efe8_0%,_transparent_45%),radial-gradient(ellipse_at_bottom_right,_#e7e2d8_0%,_transparent_40%),linear-gradient(160deg,_#f7f4ee_0%,_#ebe6dc_100%)]"

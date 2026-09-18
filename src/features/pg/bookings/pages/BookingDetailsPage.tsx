@@ -75,62 +75,53 @@ export function BookingDetailsPage() {
 
     if (loading) {
         return (
-            <div className="p-8 text-center text-gray-500">
-                Loading booking...
+            <div className="flex min-h-[300px] items-center justify-center p-8 text-neutral-400">
+                <div className="text-center space-y-2">
+                    <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-neutral-900 border-t-transparent" />
+                    <p className="text-xs font-medium">Loading booking details...</p>
+                </div>
             </div>
-        )
+        );
     }
 
     if (error || !booking) {
         return (
             <div className="space-y-4">
-                <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-red-700">
-                    {error ||
-                        "Booking not found."}
+                <div className="rounded-2xl border border-red-200 bg-red-50/80 p-4 sm:p-5 text-red-700 shadow-2xs">
+                    <p className="text-xs sm:text-sm font-semibold">{error || "Booking not found."}</p>
                 </div>
 
                 <button
                     type="button"
-                    onClick={() =>
-                        navigate(
-                            "/pg/bookings"
-                        )
-                    }
-                    className="rounded-lg bg-teal-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-teal-800"
+                    onClick={() => navigate("/pg/bookings")}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-neutral-900 px-4 py-2 text-xs font-semibold text-white shadow-2xs hover:bg-neutral-800 transition-all cursor-pointer"
                 >
-                    Back to Bookings
+                    ← Back to Bookings
                 </button>
             </div>
-        )
+        );
     }
 
     return (
-        <div className="space-y-6">
-
+        <div className="space-y-4 sm:space-y-6">
             <div>
                 <button
                     type="button"
-                    onClick={() =>
-                        navigate(
-                            "/pg/bookings"
-                        )
-                    }
-                    className="text-sm font-medium text-teal-700 hover:text-teal-800"
+                    onClick={() => navigate("/pg/bookings")}
+                    className="text-xs font-semibold text-neutral-500 hover:text-neutral-900 transition-colors cursor-pointer"
                 >
                     ← Back to Bookings
                 </button>
 
-                <h1 className="mt-4 text-3xl font-semibold text-gray-900">
+                <h1 className="mt-2 text-xl sm:text-2xl font-bold tracking-tight text-neutral-900">
                     Booking Details
                 </h1>
             </div>
 
-            <BookingDetails
-                booking={booking}
-            />
+            <BookingDetails booking={booking} />
 
             {booking.status === "pending" && (
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-2.5 pt-2">
                     <button
                         type="button"
                         onClick={async () => {
@@ -138,17 +129,17 @@ export function BookingDetailsPage() {
                                 await changeBookingStatus(
                                     booking.id,
                                     "confirmed"
-                                )
+                                );
 
                                 setBooking({
                                     ...booking,
                                     status: "confirmed",
-                                })
+                                });
                             } catch (error) {
-                                console.error("Failed to confirm booking", error)
+                                console.error("Failed to confirm booking", error);
                             }
                         }}
-                        className="rounded-lg bg-green-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-green-700"
+                        className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-neutral-900 px-4 py-2.5 text-xs font-semibold text-white shadow-2xs transition-all hover:bg-neutral-800 cursor-pointer"
                     >
                         Confirm Booking
                     </button>
@@ -160,17 +151,17 @@ export function BookingDetailsPage() {
                                 await changeBookingStatus(
                                     booking.id,
                                     "cancelled"
-                                )
+                                );
 
                                 setBooking({
                                     ...booking,
                                     status: "cancelled",
-                                })
+                                });
                             } catch (error) {
-                                console.error("Failed to cancel booking", error)
+                                console.error("Failed to cancel booking", error);
                             }
                         }}
-                        className="rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-700"
+                        className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-xs font-semibold text-red-600 shadow-2xs transition-colors hover:border-red-200 hover:bg-red-50 cursor-pointer"
                     >
                         Cancel Booking
                     </button>
@@ -178,7 +169,7 @@ export function BookingDetailsPage() {
             )}
 
             {booking.status === "confirmed" && (
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-2.5 pt-2">
                     <button
                         type="button"
                         onClick={async () => {
@@ -186,32 +177,32 @@ export function BookingDetailsPage() {
                                 if (!customerName) {
                                     throw new Error(
                                         "Customer name could not be found."
-                                    )
+                                    );
                                 }
 
                                 await checkInBooking(
                                     booking.id,
                                     customerName
-                                )
+                                );
 
                                 setBooking({
                                     ...booking,
                                     status: "checked_in",
-                                })
+                                });
                             } catch (error) {
                                 console.error(
                                     "Failed to check in",
                                     error
-                                )
+                                );
 
                                 setError(
                                     error instanceof Error
                                         ? error.message
                                         : "Failed to check in."
-                                )
+                                );
                             }
                         }}
-                        className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+                        className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-neutral-900 px-4 py-2.5 text-xs font-semibold text-white shadow-2xs transition-all hover:bg-neutral-800 cursor-pointer"
                     >
                         Check In
                     </button>
@@ -223,20 +214,20 @@ export function BookingDetailsPage() {
                                 await changeBookingStatus(
                                     booking.id,
                                     "cancelled"
-                                )
+                                );
 
                                 setBooking({
                                     ...booking,
                                     status: "cancelled",
-                                })
+                                });
                             } catch (error) {
                                 console.error(
                                     "Failed to cancel booking",
                                     error
-                                )
+                                );
                             }
                         }}
-                        className="rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-700"
+                        className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-xs font-semibold text-red-600 shadow-2xs transition-colors hover:border-red-200 hover:bg-red-50 cursor-pointer"
                     >
                         Cancel Booking
                     </button>
@@ -244,8 +235,7 @@ export function BookingDetailsPage() {
             )}
 
             {booking.status === "checked_in" && (
-                <div className="flex flex-wrap gap-3">
-
+                <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-2.5 pt-2">
                     {/* Record Meal */}
                     <button
                         type="button"
@@ -254,7 +244,7 @@ export function BookingDetailsPage() {
                                 `/pg/bookings/${booking.id}/meals`
                             )
                         }
-                        className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800"
+                        className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-neutral-900 px-4 py-2.5 text-xs font-semibold text-white shadow-2xs transition-all hover:bg-neutral-800 cursor-pointer"
                     >
                         Record Meal
                     </button>
@@ -267,7 +257,7 @@ export function BookingDetailsPage() {
                                 `/pg/billing/invoices/create?bookingId=${booking.id}`
                             )
                         }
-                        className="rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800"
+                        className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-xs font-semibold text-neutral-700 shadow-2xs transition-colors hover:bg-neutral-50 cursor-pointer"
                     >
                         Create Invoice
                     </button>
@@ -277,14 +267,12 @@ export function BookingDetailsPage() {
                         type="button"
                         onClick={handleCheckOut}
                         disabled={loading}
-                        className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-xs font-semibold text-neutral-700 shadow-2xs transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
                     >
                         {loading ? "Checking Out..." : "Check Out"}
                     </button>
-
                 </div>
             )}
-
         </div>
-    )
+    );
 }

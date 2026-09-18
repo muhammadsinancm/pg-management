@@ -1,6 +1,7 @@
 import type { AuthSession, LoginCredentials } from '@/features/auth/types'
 import { signInWithEmailAndPassword, signOut as firebaseSignOut, onAuthStateChanged, type User } from 'firebase/auth'
-import { firebaseAuth } from './config'
+import { firebaseAuth, firestoreDb } from './config'
+import { doc, getDoc } from 'firebase/firestore'
 
 /**
  * AuthService interface — swap LocalAuthService for FirebaseAuthService later
@@ -31,16 +32,8 @@ export class LocalAuthService implements AuthService {
       throw new Error('Enter a valid email address')
     }
 
-    this.session = {
-      user: {
-        id: 'local-user',
-        email,
-        displayName: email.split('@')[0] || 'Manager'
-      },
-      token: `local-${Date.now()}`
-    }
+    throw new Error('Local authentication is not available')
 
-    return this.session
   }
 
   async signOut(): Promise<void> {
@@ -52,23 +45,39 @@ export class LocalAuthService implements AuthService {
   }
 }
 
-/** Active auth implementation — replace with Firebase when ready. */
-export const authService1: AuthService = new LocalAuthService()
+async function mapFirebaseUser(user: User): Promise<AuthSession> {
+  const userRef = doc(firestoreDb, 'users', user.uid)
 
+  const userSnapshot = await getDoc(userRef)
 
-////////////////////////////////////////////////
-function mapFirebaseUser(user: User): AuthSession {
+  if (!userSnapshot.exists()) {
+    throw new Error('User profile not found')
+  }
+
+  const profile = userSnapshot.data()
+
+  if (!profile.role || !profile.organizationId) {
+    throw new Error('User profile is incomplete')
+  }
+
   return {
     user: {
       id: user.uid,
       email: user.email ?? '',
       displayName: user.displayName ?? user.email?.split('@')[0] ?? 'User',
+      role: profile.role,
+      organizationId: profile.organizationId,
+      branchId: profile.branchId
     },
     token: ''
   }
+
 }
 
-export class FirevaseAuthService {
+/** Active auth implementation — replace with Firebase when ready. */
+export const authService1: AuthService = new LocalAuthService()
+
+export class FirebaseAuthService implements AuthService {
   async signIn(
     credentials: LoginCredentials
   ): Promise<AuthSession> {
@@ -88,22 +97,37 @@ export class FirevaseAuthService {
       )
 
       const token = await result.user.getIdToken()
+      const session = await mapFirebaseUser(result.user)
 
       return {
-        ...mapFirebaseUser(result.user),
+        ...session,
         token
       }
 
-    } catch (error: any) {
-      if (error.code === 'auth/invalid-credential' ||
-        error.code === 'auth/user-not-found' ||
-        error.code === 'auth/wrong-password') {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message === 'User profile not found') {
+        await firebaseSignOut(firebaseAuth)
+        throw error
+      }
+
+      if (error instanceof Error && error.message === 'User profile is incomplete') {
+        await firebaseSignOut(firebaseAuth)
+        throw error
+      }
+
+      const firebaseError = error as { code?: string }
+
+      if (firebaseError.code === 'auth/invalid-credential' ||
+        firebaseError.code === 'auth/user-not-found' ||
+        firebaseError.code === 'auth/wrong-password'
+      ) {
         throw new Error('Invalid email or password')
       }
 
-      if (error.code === 'auth/too-many-requests') {
+      if (firebaseError.code === 'auth/too-many-requests') {
         throw new Error('Too many attempts. Try again later')
       }
+
       throw new Error('Login failed')
     }
   }
@@ -119,9 +143,10 @@ export class FirevaseAuthService {
       return null
     }
     const token = await user.getIdToken()
+    const session =await mapFirebaseUser(user)
 
     return {
-      ...mapFirebaseUser(user),
+      ...session,
       token,
     }
   }
@@ -134,17 +159,22 @@ export class FirevaseAuthService {
         callback(null)
         return
       }
-      const token = await user.getIdToken()
-      callback({
-        user: {
-          id: user.uid,
-          email: user.email ?? '',
-          displayName: user.displayName ?? user.email?.split('@')[0] ?? 'User'
-        },
-        token,
-      })
+
+      try {
+        const token = await user.getIdToken()
+        const session = await mapFirebaseUser(user)
+
+        callback({
+          ...session,
+          token
+        })
+
+      } catch (error) {
+        console.error('Failed to load user profile', error)
+        callback(null)
+      }
     })
   }
 }
 
-export const authService = new FirevaseAuthService()
+export const authService = new FirebaseAuthService()

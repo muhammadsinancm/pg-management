@@ -40,6 +40,7 @@ import DashboardPage from '@/features/pg/dashboard/pages/DashboardPage'
 import EditInvoicePage from '@/features/pg/billing/pages/EditInvoicePage'
 import CustomerMealsPage from '@/features/pg/meals/pages/CustomerMealsPage'
 import CreateCustomerMealPage from '@/features/pg/meals/pages/CreateCustomerMealPage'
+import { RoleGuard } from '@/router/RoleGuard'
 
 export function AppRouter(): React.JSX.Element {
   return (
@@ -49,7 +50,12 @@ export function AppRouter(): React.JSX.Element {
 
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardShell />}>
-            <Route path="/dashboard" element={<DashboardPage />} />
+
+            <Route element={<RoleGuard allowedRoles={['super_admin']} />}>
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path='/pg/reports' element={<ReportsPage />} />
+            </Route>
+
             <Route path='/pg/rooms' element={<FloorsPage />} />
             <Route path='/pg/rooms/floor/:floorId' element={<FloorRoomsPage />} />
             <Route path='/pg/payments' element={<PaymentsPage />} />
@@ -60,9 +66,8 @@ export function AppRouter(): React.JSX.Element {
             <Route path='/pg/bookings' element={<BookingsPage />} />
             <Route path='/pg/bookings/create' element={<BookingCreatePage />} />
             <Route path='/pg/bookings/:bookingId' element={<BookingDetailsPage />} />
-            <Route path='/pg/bookings/:bookingId/meals' element={<CustomerMealsPage/>}/>
-            <Route path='/pg/bookings/:bookingId/meals/create' element={<CreateCustomerMealPage/>}/>
-            <Route path='/pg/reports' element={<ReportsPage />} />
+            <Route path='/pg/bookings/:bookingId/meals' element={<CustomerMealsPage />} />
+            <Route path='/pg/bookings/:bookingId/meals/create' element={<CreateCustomerMealPage />} />
             <Route path='/pg/customers' element={<GuestsPage />} />
             <Route path='/pg/customers/:guestId' element={<GuestDetailsPage />} />
             <Route path='/pg/branches' element={<BranchesPage />} />
@@ -87,14 +92,13 @@ export function AppRouter(): React.JSX.Element {
             <Route path='/pg/meals/create' element={<CreateMealPage />} />
             <Route path='/pg/meals/edit/:mealId' element={<EditMealPage />} />
             <Route path='/pg/meals/:mealId' element={<MealDetailsPage />} />
-            <Route path='/pg/meals/customer' element={<CustomerMealsPage/>}/>
+            <Route path='/pg/meals/customer' element={<CustomerMealsPage />} />
             <Route path='/pg/settings' element={<SettingsPage />} />
-
           </Route>
         </Route>
 
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<Navigate to="/pg/rooms" replace />} />
+        <Route path="*" element={<Navigate to="/pg/rooms" replace />} />
       </Routes>
     </BrowserRouter>
   )
