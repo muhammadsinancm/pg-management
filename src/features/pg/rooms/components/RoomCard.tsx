@@ -118,3 +118,44 @@ export function RoomCard({ room, onView, onEdit, onDelete }: RoomCardProps) {
         </div>
     );
 }
+
+export function RoomCardSkeleton() {
+    return (
+        <div className="flex flex-col justify-between rounded-2xl border border-neutral-100 bg-white p-3.5 sm:p-4 shadow-2xs space-y-3 animate-pulse">
+            {/* Top row: Room Number & Status */}
+            <div className="flex items-start justify-between gap-2">
+                <div className="space-y-1">
+                    <div className="h-2.5 w-10 rounded bg-neutral-200/80" />
+                    <div className="mt-0.5 h-5 w-20 rounded-md bg-neutral-200" />
+                </div>
+                <div className="h-5 w-16 rounded-full bg-neutral-100" />
+            </div>
+
+            {/* Room Specs Grid (Type, Sharing, Beds, Rent) */}
+            <div className="grid grid-cols-2 gap-2 rounded-xl border border-neutral-100/80 bg-neutral-50/70 p-2.5">
+                {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="space-y-1">
+                        <div className="h-2.5 w-10 rounded bg-neutral-200/70" />
+                        <div className="h-3.5 w-16 rounded bg-neutral-200" />
+                    </div>
+                ))}
+            </div>
+
+            {/* Occupancy Progress Bar */}
+            <div className="space-y-1">
+                <div className="flex justify-between">
+                    <div className="h-2.5 w-16 rounded bg-neutral-100" />
+                    <div className="h-2.5 w-8 rounded bg-neutral-100" />
+                </div>
+                <div className="h-1.5 w-full rounded-full bg-neutral-100" />
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-1.5 pt-0.5">
+                <div className="h-8 flex-1 rounded-xl bg-neutral-900/10" />
+                <div className="h-8 w-8 shrink-0 rounded-xl border border-neutral-100 bg-neutral-100/70" />
+                <div className="h-8 w-8 shrink-0 rounded-xl border border-neutral-100 bg-neutral-100/70" />
+            </div>
+        </div>
+    );
+}

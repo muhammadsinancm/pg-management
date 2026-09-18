@@ -13,7 +13,7 @@ import {
 import { useRooms } from "../hooks/useRooms";
 import { getFloor, getFloors } from "../services/floorService";
 import { RoomForm } from "../components/RoomForm";
-import { RoomCard } from "../components/RoomCard";
+import { RoomCard, RoomCardSkeleton } from "../components/RoomCard";
 import { RoomTable } from "../components/RoomTable";
 import type { Floor } from "../types/floor.types";
 import type { CreateRoomInput, Room, RoomStatus } from "../types/room.types";
@@ -380,22 +380,9 @@ export function FloorRoomsPage() {
 
             {/* Rooms View */}
             {isLoading && filteredRooms.length === 0 ? (
-                <div className="grid grid-cols-1 gap-2.5 sm:gap-3 sm:grid-cols-2 lg:grid-cols-3 animate-pulse">
-                    {Array.from({ length: 3 }).map((_, i) => (
-                        <div
-                            key={i}
-                            className="flex min-h-[140px] flex-col justify-between rounded-2xl border border-neutral-100 bg-white p-4 shadow-2xs space-y-3"
-                        >
-                            <div className="flex items-center justify-between">
-                                <div className="h-5 w-20 rounded bg-neutral-200" />
-                                <div className="h-5 w-16 rounded-full bg-neutral-100" />
-                            </div>
-                            <div className="space-y-1.5">
-                                <div className="h-3 w-32 rounded bg-neutral-100" />
-                                <div className="h-3 w-24 rounded bg-neutral-100" />
-                            </div>
-                            <div className="h-2 w-full rounded bg-neutral-100" />
-                        </div>
+                <div className="grid grid-cols-1 gap-2.5 sm:gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                        <RoomCardSkeleton key={i} />
                     ))}
                 </div>
             ) : filteredRooms.length === 0 ? (

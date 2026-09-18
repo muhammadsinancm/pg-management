@@ -2,7 +2,7 @@ import { useNavigate } from "react-router";
 import { useRooms } from "../hooks/useRooms";
 import { useState } from "react";
 import { Room } from "../types/room.types";
-import { RoomCard } from "../components/RoomCard";
+import { RoomCard, RoomCardSkeleton } from "../components/RoomCard";
 import { RoomTable } from "../components/RoomTable";
 
 export function RoomsPage() {
@@ -123,10 +123,10 @@ export function RoomsPage() {
             )}
 
             {isLoading ? (
-                <div className="rounded-xl border p-10 text-center">
-                    <p className="text-sm text-muted-foreground">
-                        Loading rooms...
-                    </p>
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                        <RoomCardSkeleton key={i} />
+                    ))}
                 </div>
             ) : filteredRooms.length === 0 ? (
                 <div className="rounded-xl border border-dashed p-12 text-center">
