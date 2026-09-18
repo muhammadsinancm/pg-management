@@ -124,11 +124,10 @@ export function RoomForm({ branchId, floorId, room, onSubmit, onCancel }: RoomFo
         >
 
             {/* Room Number */}
-            <div className="space-y-2">
-
+            <div className="space-y-1.5">
                 <label
                     htmlFor="roomNumber"
-                    className="text-sm font-medium text-gray-900"
+                    className="block text-xs font-semibold text-neutral-700"
                 >
                     Room Number
                 </label>
@@ -153,27 +152,25 @@ export function RoomForm({ branchId, floorId, room, onSubmit, onCancel }: RoomFo
 
                     }}
                     placeholder="101"
-                    className={`w-full rounded-md border px-3 py-2 outline-none transition ${errors.roomNumber
-                            ? "border-red-500 focus:border-red-500"
-                            : "border-gray-300 focus:border-teal-600"
-                        }`}
+                    className={`w-full rounded-xl border bg-white px-3.5 py-2 text-xs sm:text-sm text-neutral-900 outline-none transition-colors ${
+                        errors.roomNumber
+                            ? "border-red-400 focus:ring-1 focus:ring-red-500"
+                            : "border-neutral-200 focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
+                    }`}
                 />
 
                 {errors.roomNumber && (
-                    <p className="text-sm text-red-500">
+                    <p className="text-[11px] font-medium text-red-600">
                         {errors.roomNumber}
                     </p>
                 )}
-
             </div>
 
-
             {/* Room Type */}
-            <div className="space-y-2">
-
+            <div className="space-y-1.5">
                 <label
                     htmlFor="type"
-                    className="text-sm font-medium text-gray-900"
+                    className="block text-xs font-semibold text-neutral-700"
                 >
                     Room Type
                 </label>
@@ -181,33 +178,19 @@ export function RoomForm({ branchId, floorId, room, onSubmit, onCancel }: RoomFo
                 <select
                     id="type"
                     value={type}
-                    onChange={(event) =>
-                        setType(
-                            event.target.value as RoomType
-                        )
-                    }
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-teal-600"
+                    onChange={(event) => setType(event.target.value as RoomType)}
+                    className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs sm:text-sm text-neutral-900 outline-none transition-colors focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
                 >
-
-                    <option value="AC">
-                        AC
-                    </option>
-
-                    <option value="NON_AC">
-                        Non AC
-                    </option>
-
+                    <option value="AC">AC</option>
+                    <option value="NON_AC">Non AC</option>
                 </select>
-
             </div>
 
-
             {/* Sharing Type */}
-            <div className="space-y-2">
-
+            <div className="space-y-1.5">
                 <label
                     htmlFor="sharingType"
-                    className="text-sm font-medium text-gray-900"
+                    className="block text-xs font-semibold text-neutral-700"
                 >
                     Sharing Type
                 </label>
@@ -216,46 +199,25 @@ export function RoomForm({ branchId, floorId, room, onSubmit, onCancel }: RoomFo
                     id="sharingType"
                     value={sharingType}
                     onChange={(event) =>
-                        setSharingType(
-                            event.target.value as SharingType
-                        )
+                        setSharingType(event.target.value as SharingType)
                     }
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-teal-600"
+                    className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs sm:text-sm text-neutral-900 outline-none transition-colors focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
                 >
-
-                    <option value="SINGLE">
-                        Single
-                    </option>
-
-                    <option value="DOUBLE">
-                        Double
-                    </option>
-
-                    <option value="TRIPLE">
-                        Triple
-                    </option>
-
-                    <option value="FOUR_SHARING">
-                        Four Sharing
-                    </option>
-
-                    <option value="DORMITORY">
-                        Dormitory
-                    </option>
-
+                    <option value="SINGLE">Single</option>
+                    <option value="DOUBLE">Double</option>
+                    <option value="TRIPLE">Triple</option>
+                    <option value="FOUR_SHARING">Four Sharing</option>
+                    <option value="DORMITORY">Dormitory</option>
                 </select>
-
             </div>
 
-
             {/* Capacity */}
-            <div className="space-y-2">
-
+            <div className="space-y-1.5">
                 <label
                     htmlFor="capacity"
-                    className="text-sm font-medium text-gray-900"
+                    className="block text-xs font-semibold text-neutral-700"
                 >
-                    Capacity
+                    Capacity (Beds)
                 </label>
 
                 <input
@@ -264,44 +226,33 @@ export function RoomForm({ branchId, floorId, room, onSubmit, onCancel }: RoomFo
                     min="1"
                     value={capacity}
                     onChange={(event) => {
-
-                        setCapacity(
-                            event.target.value
-                        );
-
-                        if (
-                            event.target.value.trim()
-                        ) {
-                            clearError(
-                                "capacity"
-                            );
+                        setCapacity(event.target.value);
+                        if (event.target.value.trim()) {
+                            clearError("capacity");
                         }
-
                     }}
-                    placeholder="4"
-                    className={`w-full rounded-md border px-3 py-2 outline-none transition ${errors.capacity
-                            ? "border-red-500 focus:border-red-500"
-                            : "border-gray-300 focus:border-teal-600"
-                        }`}
+                    placeholder="e.g. 2"
+                    className={`w-full rounded-xl border bg-white px-3.5 py-2 text-xs sm:text-sm text-neutral-900 outline-none transition-colors ${
+                        errors.capacity
+                            ? "border-red-400 focus:ring-1 focus:ring-red-500"
+                            : "border-neutral-200 focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
+                    }`}
                 />
 
                 {errors.capacity && (
-                    <p className="text-sm text-red-500">
+                    <p className="text-[11px] font-medium text-red-600">
                         {errors.capacity}
                     </p>
                 )}
-
             </div>
 
-
             {/* Monthly Rent */}
-            <div className="space-y-2">
-
+            <div className="space-y-1.5">
                 <label
                     htmlFor="rent"
-                    className="text-sm font-medium text-gray-900"
+                    className="block text-xs font-semibold text-neutral-700"
                 >
-                    Monthly Rent
+                    Monthly Rent (₹)
                 </label>
 
                 <input
@@ -310,40 +261,31 @@ export function RoomForm({ branchId, floorId, room, onSubmit, onCancel }: RoomFo
                     min="0"
                     value={rent}
                     onChange={(event) => {
-
-                        setRent(
-                            event.target.value
-                        );
-
-                        if (
-                            event.target.value.trim()
-                        ) {
+                        setRent(event.target.value);
+                        if (event.target.value.trim()) {
                             clearError("rent");
                         }
-
                     }}
-                    placeholder="8000"
-                    className={`w-full rounded-md border px-3 py-2 outline-none transition ${errors.rent
-                            ? "border-red-500 focus:border-red-500"
-                            : "border-gray-300 focus:border-teal-600"
-                        }`}
+                    placeholder="e.g. 8000"
+                    className={`w-full rounded-xl border bg-white px-3.5 py-2 text-xs sm:text-sm text-neutral-900 outline-none transition-colors ${
+                        errors.rent
+                            ? "border-red-400 focus:ring-1 focus:ring-red-500"
+                            : "border-neutral-200 focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
+                    }`}
                 />
 
                 {errors.rent && (
-                    <p className="text-sm text-red-500">
+                    <p className="text-[11px] font-medium text-red-600">
                         {errors.rent}
                     </p>
                 )}
-
             </div>
 
-
             {/* Status */}
-            <div className="space-y-2">
-
+            <div className="space-y-1.5">
                 <label
                     htmlFor="status"
-                    className="text-sm font-medium text-gray-900"
+                    className="block text-xs font-semibold text-neutral-700"
                 >
                     Status
                 </label>
@@ -352,64 +294,42 @@ export function RoomForm({ branchId, floorId, room, onSubmit, onCancel }: RoomFo
                     id="status"
                     value={status}
                     onChange={(event) =>
-                        setStatus(
-                            event.target.value as Room["status"]
-                        )
+                        setStatus(event.target.value as Room["status"])
                     }
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-teal-600"
+                    className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs sm:text-sm text-neutral-900 outline-none transition-colors focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
                 >
-
-                    <option value="available">
-                        Available
-                    </option>
-
-                    <option value="occupied">
-                        Occupied
-                    </option>
-
-                    <option value="maintenance">
-                        Maintenance
-                    </option>
-
+                    <option value="available">Available</option>
+                    <option value="occupied">Occupied</option>
+                    <option value="maintenance">Maintenance</option>
                 </select>
-
             </div>
 
-
             {/* Description */}
-            <div className="space-y-2">
-
+            <div className="space-y-1.5">
                 <label
                     htmlFor="description"
-                    className="text-sm font-medium text-gray-900"
+                    className="block text-xs font-semibold text-neutral-700"
                 >
-                    Description
+                    Description <span className="font-normal text-neutral-400">(optional)</span>
                 </label>
 
                 <textarea
                     id="description"
                     value={description}
-                    onChange={(event) =>
-                        setDescription(
-                            event.target.value
-                        )
-                    }
-                    placeholder="Room description..."
-                    rows={4}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-teal-600"
+                    onChange={(event) => setDescription(event.target.value)}
+                    placeholder="Add room notes, balcony details, etc..."
+                    rows={3}
+                    className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs sm:text-sm text-neutral-900 outline-none transition-colors focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
                 />
-
             </div>
 
-
             {/* Buttons */}
-            <div className="flex justify-end gap-3 border-t pt-5">
-
+            <div className="flex items-center justify-end gap-2 border-t border-neutral-100 pt-4">
                 <button
                     type="button"
                     onClick={onCancel}
                     disabled={isSubmitting}
-                    className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-xl border border-neutral-200 bg-white px-4 py-2 text-xs sm:text-sm font-semibold text-neutral-700 shadow-2xs hover:bg-neutral-50 transition-colors disabled:opacity-50 cursor-pointer"
                 >
                     Cancel
                 </button>
@@ -417,15 +337,14 @@ export function RoomForm({ branchId, floorId, room, onSubmit, onCancel }: RoomFo
                 <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-xl bg-neutral-900 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-2xs hover:bg-neutral-800 transition-all disabled:opacity-50 cursor-pointer"
                 >
                     {isSubmitting
                         ? "Saving..."
                         : room
-                            ? "Update Room"
-                            : "Create Room"}
+                        ? "Update Room"
+                        : "Create Room"}
                 </button>
-
             </div>
 
         </form>

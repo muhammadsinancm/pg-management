@@ -1,244 +1,171 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import { Layers, Plus, AlertCircle, ArrowLeft } from "lucide-react";
 import { useFloors } from "../hooks/useFloors";
-import { useState } from "react";
-import { CreateFloorInput, Floor } from "../types/floor.types";
-import { FloorCard } from "../components/FloorCard";
-import { FloorForm } from "../components/FloorForm";
 import { useRooms } from "../hooks/useRooms";
 import { useBranches } from "../../branches/hooks/useBranches";
 import { BranchSelector } from "../../branches/components/BranchSelector";
+import { FloorCard } from "../components/FloorCard";
+import { FloorForm } from "../components/FloorForm";
+import type { CreateFloorInput, Floor } from "../types/floor.types";
 
 export function FloorsPage() {
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
-    const { branches, loading: branchesLoading, error: branchesError } = useBranches()
+    const { branches, loading: branchesLoading, error: branchesError } = useBranches();
 
-    const [showForm, setShowForm] = useState(false)
-    const [editingFloor, setEditingFloor] = useState<Floor | undefined>()
-    const [selectedBranchId, setSelectedBranchId] = useState<string>('')
+    const [showForm, setShowForm] = useState(false);
+    const [editingFloor, setEditingFloor] = useState<Floor | undefined>();
+    const [selectedBranchId, setSelectedBranchId] = useState<string>(() => {
+        return localStorage.getItem("selected_branch_id") || "";
+    });
 
-    const { floors, isLoading, error, addFloor, editFloor, removeFloor } = useFloors(selectedBranchId)
+    const { floors, isLoading, error, addFloor, editFloor, removeFloor } = useFloors(selectedBranchId);
+    const { rooms } = useRooms();
 
+    // Auto-select first branch or restore from localStorage
+    useEffect(() => {
+        if (branches.length > 0) {
+            const valid = selectedBranchId && branches.some((b) => b.id === selectedBranchId);
+            if (!valid) {
+                const newId = branches[0].id;
+                setSelectedBranchId(newId);
+                localStorage.setItem("selected_branch_id", newId);
+            }
+        }
+    }, [branches, selectedBranchId]);
 
-    const { rooms } = useRooms()
-
-    const selectedBranch = branches.find(branch => branch.id === selectedBranchId)
+    const selectedBranch = branches.find((branch) => branch.id === selectedBranchId);
 
     function getRoomCount(floorId: string): number {
-        return rooms.filter(room => room.floorId === floorId).length
+        return rooms.filter((room) => room.floorId === floorId).length;
     }
 
     function handleBranchChange(branchId: string) {
-        setSelectedBranchId(branchId)
-        setShowForm(false)
-        setEditingFloor(undefined)
+        setSelectedBranchId(branchId);
+        localStorage.setItem("selected_branch_id", branchId);
+        setShowForm(false);
+        setEditingFloor(undefined);
     }
 
     async function handleSubmit(data: CreateFloorInput) {
         if (!selectedBranchId) {
-            alert('Please select a branch first')
-            return
+            alert("Please select a branch first");
+            return;
         }
 
         try {
             if (editingFloor) {
                 await editFloor(editingFloor.id, {
-                    branchId: selectedBranchId
-                })
-            }
-            else {
+                    branchId: selectedBranchId,
+                });
+            } else {
                 await addFloor({
                     ...data,
-                    branchId: selectedBranchId
-                })
+                    branchId: selectedBranchId,
+                });
             }
-            setEditingFloor(undefined)
-            setShowForm(false)
-
-        } catch (error) {
-            console.error('Failed to save floor', error)
+            setEditingFloor(undefined);
+            setShowForm(false);
+        } catch (err) {
+            console.error("Failed to save floor", err);
         }
     }
 
     function handleAdd() {
         if (!selectedBranchId) {
-            alert('Please select a branch first')
-            return
+            alert("Please select a branch first");
+            return;
         }
 
-        setEditingFloor(undefined)
-        setShowForm(true)
+        setEditingFloor(undefined);
+        setShowForm(true);
     }
 
     function handleEdit(floor: Floor) {
-        setEditingFloor(floor)
-        setShowForm(true)
+        setEditingFloor(floor);
+        setShowForm(true);
     }
 
     async function handleDelete(floor: Floor) {
-        const confirmed = window.confirm(`Delete ${floor.name}`)
-
-        if (!confirmed) {
-            return
-        }
+        const confirmed = window.confirm(`Delete ${floor.name}?`);
+        if (!confirmed) return;
 
         try {
-            await removeFloor(floor.id)
-        } catch (error) {
-            console.error('Failed to delete floors', error)
+            await removeFloor(floor.id);
+        } catch (err) {
+            console.error("Failed to delete floor", err);
         }
-
     }
 
     function handleViewRooms(floor: Floor) {
-        navigate(`/pg/rooms/floor/${floor.id}`)
+        navigate(`/pg/rooms/floor/${floor.id}`, {
+            state: { floor, floors, branch: selectedBranch }
+        });
     }
 
     function handleCancelForm() {
-        setShowForm(false)
-        setEditingFloor(undefined)
+        setShowForm(false);
+        setEditingFloor(undefined);
     }
 
     if (branchesLoading) {
         return (
-            <div className="p-10 text-center">
-
-                <p className="text-sm text-muted-foreground">
-                    Loading branches...
-                </p>
-
+            <div className="w-full space-y-4 animate-pulse">
+                <div className="flex items-center justify-between">
+                    <div className="space-y-1.5">
+                        <div className="h-6 w-36 rounded-md bg-neutral-200" />
+                        <div className="h-3.5 w-60 rounded bg-neutral-100" />
+                    </div>
+                    <div className="h-8 w-24 rounded-xl bg-neutral-100" />
+                </div>
+                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                        <div key={i} className="h-24 rounded-2xl border border-neutral-100 bg-white p-4 shadow-2xs" />
+                    ))}
+                </div>
             </div>
         );
     }
 
     if (branchesError) {
         return (
-            <div className="mx-auto max-w-7xl p-6">
-
-                <div className="
-                    rounded-md
-                    bg-destructive/10
-                    p-4
-                    text-sm
-                    text-destructive
-                ">
-                    {branchesError}
+            <div className="rounded-2xl border border-red-200 bg-red-50/80 p-4 shadow-2xs">
+                <div className="flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 text-red-600 shrink-0" />
+                    <div>
+                        <h3 className="text-sm font-bold text-red-900">Failed to load branches</h3>
+                        <p className="mt-0.5 text-xs text-red-700">{branchesError}</p>
+                    </div>
                 </div>
-
             </div>
         );
     }
 
+    // Form View
     if (showForm) {
         return (
+            <div className="mx-auto max-w-2xl space-y-4">
+                <button
+                    type="button"
+                    onClick={handleCancelForm}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-500 hover:text-neutral-900 transition-colors cursor-pointer"
+                >
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    Back to Floors
+                </button>
 
-            <div className="mx-auto max-w-4xl space-y-6">
-
-                {/* Back */}
-
-                <div>
-
-                    <button
-                        type="button"
-                        onClick={handleCancelForm}
-                        className="
-                            text-sm
-                            text-muted-foreground
-                            hover:underline
-                        "
-                    >
-                        ← Back to Floors
-                    </button>
-
-                </div>
-
-
-                {/* Header */}
-
-                <div>
-
-                    <p className="
-                        text-xs
-                        font-semibold
-                        uppercase
-                        tracking-[0.18em]
-                        text-primary
-                    ">
-                        PG Management
-                    </p>
-
-                    <h1 className="
-                        mt-1
-                        text-3xl
-                        font-semibold
-                    ">
-                        {editingFloor
-                            ? "Edit Floor"
-                            : "Create Floor"}
-                    </h1>
-
-                    <p className="
-                        mt-1
-                        text-sm
-                        text-muted-foreground
-                    ">
-                        {editingFloor
-                            ? "Update floor information."
-                            : "Create a new floor inside the selected branch."}
-                    </p>
-
-                </div>
-
-
-                {/* Selected Branch */}
-
-                <div className="
-                    rounded-xl
-                    border
-                    bg-card
-                    p-5
-                ">
-
-                    <p className="
-                        text-xs
-                        font-medium
-                        uppercase
-                        tracking-wide
-                        text-muted-foreground
-                    ">
-                        Branch
-                    </p>
-
-                    <p className="
-                        mt-1
-                        text-lg
-                        font-semibold
-                    ">
-                        {selectedBranch?.name ??
-                            "Selected Branch"}
-                    </p>
-
-                    {selectedBranch && (
-                        <p className="
-                            mt-1
-                            text-sm
-                            text-muted-foreground
-                        ">
-                            Code: {selectedBranch.code}
+                <div className="overflow-hidden rounded-2xl border border-neutral-100 bg-white p-5 sm:p-6 shadow-2xs space-y-4">
+                    <div className="border-b border-neutral-100 pb-3">
+                        <h2 className="text-base sm:text-lg font-bold text-neutral-900">
+                            {editingFloor ? "Edit Floor" : "Create Floor"}
+                        </h2>
+                        <p className="text-xs text-neutral-400">
+                            {editingFloor
+                                ? `Updating floor in ${selectedBranch?.name ?? "branch"}`
+                                : `Adding a new floor to ${selectedBranch?.name ?? "branch"}`}
                         </p>
-                    )}
-
-                </div>
-
-
-                {/* Floor Form */}
-
-                <div className="
-                    rounded-xl
-                    border
-                    bg-card
-                    p-6
-                ">
+                    </div>
 
                     <FloorForm
                         branchId={selectedBranchId}
@@ -246,321 +173,124 @@ export function FloorsPage() {
                         onSubmit={handleSubmit}
                         onCancel={handleCancelForm}
                     />
-
                 </div>
-
             </div>
         );
-
     }
 
     return (
-
-        <div className="
-            mx-auto
-            max-w-7xl
-            space-y-6
-        ">
-
-            {/* ---------------------------------------- */}
-            {/* HEADER */}
-            {/* ---------------------------------------- */}
-
-            <div className="
-                flex
-                flex-col
-                gap-4
-                sm:flex-row
-                sm:items-end
-                sm:justify-between
-            ">
-
+        <div className="w-full space-y-4">
+            {/* Header */}
+            <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-
-                    <p className="
-                        text-xs
-                        font-semibold
-                        uppercase
-                        tracking-[0.18em]
-                        text-primary
-                    ">
-                        PG Management
-                    </p>
-
-                    <h1 className="
-                        mt-1
-                        text-3xl
-                        font-semibold
-                    ">
-                        Floors
+                    <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900">
+                        Floors & Rooms
                     </h1>
-
-                    <p className="
-                        mt-1
-                        text-sm
-                        text-muted-foreground
-                    ">
-                        Select a branch to manage its floors and rooms.
+                    <p className="mt-0.5 text-xs text-neutral-400">
+                        Select a branch to manage its floors, rooms, and bed capacity
                     </p>
-
                 </div>
-
 
                 <button
                     type="button"
                     onClick={handleAdd}
                     disabled={!selectedBranchId}
-                    className="
-                        rounded-md
-                        bg-primary
-                        px-4
-                        py-2
-                        text-sm
-                        font-medium
-                        text-primary-foreground
-                        disabled:cursor-not-allowed
-                        disabled:opacity-50
-                    "
+                    className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-neutral-900 px-3.5 py-2 text-xs font-semibold text-white shadow-2xs transition-all hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shrink-0"
                 >
-                    + Add Floor
+                    <Plus className="h-3.5 w-3.5" />
+                    Add Floor
                 </button>
-
             </div>
 
-
-            {/* ---------------------------------------- */}
-            {/* BRANCH SELECTOR */}
-            {/* ---------------------------------------- */}
-
+            {/* Interactive Branch Selector Cards */}
             <BranchSelector
                 branches={branches}
                 value={selectedBranchId}
                 onChange={handleBranchChange}
             />
 
-
-            {/* ---------------------------------------- */}
-            {/* NO BRANCH SELECTED */}
-            {/* ---------------------------------------- */}
-
-            {!selectedBranchId && (
-
-                <div className="
-                    rounded-xl
-                    border
-                    border-dashed
-                    p-12
-                    text-center
-                ">
-
-                    <h2 className="font-semibold">
-                        Select a branch
-                    </h2>
-
-                    <p className="
-                        mt-1
-                        text-sm
-                        text-muted-foreground
-                    ">
-                        Select a branch above to view and manage its floors.
-                    </p>
-
+            {/* Error banner if floor fetch fails */}
+            {error && (
+                <div className="rounded-2xl border border-red-200 bg-red-50/80 p-3.5 shadow-2xs">
+                    <div className="flex items-center gap-2.5">
+                        <AlertCircle className="h-4 w-4 text-red-600 shrink-0" />
+                        <p className="text-xs font-semibold text-red-800">{error}</p>
+                    </div>
                 </div>
             )}
 
-
-            {/* ---------------------------------------- */}
-            {/* SELECTED BRANCH */}
-            {/* ---------------------------------------- */}
-
+            {/* Floors Section */}
             {selectedBranchId && (
-
-                <>
-
-                    {/* Branch heading */}
-
-                    <div className="
-                        flex
-                        items-center
-                        justify-between
-                        rounded-xl
-                        border
-                        bg-card
-                        px-5
-                        py-4
-                    ">
-
+                <div className="space-y-2.5">
+                    <div className="flex items-center justify-between px-0.5">
                         <div>
-
-                            <p className="
-                                text-xs
-                                uppercase
-                                tracking-wide
-                                text-muted-foreground
-                            ">
-                                Selected Branch
-                            </p>
-
-                            <h2 className="
-                                mt-1
-                                text-xl
-                                font-semibold
-                            ">
-                                {selectedBranch?.name}
+                            <h2 className="text-xs sm:text-sm font-bold tracking-tight text-neutral-900">
+                                {selectedBranch?.name} — Floors
                             </h2>
-
+                            <p className="text-[10px] sm:text-[11px] text-neutral-400">
+                                Click View Rooms to manage rooms and beds
+                            </p>
                         </div>
 
-
-                        <span className="
-                            rounded-md
-                            bg-muted
-                            px-3
-                            py-1
-                            text-sm
-                            font-medium
-                        ">
-                            {floors.length}{" "}
-                            {floors.length === 1
-                                ? "Floor"
-                                : "Floors"}
+                        <span className="rounded-md bg-neutral-100 px-2 py-0.5 text-[10px] font-bold text-neutral-600">
+                            {floors.length} {floors.length === 1 ? "Floor" : "Floors"}
                         </span>
-
                     </div>
 
-
-                    {/* Error */}
-
-                    {error && (
-
-                        <div className="
-                            rounded-md
-                            bg-destructive/10
-                            p-3
-                            text-sm
-                            text-destructive
-                        ">
-                            {error}
+                    {isLoading && floors.length === 0 ? (
+                        <div className="grid grid-cols-1 gap-2.5 sm:gap-3 sm:grid-cols-2 lg:grid-cols-3 animate-pulse">
+                            {Array.from({ length: 3 }).map((_, i) => (
+                                <div
+                                    key={i}
+                                    className="flex min-h-[96px] flex-col justify-between rounded-2xl border border-neutral-100 bg-white p-3.5 shadow-2xs"
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="h-8 w-8 rounded-xl bg-neutral-100" />
+                                        <div className="h-5 w-16 rounded-md bg-neutral-100" />
+                                    </div>
+                                    <div className="h-4 w-28 rounded bg-neutral-200" />
+                                </div>
+                            ))}
                         </div>
-                    )}
-
-
-                    {/* Loading */}
-
-                    {isLoading ? (
-
-                        <div className="
-                            rounded-xl
-                            border
-                            p-10
-                            text-center
-                        ">
-
-                            <p className="
-                                text-sm
-                                text-muted-foreground
-                            ">
-                                Loading floors...
-                            </p>
-
-                        </div>
-
                     ) : floors.length === 0 ? (
-
-                        /* No floors */
-
-                        <div className="
-                            rounded-xl
-                            border
-                            border-dashed
-                            p-12
-                            text-center
-                        ">
-
-                            <h2 className="font-semibold">
-                                No floors found
-                            </h2>
-
-                            <p className="
-                                mt-1
-                                text-sm
-                                text-muted-foreground
-                            ">
-                                This branch does not have any floors yet.
+                        <div className="rounded-2xl border border-dashed border-neutral-200 bg-white p-8 text-center shadow-2xs">
+                            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 text-neutral-400">
+                                <Layers className="h-5 w-5" />
+                            </div>
+                            <h3 className="mt-2 text-sm font-bold text-neutral-900">
+                                No Floors Found
+                            </h3>
+                            <p className="mt-0.5 text-xs text-neutral-400">
+                                This branch does not have any floors registered yet.
                             </p>
-
                             <button
                                 type="button"
                                 onClick={handleAdd}
-                                className="
-                                    mt-4
-                                    rounded-md
-                                    bg-primary
-                                    px-4
-                                    py-2
-                                    text-sm
-                                    text-primary-foreground
-                                "
+                                className="mt-3.5 inline-flex items-center gap-1.5 rounded-xl bg-neutral-900 px-3.5 py-1.5 text-xs font-semibold text-white shadow-2xs hover:bg-neutral-800 transition-all cursor-pointer"
                             >
-                                + Add Floor
+                                <Plus className="h-3.5 w-3.5" />
+                                Add First Floor
                             </button>
-
                         </div>
-
                     ) : (
-
-                        /* Floors */
-
-                        <div className="
-                            grid
-                            gap-4
-                            md:grid-cols-2
-                            xl:grid-cols-3
-                        ">
-
+                        <div className="grid grid-cols-1 gap-2.5 sm:gap-3 sm:grid-cols-2 lg:grid-cols-3">
                             {floors
                                 .slice()
-                                .sort(
-                                    (a, b) =>
-                                        a.floorNumber -
-                                        b.floorNumber
-                                )
-                                .map(
-                                    (floor) => (
-
-                                        <FloorCard
-                                            key={floor.id}
-                                            floor={floor}
-
-                                            roomCount={
-                                                getRoomCount(
-                                                    floor.id
-                                                )
-                                            }
-
-                                            onViewRooms={
-                                                handleViewRooms
-                                            }
-
-                                            onEdit={
-                                                handleEdit
-                                            }
-
-                                            onDelete={
-                                                handleDelete
-                                            }
-                                        />
-
-                                    )
-                                )}
-
+                                .sort((a, b) => a.floorNumber - b.floorNumber)
+                                .map((floor) => (
+                                    <FloorCard
+                                        key={floor.id}
+                                        floor={floor}
+                                        roomCount={getRoomCount(floor.id)}
+                                        onViewRooms={handleViewRooms}
+                                        onEdit={handleEdit}
+                                        onDelete={handleDelete}
+                                    />
+                                ))}
                         </div>
                     )}
-
-                </>
+                </div>
             )}
-
         </div>
     );
-
 }
