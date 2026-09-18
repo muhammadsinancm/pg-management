@@ -3,43 +3,49 @@ import { Branch, CreateBranchInput } from "../types/branch.types";
 import { createBranch, deleteBranch, getBranch, getBranches, updateBranch } from "../services/branchService";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
+let cachedBranches: Branch[] | null = null;
+
 export function useBranches() {
+    const { user } = useAuth();
 
-const {user} = useAuth()
-
-    const [branches, setBranches] = useState<Branch[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    const [branches, setBranches] = useState<Branch[]>(() => cachedBranches || []);
+    const [loading, setLoading] = useState<boolean>(() => !cachedBranches);
+    const [error, setError] = useState<string | null>(null);
 
     const loadBranches = useCallback(async () => {
         if (!user) {
-            setBranches([])
-            setLoading(false)
-            return
+            setBranches([]);
+            setLoading(false);
+            return;
         }
 
         try {
-            setLoading(true)
-            setError(null)
+            if (!cachedBranches) {
+                setLoading(true);
+            }
+            setError(null);
 
             if (user.role === 'super_admin') {
-                const data = await getBranches()
-                setBranches(data)
-                return
+                const data = await getBranches();
+                cachedBranches = data;
+                setBranches(data);
+                return;
             }
             if (user.role === 'branch_manager') {
                 if (!user.branchId) {
-                    setBranches([])
-                    setError('Branch is not assigned to this user')
-                    return
+                    setBranches([]);
+                    setError('Branch is not assigned to this user');
+                    return;
                 }
 
-                const branch = await getBranch(user.branchId)
-                setBranches(branch ? [branch] : [])
-                return
+                const branch = await getBranch(user.branchId);
+                const list = branch ? [branch] : [];
+                cachedBranches = list;
+                setBranches(list);
+                return;
             }
 
-            setBranches([])
+            setBranches([]);
 
         } catch (error) {
             console.error(error)
