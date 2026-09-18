@@ -50,9 +50,7 @@ export function BookingCreatePage() {
 
     }
     return (
-
-        <div className="p-6">
-
+        <div className="p-4 sm:p-6 max-w-4xl mx-auto">
             <BookingForm
                 organizationId={organizationId}
                 createdBy={createdBy}
@@ -61,7 +59,6 @@ export function BookingCreatePage() {
                     navigate("/pg/bookings")
                 }
             />
-
         </div>
-    )
+    );
 }

@@ -171,7 +171,7 @@ export function BookingForm({ organizationId, createdBy, onSubmit, onCancel }: B
 
       {/* Booking Information */}
 
-      <section className="rounded-xl border border-gray-200 bg-white p-6">
+      <section className="rounded-2xl border border-neutral-100 bg-white p-4 sm:p-6 shadow-2xs">
 
         <h3 className="text-lg font-semibold">
           Booking Information
@@ -226,7 +226,7 @@ export function BookingForm({ organizationId, createdBy, onSubmit, onCancel }: B
 
       {/* Room Information */}
 
-      <section className="rounded-xl border border-gray-200 bg-white p-6">
+      <section className="rounded-2xl border border-neutral-100 bg-white p-4 sm:p-6 shadow-2xs">
 
         <h3 className="text-lg font-semibold">
           Room Information
@@ -478,7 +478,7 @@ export function BookingForm({ organizationId, createdBy, onSubmit, onCancel }: B
 
       {/* Dates */}
 
-      <section className="rounded-xl border border-gray-200 bg-white p-6">
+      <section className="rounded-2xl border border-neutral-100 bg-white p-4 sm:p-6 shadow-2xs">
 
         <h3 className="text-lg font-semibold">
           Booking Dates
@@ -511,7 +511,7 @@ export function BookingForm({ organizationId, createdBy, onSubmit, onCancel }: B
 
       {/* Financial */}
 
-      <section className="rounded-xl border border-gray-200 bg-white p-6">
+      <section className="rounded-2xl border border-neutral-100 bg-white p-4 sm:p-6 shadow-2xs">
 
         <h3 className="text-lg font-semibold">
           Financial Information
@@ -588,7 +588,7 @@ export function BookingForm({ organizationId, createdBy, onSubmit, onCancel }: B
 
       {/* Notes */}
 
-      <section className="rounded-xl border border-gray-200 bg-white p-6">
+      <section className="rounded-2xl border border-neutral-100 bg-white p-4 sm:p-6 shadow-2xs">
 
         <label className="mb-2 block text-sm font-medium text-gray-700">
           Notes
@@ -612,7 +612,7 @@ export function BookingForm({ organizationId, createdBy, onSubmit, onCancel }: B
 
       {/* Actions */}
 
-      <div className="flex justify-end gap-3">
+      <div className="flex flex-col-reverse sm:flex-row justify-end gap-2.5 sm:gap-3 pt-2">
 
         {onCancel && (
 
@@ -620,7 +620,7 @@ export function BookingForm({ organizationId, createdBy, onSubmit, onCancel }: B
             type="button"
             onClick={onCancel}
             disabled={submitting}
-            className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+            className="w-full sm:w-auto rounded-xl border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 cursor-pointer"
           >
             Cancel
           </button>
@@ -631,7 +631,7 @@ export function BookingForm({ organizationId, createdBy, onSubmit, onCancel }: B
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-lg bg-teal-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full sm:w-auto rounded-xl bg-neutral-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
         >
 
           {submitting
