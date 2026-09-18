@@ -27,7 +27,7 @@ export default function OccupancySummary({
         },
         {
             status: "Maintenance",
-            rooms: occupancy.maintenanceRooms,
+            rooms: Math.max(occupancy.maintenanceRooms, occupancy.maintenanceBeds ?? 0),
         },
     ];
 

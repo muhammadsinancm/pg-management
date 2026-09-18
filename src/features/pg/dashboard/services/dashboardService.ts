@@ -10,7 +10,8 @@ const COLLECTIONS = {
     payments: 'payments',
     expenses: 'expenses',
     invoices: 'invoices',
-    branches: 'branches'
+    branches: 'branches',
+    floors: 'floor',
 } as const
 
 function convertDate(value: unknown): Date | null {
@@ -104,99 +105,142 @@ export async function getDashboardData(organizationId: string, branchId?: string
         throw new Error('Organization ID is required')
     }
 
-    const [guestsSnapshot,
+    const [
+        guestsSnapshot,
         bookingsSnapshot,
         paymentsSnapshot,
         rooms,
         expensesSnapshot,
         invoicesSnapshot,
-        branchesSnapshot] = await Promise.all([
-            getDocs(collection(firestoreDb, COLLECTIONS.guests)),
-            getDocs(collection(firestoreDb, COLLECTIONS.bookings)),
-            getDocs(collection(firestoreDb, COLLECTIONS.payments)),
-            getRooms(),
-            getDocs(collection(firestoreDb, COLLECTIONS.expenses)),
-            getDocs(collection(firestoreDb, COLLECTIONS.invoices)),
-            getDocs(collection(firestoreDb, COLLECTIONS.branches))
-        ])
+        branchesSnapshot,
+        floorsSnapshot
+    ] = await Promise.all([
+        getDocs(collection(firestoreDb, COLLECTIONS.guests)),
+        getDocs(collection(firestoreDb, COLLECTIONS.bookings)),
+        getDocs(collection(firestoreDb, COLLECTIONS.payments)),
+        getRooms(),
+        getDocs(collection(firestoreDb, COLLECTIONS.expenses)),
+        getDocs(collection(firestoreDb, COLLECTIONS.invoices)),
+        getDocs(collection(firestoreDb, COLLECTIONS.branches)),
+        getDocs(collection(firestoreDb, COLLECTIONS.floors))
+    ]);
 
-    const guests = guestsSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data()
-    })).filter((guest) => {
-        const data = guest as Record<string, unknown>
+    const guests = guestsSnapshot.docs
+        .map((doc) => ({
+            id: doc.id,
+            ...doc.data()
+        }))
+        .filter((guest) => {
+            const data = guest as Record<string, unknown>;
+            if (organizationId && data.organizationId && data.organizationId !== organizationId) {
+                return false;
+            }
+            if (branchId && data.branchId !== undefined && data.branchId !== branchId) {
+                return false;
+            }
+            return true;
+        });
 
-        if (data.organizationId !== organizationId) {
-            return false
+    const activeGuests = guests.filter((guest) => isActiveCustomer(guest as Record<string, unknown>));
+
+    const floorBranchMap = new Map<string, string>();
+    floorsSnapshot.docs.forEach((doc) => {
+        const data = doc.data() as Record<string, unknown>;
+        if (data.branchId) {
+            floorBranchMap.set(doc.id, String(data.branchId));
         }
-        if (branchId && data.branchId !== undefined && data.branchId !== branchId) {
-            return false
-        }
-        return true
-    })
+    });
 
-    const activeGuests = guests.filter((guest) => isActiveCustomer(guest as Record<string, unknown>))
+    const organizationBranchIds = new Set(
+        branchesSnapshot.docs
+            .map((doc) => ({
+                id: doc.id,
+                ...doc.data()
+            }))
+            .filter((branch) => {
+                const data = branch as Record<string, unknown>;
+                return !organizationId || !data.organizationId || data.organizationId === organizationId;
+            })
+            .map((branch) => String(branch.id))
+    );
 
-    const organizationBranchIds = new Set(branchesSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data()
-    })).filter((branch) => {
-        const data = branch as Record<string, unknown>
-
-        return data.organizationId === organizationId
-
-    }).map((branch) => String(branch.id)))
     const filteredRooms = rooms.filter((room) => {
-        const roomBranchId = String(room.branchId ?? '')
+        const roomBranchId = String(room.branchId || floorBranchMap.get(room.floorId) || '');
 
-        if (!organizationBranchIds.has(roomBranchId)) {
-            return false
-        }
-        if (branchId && roomBranchId !== branchId) {
-            return false
+        if (branchId && roomBranchId && roomBranchId !== branchId) {
+            return false;
         }
 
-        return true
-        
-    })
+        if (organizationId && organizationBranchIds.size > 0 && roomBranchId && !organizationBranchIds.has(roomBranchId)) {
+            return false;
+        }
 
-    const vacantRooms = filteredRooms.filter((room) => {
-        const status = normalizeStatus(room.status)
+        return true;
+    });
 
-        return status === 'available' || status === 'vacant'
-    })
-
-    const occupiedRooms = filteredRooms.filter((room) => {
-        const status = normalizeStatus(room.status)
-
-        return status === 'occupied'
-    })
-
-    const maintenanceRooms = filteredRooms.filter((room) => {
-        const status = normalizeStatus(room.status)
-        return status === 'maintenance'
-    })
-
-    let totalBeds = 0
-    let occupiedBeds = 0
-    let availableBeds = 0
+    let totalBeds = 0;
+    let occupiedBeds = 0;
+    let availableBeds = 0;
+    let maintenanceBeds = 0;
 
     filteredRooms.forEach((room) => {
-        const beds = room.beds ?? []
-        
-        beds.forEach((bed) => {
-            totalBeds++
+        const beds = room.beds ?? [];
 
-            const status = normalizeStatus(bed.status)
+        beds.forEach((bed) => {
+            totalBeds++;
+
+            const status = normalizeStatus(bed.status);
 
             if (status === 'occupied' || status === 'booked') {
-                occupiedBeds++
+                occupiedBeds++;
+            } else if (status === 'maintenance' || status === 'repair') {
+                maintenanceBeds++;
+            } else {
+                availableBeds++;
             }
-            if (status === 'available' || status === 'vacant') {
-                availableBeds++
-            }
-        })
-    })
+        });
+    });
+
+    // Maintenance rooms: Room status is 'maintenance' OR any bed is under maintenance
+    const maintenanceRooms = filteredRooms.filter((room) => {
+        const status = normalizeStatus(room.status);
+        if (status === 'maintenance' || status === 'repair') return true;
+        const beds = room.beds ?? [];
+        return beds.some((b) => {
+            const bs = normalizeStatus(b.status);
+            return bs === 'maintenance' || bs === 'repair';
+        });
+    });
+
+    // Occupied rooms: Room status is 'occupied' OR any bed is occupied
+    const occupiedRooms = filteredRooms.filter((room) => {
+        const status = normalizeStatus(room.status);
+        if (status === 'occupied') return true;
+        const beds = room.beds ?? [];
+        return beds.some((b) => {
+            const bs = normalizeStatus(b.status);
+            return bs === 'occupied' || bs === 'booked';
+        });
+    });
+
+    // Vacant rooms: Available rooms that have available capacity and not in maintenance
+    const vacantRooms = filteredRooms.filter((room) => {
+        const status = normalizeStatus(room.status);
+        if (status === 'maintenance' || status === 'repair') return false;
+        const beds = room.beds ?? [];
+        if (beds.length === 0) {
+            return status === 'available' || status === 'vacant' || !status;
+        }
+        const hasAvailable = beds.some((b) => {
+            const bs = normalizeStatus(b.status);
+            return bs === 'available' || bs === 'vacant' || (!bs && bs !== 'occupied' && bs !== 'maintenance');
+        });
+        const hasOccupied = beds.some((b) => {
+            const bs = normalizeStatus(b.status);
+            return bs === 'occupied' || bs === 'booked';
+        });
+        return hasAvailable || (!hasOccupied && status !== 'occupied');
+    });
  
     const payments = paymentsSnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -360,6 +404,7 @@ console.log("GUEST MAP:", guestMap)
         vacantRooms: vacantRooms.length,
         occupiedRooms: occupiedRooms.length,
         maintenanceRooms: maintenanceRooms.length,
+        maintenanceBeds,
         totalBeds,
         occupiedBeds,
         availableBeds,
@@ -380,6 +425,7 @@ console.log("GUEST MAP:", guestMap)
         occupiedRooms: occupiedRooms.length,
         vacantRooms: vacantRooms.length,
         maintenanceRooms: maintenanceRooms.length,
+        maintenanceBeds,
         occupancyPercentage
     }
 

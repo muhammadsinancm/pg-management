@@ -5,6 +5,7 @@ import {
     DoorOpen,
     Receipt,
     Users,
+    Wrench,
 } from "lucide-react";
 
 import DashboardHeader from "../components/DashboardHeader";
@@ -237,7 +238,7 @@ export default function DashboardPage() {
                 <DashboardStatCard
                     title="Vacant Rooms"
                     value={stats.vacantRooms}
-                    description={`${stats.totalRooms} total`}
+                    description={`${stats.availableBeds} beds available`}
                     icon={DoorOpen}
                 />
 
@@ -251,14 +252,14 @@ export default function DashboardPage() {
                 <DashboardStatCard
                     title="Occupied Rooms"
                     value={stats.occupiedRooms}
-                    description={`${stats.maintenanceRooms} maintenance`}
+                    description={`${stats.occupiedBeds} beds occupied`}
                     icon={Building2}
                 />
 
                 <DashboardStatCard
                     title="Total Beds"
                     value={stats.totalBeds}
-                    description={`${stats.occupiedBeds} occupied`}
+                    description={`${stats.totalRooms} rooms total`}
                     icon={BedDouble}
                 />
 
@@ -271,9 +272,17 @@ export default function DashboardPage() {
 
                 <DashboardStatCard
                     title="Maintenance"
-                    value={stats.maintenanceRooms}
-                    description="Rooms unavailable"
-                    icon={Building2}
+                    value={
+                        stats.maintenanceBeds > 0
+                            ? stats.maintenanceBeds
+                            : stats.maintenanceRooms
+                    }
+                    description={
+                        stats.maintenanceBeds > 0
+                            ? `${stats.maintenanceBeds} ${stats.maintenanceBeds === 1 ? 'bed' : 'beds'} (${stats.maintenanceRooms} ${stats.maintenanceRooms === 1 ? 'room' : 'rooms'})`
+                            : `${stats.maintenanceRooms} ${stats.maintenanceRooms === 1 ? 'room' : 'rooms'} unavailable`
+                    }
+                    icon={Wrench}
                 />
 
                 <DashboardStatCard
