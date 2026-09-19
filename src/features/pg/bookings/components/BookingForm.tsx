@@ -681,7 +681,7 @@ function FormInput({ label, value, onChange, placeholder, type = 'text', disable
   )
 }
 
-interface FormSelecteProps {
+interface FormSelectProps {
   label: string
   value: string
   onChange: (value: string) => void
@@ -689,7 +689,7 @@ interface FormSelecteProps {
   children: React.ReactNode
 }
 
-function FormSelect({ label, value, onChange, disabled, children }: FormSelecteProps) {
+function FormSelect({ label, value, onChange, disabled, children }: FormSelectProps) {
   return (
 
     <div>

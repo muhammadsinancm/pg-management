@@ -21,11 +21,15 @@ export function BookingsPage() {
         const searchValue = search.trim().toLowerCase();
 
         return bookings.filter((booking) => {
+            const bookingNo = (booking.bookingNumber || "").toLowerCase();
+            const customer = (booking.customerId || "").toLowerCase();
+            const room = (booking.roomNumber || "").toLowerCase();
+
             const matchesSearch =
                 !searchValue ||
-                booking.bookingNumber.toLowerCase().includes(searchValue) ||
-                booking.customerId.toLowerCase().includes(searchValue) ||
-                booking.roomNumber.toLowerCase().includes(searchValue);
+                bookingNo.includes(searchValue) ||
+                customer.includes(searchValue) ||
+                room.includes(searchValue);
 
             const matchesStatus =
                 statusFilter === "all" || booking.status === statusFilter;
@@ -51,7 +55,7 @@ export function BookingsPage() {
     };
 
     return (
-        <div className="w-full space-y-4">
+        <div className="w-full min-w-0 space-y-4">
             {/* Header */}
             <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
