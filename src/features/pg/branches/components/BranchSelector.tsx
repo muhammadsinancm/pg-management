@@ -33,23 +33,22 @@ export function BranchSelector({
 
     return (
         <div className="space-y-2">
-            <div className="flex items-center justify-between px-0.5">
-                <div>
-                    <h2 className="text-xs sm:text-sm font-bold tracking-tight text-neutral-900">
+            <div className="flex items-center justify-between px-0.5 gap-2">
+                <div className="min-w-0 flex-1">
+                    <h2 className="text-xs sm:text-sm font-bold tracking-tight text-neutral-900 truncate">
                         Select Branch
                     </h2>
-                    <p className="text-[10px] sm:text-[11px] text-neutral-400">
+                    <p className="text-[10px] sm:text-[11px] text-neutral-400 truncate">
                         Choose a branch to view and manage its floors & rooms
                     </p>
                 </div>
-                <span className="text-[10px] font-semibold text-neutral-400">
+                <span className="text-[10px] font-semibold text-neutral-400 shrink-0">
                     {branches.length} {branches.length === 1 ? "Branch" : "Branches"} Available
                 </span>
             </div>
 
             {/* Interactive Branch Cards Grid */}
             <div className="grid grid-cols-1 gap-2 sm:gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-
                 {branches.map((branch) => {
                     const isSelected = branch.id === value;
 
@@ -60,7 +59,7 @@ export function BranchSelector({
                             disabled={disabled}
                             onClick={() => onChange(branch.id)}
                             className={cn(
-                                "group relative flex flex-col justify-between rounded-2xl border p-3.5 sm:p-4 text-left transition-all cursor-pointer shadow-2xs",
+                                "group relative flex flex-col justify-between rounded-2xl border p-3.5 sm:p-4 text-left transition-all cursor-pointer shadow-2xs min-w-0",
                                 isSelected
                                     ? "border-neutral-900 bg-neutral-50/70 shadow-xs ring-2 ring-neutral-900/10"
                                     : "border-neutral-100 bg-white hover:border-neutral-200 hover:shadow-xs",
@@ -68,7 +67,7 @@ export function BranchSelector({
                             )}
                         >
                             {/* Top row: Icon & Badges */}
-                            <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-start justify-between gap-2 min-w-0">
                                 <div
                                     className={cn(
                                         "flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-xl transition-colors",
@@ -80,7 +79,7 @@ export function BranchSelector({
                                     <Building2 className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
                                 </div>
 
-                                <div className="flex items-center gap-1.5">
+                                <div className="flex items-center gap-1.5 shrink-0">
                                     {branch.code && (
                                         <span className="rounded-md bg-neutral-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-neutral-600">
                                             {branch.code}
@@ -119,27 +118,27 @@ export function BranchSelector({
 export function BranchSelectorSkeleton() {
     return (
         <div className="space-y-2 animate-pulse">
-            <div className="flex items-center justify-between px-0.5">
-                <div className="space-y-1">
+            <div className="flex items-center justify-between px-0.5 gap-2">
+                <div className="space-y-1 min-w-0 flex-1">
                     <div className="h-4 w-24 rounded bg-neutral-200" />
-                    <div className="h-3 w-48 rounded bg-neutral-100" />
+                    <div className="h-3 w-48 max-w-full rounded bg-neutral-100" />
                 </div>
-                <div className="h-3 w-28 rounded bg-neutral-100" />
+                <div className="h-3 w-28 rounded bg-neutral-100 shrink-0" />
             </div>
 
             <div className="grid grid-cols-1 gap-2 sm:gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
                 {Array.from({ length: 3 }).map((_, i) => (
                     <div
                         key={i}
-                        className="flex flex-col justify-between rounded-2xl border border-neutral-100 bg-white p-3.5 sm:p-4 shadow-2xs space-y-3"
+                        className="flex flex-col justify-between rounded-2xl border border-neutral-100 bg-white p-3.5 sm:p-4 shadow-2xs space-y-3 min-w-0"
                     >
                         <div className="flex items-start justify-between gap-2">
                             <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-neutral-100 shrink-0" />
-                            <div className="h-4 w-12 rounded bg-neutral-100" />
+                            <div className="h-4 w-12 rounded bg-neutral-100 shrink-0" />
                         </div>
-                        <div className="mt-3 space-y-1.5">
-                            <div className="h-4 w-28 rounded bg-neutral-200" />
-                            <div className="h-3 w-36 rounded bg-neutral-100" />
+                        <div className="mt-3 space-y-1.5 min-w-0">
+                            <div className="h-4 w-28 max-w-[80%] rounded bg-neutral-200" />
+                            <div className="h-3 w-36 max-w-[90%] rounded bg-neutral-100" />
                         </div>
                     </div>
                 ))}
