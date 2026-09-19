@@ -16,55 +16,57 @@ export function RoomCard({ room, onView, onEdit, onDelete }: RoomCardProps) {
     const occupancyPercent = Math.min(100, Math.round((occupiedBeds / capacity) * 100));
 
     return (
-        <div className="flex flex-col justify-between rounded-2xl border border-neutral-100 bg-white p-3.5 sm:p-4 shadow-2xs transition-all hover:border-neutral-200 hover:shadow-xs space-y-3">
+        <div className="flex flex-col justify-between rounded-2xl border border-neutral-100 bg-white p-3.5 sm:p-4 shadow-2xs transition-all hover:border-neutral-200 hover:shadow-xs space-y-3 min-w-0">
             {/* Top row: Room Number & Status */}
-            <div className="flex items-start justify-between gap-2">
-                <div>
+            <div className="flex items-start justify-between gap-2 min-w-0">
+                <div className="min-w-0 flex-1">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
                         Room
                     </p>
-                    <h3 className="text-base sm:text-lg font-bold tracking-tight text-neutral-900">
+                    <h3 className="truncate text-base sm:text-lg font-bold tracking-tight text-neutral-900">
                         {room.roomNumber}
                     </h3>
                 </div>
 
-                <RoomStatusBadge status={room.status} />
+                <div className="shrink-0">
+                    <RoomStatusBadge status={room.status} />
+                </div>
             </div>
 
             {/* Room Specs Grid */}
             <div className="grid grid-cols-2 gap-2 rounded-xl border border-neutral-100/80 bg-neutral-50/70 p-2.5 text-xs">
-                <div>
+                <div className="min-w-0">
                     <span className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider block">
                         Type
                     </span>
-                    <span className="font-bold text-neutral-800 capitalize">
+                    <span className="truncate block font-bold text-neutral-800 capitalize">
                         {room.type}
                     </span>
                 </div>
 
-                <div>
+                <div className="min-w-0">
                     <span className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider block">
                         Sharing
                     </span>
-                    <span className="font-bold text-neutral-800 capitalize">
+                    <span className="truncate block font-bold text-neutral-800 capitalize">
                         {room.sharingType}
                     </span>
                 </div>
 
-                <div>
+                <div className="min-w-0">
                     <span className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider block">
                         Beds
                     </span>
-                    <span className="font-bold text-neutral-800">
+                    <span className="truncate block font-bold text-neutral-800">
                         {occupiedBeds}/{capacity} Occupied
                     </span>
                 </div>
 
-                <div>
+                <div className="min-w-0">
                     <span className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider block">
                         Rent
                     </span>
-                    <span className="font-bold text-neutral-800">
+                    <span className="truncate block font-bold text-neutral-800">
                         ₹{Number(room.rent || 0).toLocaleString("en-IN")}
                     </span>
                 </div>
@@ -85,14 +87,14 @@ export function RoomCard({ room, onView, onEdit, onDelete }: RoomCardProps) {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center gap-1.5 pt-0.5">
+            <div className="flex items-center gap-1.5 pt-0.5 min-w-0">
                 <button
                     type="button"
                     onClick={() => onView(room)}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-neutral-900 py-2 px-3 text-xs font-semibold text-white shadow-2xs transition-all hover:bg-neutral-800 cursor-pointer"
+                    className="flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 rounded-xl bg-neutral-900 py-2 px-2.5 sm:px-3 text-xs font-semibold text-white shadow-2xs transition-all hover:bg-neutral-800 cursor-pointer"
                 >
-                    View Beds
-                    <ArrowRight className="h-3 w-3" />
+                    <span className="truncate">View Beds</span>
+                    <ArrowRight className="h-3 w-3 shrink-0" />
                 </button>
 
                 <button
@@ -121,14 +123,14 @@ export function RoomCard({ room, onView, onEdit, onDelete }: RoomCardProps) {
 
 export function RoomCardSkeleton() {
     return (
-        <div className="flex flex-col justify-between rounded-2xl border border-neutral-100 bg-white p-3.5 sm:p-4 shadow-2xs space-y-3 animate-pulse">
+        <div className="flex flex-col justify-between rounded-2xl border border-neutral-100 bg-white p-3.5 sm:p-4 shadow-2xs space-y-3 animate-pulse min-w-0">
             {/* Top row: Room Number & Status */}
             <div className="flex items-start justify-between gap-2">
                 <div className="space-y-1">
                     <div className="h-2.5 w-10 rounded bg-neutral-200/80" />
                     <div className="mt-0.5 h-5 w-20 rounded-md bg-neutral-200" />
                 </div>
-                <div className="h-5 w-16 rounded-full bg-neutral-100" />
+                <div className="h-5 w-16 rounded-full bg-neutral-100 shrink-0" />
             </div>
 
             {/* Room Specs Grid (Type, Sharing, Beds, Rent) */}
@@ -151,8 +153,8 @@ export function RoomCardSkeleton() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center gap-1.5 pt-0.5">
-                <div className="h-8 flex-1 rounded-xl bg-neutral-900/10" />
+            <div className="flex items-center gap-1.5 pt-0.5 min-w-0">
+                <div className="h-8 flex-1 min-w-0 rounded-xl bg-neutral-900/10" />
                 <div className="h-8 w-8 shrink-0 rounded-xl border border-neutral-100 bg-neutral-100/70" />
                 <div className="h-8 w-8 shrink-0 rounded-xl border border-neutral-100 bg-neutral-100/70" />
             </div>

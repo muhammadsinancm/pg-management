@@ -324,12 +324,12 @@ export function RoomForm({ branchId, floorId, room, onSubmit, onCancel }: RoomFo
             </div>
 
             {/* Buttons */}
-            <div className="flex items-center justify-end gap-2 border-t border-neutral-100 pt-4">
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 border-t border-neutral-100 pt-4">
                 <button
                     type="button"
                     onClick={onCancel}
                     disabled={isSubmitting}
-                    className="rounded-xl border border-neutral-200 bg-white px-4 py-2 text-xs sm:text-sm font-semibold text-neutral-700 shadow-2xs hover:bg-neutral-50 transition-colors disabled:opacity-50 cursor-pointer"
+                    className="w-full sm:w-auto rounded-xl border border-neutral-200 bg-white px-4 py-2 text-xs sm:text-sm font-semibold text-neutral-700 shadow-2xs hover:bg-neutral-50 transition-colors disabled:opacity-50 cursor-pointer"
                 >
                     Cancel
                 </button>
@@ -337,7 +337,7 @@ export function RoomForm({ branchId, floorId, room, onSubmit, onCancel }: RoomFo
                 <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="rounded-xl bg-neutral-900 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-2xs hover:bg-neutral-800 transition-all disabled:opacity-50 cursor-pointer"
+                    className="w-full sm:w-auto rounded-xl bg-neutral-900 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-2xs hover:bg-neutral-800 transition-all disabled:opacity-50 cursor-pointer"
                 >
                     {isSubmitting
                         ? "Saving..."
