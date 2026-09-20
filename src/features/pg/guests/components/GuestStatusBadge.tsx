@@ -1,27 +1,48 @@
 import { GuestStatus } from "../types/guests.types";
 
 interface GuestStatusBadgeProps {
-    status: GuestStatus
+    status: GuestStatus | string;
+    size?: "sm" | "md";
 }
 
-export function GuestStatusBadge({ status }: GuestStatusBadgeProps) {
-    const styles: Record<GuestStatus, string> = {
-        active: 'bg-emerald-100 text-emerald-700',
-        checked_out: 'bg-gray-100 text-gray-700',
-        cancelled: 'bg-red-100 text-red-700'
-    }
+export function GuestStatusBadge({ status, size = "md" }: GuestStatusBadgeProps) {
+    const config: Record<
+        string,
+        { label: string; badge: string; dot: string }
+    > = {
+        active: {
+            label: "Active",
+            badge: "bg-emerald-50 text-emerald-800 border-emerald-200/80",
+            dot: "bg-emerald-500",
+        },
+        checked_out: {
+            label: "Checked Out",
+            badge: "bg-neutral-100 text-neutral-700 border-neutral-200",
+            dot: "bg-neutral-400",
+        },
+        cancelled: {
+            label: "Cancelled",
+            badge: "bg-red-50 text-red-800 border-red-200/80",
+            dot: "bg-red-500",
+        },
+    };
 
-    const labels: Record<GuestStatus, string> = {
-        active: 'Active',
-        checked_out: 'Checked Out',
-        cancelled: 'Cancelled'
-    }
+    const current = config[status] || {
+        label: typeof status === "string" ? status.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) : "Unknown",
+        badge: "bg-neutral-100 text-neutral-700 border-neutral-200",
+        dot: "bg-neutral-400",
+    };
 
     return (
         <span
-            className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${styles[status]}`}
+            className={`inline-flex items-center gap-1.5 rounded-full border font-semibold tracking-tight shadow-2xs whitespace-nowrap shrink-0 ${
+                size === "sm"
+                    ? "px-2 py-0.5 text-[10px]"
+                    : "px-2.5 py-1 text-xs"
+            } ${current.badge}`}
         >
-            {labels[status]}
+            <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${current.dot}`} />
+            {current.label}
         </span>
-    )
-}
+    );
+}

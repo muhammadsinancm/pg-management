@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDoc, getDocs, updateDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, updateDoc } from "firebase/firestore";
 import { CreateGuestInput, Guest } from "../types/guests.types";
 import { firestoreDb } from "@/services/firebase/config";
 
@@ -27,7 +27,6 @@ export async function getGuest(guestId: string): Promise<Guest> {
 }
 
 export async function createGuest(data: CreateGuestInput, organizationId: string): Promise<string> {
-
     const guestData = {
         ...data,
         organizationId,
@@ -41,8 +40,6 @@ export async function createGuest(data: CreateGuestInput, organizationId: string
     })
 
     return docRef.id
-
-
 }
 
 export async function updateGuest(guestId: string, data: Partial<CreateGuestInput>): Promise<void> {
@@ -53,3 +50,8 @@ export async function updateGuest(guestId: string, data: Partial<CreateGuestInpu
         updatedAt: new Date().toISOString()
     })
 }
+
+export async function deleteGuest(guestId: string): Promise<void> {
+    const guestRef = doc(firestoreDb, COLLECTION, guestId)
+    await deleteDoc(guestRef)
+}
