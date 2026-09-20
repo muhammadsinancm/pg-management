@@ -58,8 +58,8 @@ export function GuestTable({
         <div className="w-full min-w-0 overflow-hidden rounded-2xl border border-neutral-100 bg-white shadow-2xs">
             {/* Scrollable table container */}
             <div className="overflow-x-auto w-full min-w-0">
-                <table className="w-full lg:min-w-[840px] text-left text-xs lg:text-sm">
-                    <thead className="hidden lg:table-header-group border-b border-neutral-100 bg-neutral-50/70">
+                <table className="w-full text-left text-xs xl:text-sm">
+                    <thead className="hidden xl:table-header-group border-b border-neutral-100 bg-neutral-50/70">
                         <tr>
                             <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-neutral-400 whitespace-nowrap">
                                 Guest
@@ -79,24 +79,24 @@ export function GuestTable({
                             <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-neutral-400 whitespace-nowrap">
                                 Status
                             </th>
-                            <th className="pl-2 pr-4 py-3 text-[11px] font-bold uppercase tracking-wider text-neutral-400 whitespace-nowrap">
+                            <th className="pl-2 pr-4 py-3 text-[11px] font-bold uppercase tracking-wider text-neutral-400 whitespace-nowrap text-right w-[1%]">
                                 Actions
                             </th>
                         </tr>
                     </thead>
 
-                    <tbody className="flex flex-col lg:table-row-group gap-4 lg:gap-0 p-4 lg:p-0 bg-neutral-50/30 lg:bg-transparent lg:divide-y lg:divide-neutral-100">
+                    <tbody className="flex flex-col xl:table-row-group gap-4 xl:gap-0 p-4 xl:p-0 bg-neutral-50/30 xl:bg-transparent xl:divide-y xl:divide-neutral-100">
                         {guests.map((guest) => {
                             const location = [guest.city, guest.state].filter(Boolean).join(", ") || "—";
 
                             return (
                                 <tr
                                     key={guest.id}
-                                    className="flex flex-col lg:table-row transition-colors hover:bg-neutral-50/80 bg-white lg:bg-transparent rounded-xl lg:rounded-none border border-neutral-100 lg:border-none shadow-xs lg:shadow-none overflow-hidden"
+                                    className="flex flex-col xl:table-row transition-colors hover:bg-neutral-50/80 bg-white xl:bg-transparent rounded-xl xl:rounded-none border border-neutral-100 xl:border-none shadow-xs xl:shadow-none overflow-hidden"
                                 >
                                     {/* Guest Name & Gender */}
-                                    <td className="px-4 py-3 lg:py-3.5 flex justify-between items-center lg:table-cell border-b border-neutral-50 lg:border-none bg-neutral-50/50 lg:bg-transparent">
-                                        <span className="lg:hidden text-[10px] font-bold uppercase text-neutral-400">
+                                    <td className="px-4 py-3 xl:py-3.5 flex justify-between items-center xl:table-cell border-b border-neutral-50 xl:border-none bg-neutral-50/50 xl:bg-transparent">
+                                        <span className="xl:hidden text-[10px] font-bold uppercase text-neutral-400">
                                             Guest
                                         </span>
                                         <div className="flex items-center gap-2.5">
@@ -104,7 +104,7 @@ export function GuestTable({
                                                 <User className="h-3.5 w-3.5" />
                                             </div>
                                             <div className="min-w-0">
-                                                <p className="font-bold text-neutral-900 text-xs truncate">
+                                                <p className="font-bold text-neutral-900 text-xs break-words">
                                                     {guest.fullName}
                                                 </p>
                                                 {guest.gender && (
@@ -117,25 +117,25 @@ export function GuestTable({
                                     </td>
 
                                     {/* Phone */}
-                                    <td className="px-4 py-2.5 lg:py-3.5 flex justify-between items-center lg:table-cell border-b border-neutral-50 lg:border-none">
-                                        <span className="lg:hidden text-[10px] font-bold uppercase text-neutral-400">
+                                    <td className="px-4 py-2.5 xl:py-3.5 flex justify-between items-center xl:table-cell border-b border-neutral-50 xl:border-none">
+                                        <span className="xl:hidden text-[10px] font-bold uppercase text-neutral-400">
                                             Phone
                                         </span>
                                         <div className="flex items-center gap-1.5 text-neutral-700 font-medium text-xs">
                                             <Phone className="h-3 w-3 text-neutral-400 shrink-0" />
-                                            <span className="font-mono">{guest.phone}</span>
+                                            <span className="font-mono whitespace-nowrap">{guest.phone}</span>
                                         </div>
                                     </td>
 
                                     {/* Email */}
-                                    <td className="px-4 py-2.5 lg:py-3.5 flex justify-between items-center lg:table-cell border-b border-neutral-50 lg:border-none">
-                                        <span className="lg:hidden text-[10px] font-bold uppercase text-neutral-400">
+                                    <td className="px-4 py-2.5 xl:py-3.5 flex justify-between items-center xl:table-cell border-b border-neutral-50 xl:border-none">
+                                        <span className="xl:hidden text-[10px] font-bold uppercase text-neutral-400">
                                             Email
                                         </span>
                                         {guest.email ? (
-                                            <div className="flex items-center gap-1.5 text-neutral-600 text-xs truncate max-w-[200px]" title={guest.email}>
+                                            <div className="flex items-center gap-1.5 text-neutral-600 text-xs break-all" title={guest.email}>
                                                 <Mail className="h-3 w-3 text-neutral-400 shrink-0" />
-                                                <span className="truncate">{guest.email}</span>
+                                                <span>{guest.email}</span>
                                             </div>
                                         ) : (
                                             <span className="text-neutral-400 text-xs">—</span>
@@ -143,19 +143,19 @@ export function GuestTable({
                                     </td>
 
                                     {/* Identification */}
-                                    <td className="px-4 py-2.5 lg:py-3.5 flex justify-between items-center lg:table-cell border-b border-neutral-50 lg:border-none">
-                                        <span className="lg:hidden text-[10px] font-bold uppercase text-neutral-400">
+                                    <td className="px-4 py-2.5 xl:py-3.5 flex justify-between items-center xl:table-cell border-b border-neutral-50 xl:border-none">
+                                        <span className="xl:hidden text-[10px] font-bold uppercase text-neutral-400">
                                             ID
                                         </span>
                                         {guest.idNumber ? (
                                             <div className="flex items-center gap-1.5">
                                                 <ShieldCheck className="h-3.5 w-3.5 text-neutral-400 shrink-0" />
                                                 <div className="min-w-0">
-                                                    <span className="font-mono text-xs font-semibold text-neutral-800">
+                                                    <span className="font-mono text-xs font-semibold text-neutral-800 break-words">
                                                         {guest.idNumber}
                                                     </span>
                                                     {guest.idType && (
-                                                        <span className="ml-1 text-[10px] text-neutral-400">
+                                                        <span className="ml-1 text-[10px] text-neutral-400 whitespace-nowrap">
                                                             ({formatIdType(guest.idType)})
                                                         </span>
                                                     )}
@@ -167,30 +167,30 @@ export function GuestTable({
                                     </td>
 
                                     {/* Location */}
-                                    <td className="px-4 py-2.5 lg:py-3.5 flex justify-between items-center lg:table-cell text-neutral-600 text-xs border-b border-neutral-50 lg:border-none">
-                                        <span className="lg:hidden text-[10px] font-bold uppercase text-neutral-400">
+                                    <td className="px-4 py-2.5 xl:py-3.5 flex justify-between items-center xl:table-cell text-neutral-600 text-xs border-b border-neutral-50 xl:border-none">
+                                        <span className="xl:hidden text-[10px] font-bold uppercase text-neutral-400">
                                             Location
                                         </span>
-                                        <div className="flex items-center gap-1.5 truncate max-w-[160px]">
+                                        <div className="flex items-center gap-1.5 break-words">
                                             <MapPin className="h-3 w-3 text-neutral-400 shrink-0" />
-                                            <span className="truncate">{location}</span>
+                                            <span>{location}</span>
                                         </div>
                                     </td>
 
                                     {/* Status */}
-                                    <td className="px-4 py-2.5 lg:py-3.5 flex justify-between items-center lg:table-cell border-b border-neutral-50 lg:border-none">
-                                        <span className="lg:hidden text-[10px] font-bold uppercase text-neutral-400">
+                                    <td className="px-4 py-2.5 xl:py-3.5 flex justify-between items-center xl:table-cell border-b border-neutral-50 xl:border-none">
+                                        <span className="xl:hidden text-[10px] font-bold uppercase text-neutral-400">
                                             Status
                                         </span>
                                         <GuestStatusBadge status={guest.status} size="sm" />
                                     </td>
 
                                     {/* Actions */}
-                                    <td className="pl-2 pr-4 py-3 lg:py-3.5 flex justify-between items-center lg:table-cell bg-neutral-50/50 lg:bg-transparent">
-                                        <span className="lg:hidden text-[10px] font-bold uppercase text-neutral-400">
+                                    <td className="pl-2 pr-4 py-3 xl:py-3.5 flex justify-between items-center xl:table-cell bg-neutral-50/50 xl:bg-transparent text-right">
+                                        <span className="xl:hidden text-[10px] font-bold uppercase text-neutral-400">
                                             Actions
                                         </span>
-                                        <div className="inline-flex items-center gap-2 justify-end lg:justify-start w-full lg:w-auto">
+                                        <div className="inline-flex items-center gap-2 justify-end w-full">
                                             <button
                                                 type="button"
                                                 onClick={() => onView(guest)}
@@ -240,8 +240,8 @@ export function GuestTableSkeleton() {
     return (
         <div className="w-full min-w-0 overflow-hidden rounded-2xl border border-neutral-100 bg-white shadow-2xs animate-pulse">
             <div className="overflow-x-auto w-full min-w-0">
-                <div className="lg:min-w-[840px]">
-                    <div className="hidden lg:flex border-b border-neutral-100 bg-neutral-50/70 p-3.5 justify-between items-center">
+                <div className="xl:min-w-[840px]">
+                    <div className="hidden xl:flex border-b border-neutral-100 bg-neutral-50/70 p-3.5 justify-between items-center">
                         <div className="h-3 w-20 rounded bg-neutral-200" />
                         <div className="h-3 w-24 rounded bg-neutral-200" />
                         <div className="h-3 w-28 rounded bg-neutral-200" />
