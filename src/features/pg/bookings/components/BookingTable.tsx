@@ -167,7 +167,7 @@ export function BookingTable({ bookings, onDelete }: BookingTableProps) {
                                     {/* Actions */}
                                     <td className="pl-2 pr-4 py-3 lg:py-3.5 flex justify-between items-center lg:table-cell bg-neutral-50/50 lg:bg-transparent">
                                         <span className="lg:hidden text-[10px] font-bold uppercase text-neutral-400">Actions</span>
-                                        <div className="flex items-center gap-4 justify-end lg:justify-between lg:w-full">
+                                        <div className="inline-flex items-center gap-2 justify-end lg:justify-start w-full lg:w-auto">
                                             <button
                                                 type="button"
                                                 onClick={() =>
