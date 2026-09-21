@@ -1,431 +1,383 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
+import {
+    AlertCircle,
+    ArrowLeft,
+    Briefcase,
+    Calendar,
+    Clock,
+    FileText,
+    IndianRupee,
+    Mail,
+    MapPin,
+    Pencil,
+    Phone,
+    Trash2,
+    User,
+} from "lucide-react";
 import { Staff } from "../types/staff.types";
-import { getStaffMember } from "../services/staffService";
+import { deleteStaff, getStaffMember } from "../services/staffService";
+import { Branch } from "../../branches/types/branch.types";
+import { getBranches } from "../../branches/services/branchService";
+import { StaffRoleBadge } from "../components/StaffRoleBadge";
+import { StaffStatsBadge } from "../components/StaffStatsBadge";
+
+function formatSalary(salary: number, salaryType: Staff["salaryType"]): string {
+    const formatted = new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 0,
+    }).format(salary);
+
+    return `${formatted} / ${salaryType}`;
+}
+
+function formatDate(dateString?: string): string {
+    if (!dateString) return "—";
+    try {
+        const d = new Date(dateString);
+        if (isNaN(d.getTime())) return dateString;
+        return d.toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+        });
+    } catch {
+        return dateString;
+    }
+}
 
 export function StaffDetailsPage() {
-    const { staffId } = useParams()
-    const navigate = useNavigate()
+    const { staffId } = useParams<{ staffId: string }>();
+    const navigate = useNavigate();
 
-    const [staff, setStaff] = useState<Staff | null>(null)
-    const [loading, setLoaidng] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    const [staff, setStaff] = useState<Staff | null>(null);
+    const [branches, setBranches] = useState<Branch[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-
-        async function loadStaff() {
+        async function loadStaffAndBranches() {
             if (!staffId) {
-                setError('Staff ID is missing')
-                setLoaidng(false)
-                return
+                setError("Staff ID is missing.");
+                setLoading(false);
+                return;
             }
+
             try {
-                setLoaidng(true)
-                setError(null)
+                setLoading(true);
+                setError(null);
 
-                const data = await getStaffMember(staffId)
+                const [staffData, branchData] = await Promise.all([
+                    getStaffMember(staffId),
+                    getBranches().catch(() => [] as Branch[]),
+                ]);
 
-                if (!data) {
-                    setError('Staff member not found')
-                    return
+                if (!staffData) {
+                    setError("Staff member not found.");
+                    return;
                 }
 
-                setStaff(data)
-
-            } catch (error) {
-                console.error('Failed to load staff', error)
-                setError(error instanceof Error ? error.message : 'Failed to load staff')
-
+                setStaff(staffData);
+                setBranches(branchData);
+            } catch (err) {
+                console.error("Failed to load staff details", err);
+                setError("Failed to load staff details.");
             } finally {
-                setLoaidng(false)
+                setLoading(false);
             }
         }
 
-        loadStaff()
+        loadStaffAndBranches();
+    }, [staffId]);
 
-    }, [staffId])
+    const branchName =
+        branches.find((b) => b.id === staff?.branchId)?.name || staff?.branchId || "—";
 
-    function formatRole(role: Staff['role']) {
-        return role.replace('_', ' ').replace(/\b\w/g, char => char.toUpperCase())
-    }
+    async function handleDelete() {
+        if (!staff) return;
 
-    function formatSalary(salary: number, salaryType: Staff['salaryType']) {
-        return `₹${salary.toLocaleString('en-IN')} / ${salaryType}`
+        const confirmed = window.confirm(`Are you sure you want to delete ${staff.name}?`);
+        if (!confirmed) return;
+
+        try {
+            await deleteStaff(staff.id);
+            navigate("/pg/staff");
+        } catch (err) {
+            console.error("Failed to delete staff member", err);
+            alert("Failed to delete staff member.");
+        }
     }
 
     if (loading) {
         return (
-            <div className="p-6">
-                Loading staff details...
+            <div className="flex min-h-[360px] items-center justify-center p-8 text-neutral-400">
+                <div className="text-center space-y-2">
+                    <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-neutral-900 border-t-transparent" />
+                    <p className="text-xs font-medium">Loading staff profile...</p>
+                </div>
             </div>
-        )
+        );
     }
 
     if (error || !staff) {
         return (
-            <div className="space-y-4 p-6">
+            <div className="space-y-4">
+                <div className="rounded-2xl border border-red-200 bg-red-50/80 p-4 sm:p-5 text-red-700 shadow-2xs">
+                    <div className="flex items-center gap-2.5">
+                        <AlertCircle className="h-5 w-5 text-red-600 shrink-0" />
+                        <p className="text-xs sm:text-sm font-semibold">
+                            {error || "Staff record not found."}
+                        </p>
+                    </div>
+                </div>
 
                 <button
                     type="button"
-                    onClick={() =>
-                        navigate("/pg/staff")
-                    }
-                    className="rounded border px-4 py-2"
+                    onClick={() => navigate("/pg/staff")}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-neutral-900 px-4 py-2 text-xs font-semibold text-white shadow-2xs hover:bg-neutral-800 transition-all cursor-pointer"
                 >
-                    ← Back to Staff
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    <span>Back to Staff</span>
                 </button>
-
-                <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
-                    {error ?? "Staff member not found"}
-                </div>
-
             </div>
-        )
+        );
     }
 
     return (
+        <div className="w-full min-w-0 space-y-4">
+            {/* Top Action Bar */}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+                <button
+                    type="button"
+                    onClick={() => navigate("/pg/staff")}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-500 hover:text-neutral-900 transition-colors cursor-pointer"
+                >
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    <span>Back to Staff</span>
+                </button>
 
-        <div className="space-y-6 p-6">
-
-            {/* Header */}
-
-            <div className="flex items-center justify-between">
-
-                <div>
+                <div className="flex items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={() => navigate(`/pg/staff/${staff.id}/edit`)}
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-neutral-900 px-3.5 py-1.5 text-xs font-semibold text-white shadow-2xs hover:bg-neutral-800 transition-all cursor-pointer"
+                    >
+                        <Pencil className="h-3.5 w-3.5" />
+                        <span>Edit Staff</span>
+                    </button>
 
                     <button
                         type="button"
-                        onClick={() =>
-                            navigate("/pg/staff")
-                        }
-                        className="mb-3 text-sm text-gray-500 hover:text-black"
+                        onClick={handleDelete}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-neutral-700 shadow-2xs hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all cursor-pointer"
                     >
-                        ← Back to Staff
+                        <Trash2 className="h-3.5 w-3.5" />
+                        <span>Delete</span>
                     </button>
-
-                    <h1 className="text-2xl font-semibold">
-                        {staff.name}
-                    </h1>
-
-                    <p className="mt-1 text-sm text-gray-500">
-                        {staff.employeeId
-                            ? staff.employeeId
-                            : "Staff member"}
-                    </p>
-
                 </div>
-
-
-                <button
-                    type="button"
-                    onClick={() =>
-                        navigate(
-                            `/pg/staff/${staff.id}/edit`
-                        )
-                    }
-                    className="rounded bg-black px-4 py-2 text-white"
-                >
-                    Edit Staff
-                </button>
-
             </div>
 
-
-            {/* Status */}
-
-            <div>
-
-                <span
-                    className={
-                        staff.status === "active"
-                            ? "rounded-full bg-green-100 px-3 py-1 text-sm text-green-700"
-                            : "rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-600"
-                    }
-                >
-                    {staff.status === "active"
-                        ? "Active"
-                        : "Inactive"}
-                </span>
-
-            </div>
-
-
-            {/* Personal Information */}
-
-            <section className="rounded-lg border">
-
-                <div className="border-b p-4">
-
-                    <h2 className="text-lg font-semibold">
-                        Personal Information
-                    </h2>
-
-                </div>
-
-
-                <div className="grid grid-cols-1 gap-5 p-4 md:grid-cols-2">
-
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Name
-                        </p>
-
-                        <p className="mt-1 font-medium">
-                            {staff.name}
-                        </p>
-                    </div>
-
-
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Phone
-                        </p>
-
-                        <p className="mt-1">
-                            {staff.phone}
-                        </p>
-                    </div>
-
-
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Email
-                        </p>
-
-                        <p className="mt-1">
-                            {staff.email || "-"}
-                        </p>
-                    </div>
-
-
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Date of Birth
-                        </p>
-
-                        <p className="mt-1">
-                            {staff.dateOfBirth || "-"}
-                        </p>
-                    </div>
-
-
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Gender
-                        </p>
-
-                        <p className="mt-1 capitalize">
-                            {staff.gender || "-"}
-                        </p>
-                    </div>
-
-
-                    <div className="md:col-span-2">
-
-                        <p className="text-sm text-gray-500">
-                            Address
-                        </p>
-
-                        <p className="mt-1">
-                            {staff.address || "-"}
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            {/* Employment Information */}
-
-            <section className="rounded-lg border">
-
-                <div className="border-b p-4">
-
-                    <h2 className="text-lg font-semibold">
-                        Employment Information
-                    </h2>
-
-                </div>
-
-
-                <div className="grid grid-cols-1 gap-5 p-4 md:grid-cols-2">
-
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Employee ID
-                        </p>
-
-                        <p className="mt-1">
-                            {staff.employeeId || "-"}
-                        </p>
-                    </div>
-
-
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Branch ID
-                        </p>
-
-                        <p className="mt-1">
-                            {staff.branchId}
-                        </p>
-                    </div>
-
-
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Role
-                        </p>
-
-                        <p className="mt-1">
-                            {formatRole(staff.role)}
-                        </p>
-                    </div>
-
-
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Joined Date
-                        </p>
-
-                        <p className="mt-1">
-                            {staff.joinedDate}
-                        </p>
-                    </div>
-
-
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Employment Status
-                        </p>
-
-                        <p className="mt-1 capitalize">
-                            {staff.status}
-                        </p>
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            {/* Salary Information */}
-
-            <section className="rounded-lg border">
-
-                <div className="border-b p-4">
-
-                    <h2 className="text-lg font-semibold">
-                        Salary Information
-                    </h2>
-
-                </div>
-
-
-                <div className="grid grid-cols-1 gap-5 p-4 md:grid-cols-2">
-
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Salary
-                        </p>
-
-                        <p className="mt-1 text-lg font-semibold">
-                            {formatSalary(
-                                staff.salary,
-                                staff.salaryType
-                            )}
-                        </p>
-                    </div>
-
-
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Salary Type
-                        </p>
-
-                        <p className="mt-1 capitalize">
-                            {staff.salaryType}
-                        </p>
-                    </div>
-
-
-                    {staff.salaryType === "monthly" && (
-
+            {/* Single Unified Container: All Staff Data */}
+            <div className="w-full min-w-0 overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-2xs">
+                {/* Header Strip inside the container */}
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-100 bg-neutral-50/50 px-4 py-3.5 sm:px-5">
+                    <div className="flex items-center gap-3">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-neutral-900 text-base font-bold text-white shadow-2xs">
+                            {staff.name ? staff.name.charAt(0).toUpperCase() : <User className="h-5 w-5" />}
+                        </div>
                         <div>
-                            <p className="text-sm text-gray-500">
-                                Salary Payment Day
-                            </p>
-
-                            <p className="mt-1">
-                                {staff.paymentDay
-                                    ? `Day ${staff.paymentDay}`
-                                    : "-"}
+                            <div className="flex flex-wrap items-center gap-2.5">
+                                <h2 className="text-base sm:text-lg font-bold text-neutral-900 leading-tight">
+                                    {staff.name}
+                                </h2>
+                                <StaffRoleBadge role={staff.role} size="sm" />
+                                <StaffStatsBadge status={staff.status} size="sm" />
+                            </div>
+                            <p className="mt-0.5 text-xs text-neutral-500 flex items-center gap-1.5 flex-wrap">
+                                <span className="font-mono">{staff.phone}</span>
+                                {staff.email && <span>• {staff.email}</span>}
+                                <span>• ID: <span className="font-mono font-medium">{staff.employeeId || "—"}</span></span>
                             </p>
                         </div>
-
-                    )}
-
-                </div>
-
-            </section>
-
-
-            {/* Metadata */}
-
-            <section className="rounded-lg border">
-
-                <div className="border-b p-4">
-
-                    <h2 className="text-lg font-semibold">
-                        Record Information
-                    </h2>
-
-                </div>
-
-
-                <div className="grid grid-cols-1 gap-5 p-4 md:grid-cols-2">
-
-                    <div>
-
-                        <p className="text-sm text-gray-500">
-                            Created At
-                        </p>
-
-                        <p className="mt-1 text-sm">
-                            {staff.createdAt
-                                ? new Date(
-                                    staff.createdAt
-                                ).toLocaleString()
-                                : "-"}
-
-                        </p>
-
                     </div>
-
-
-                    <div>
-
-                        <p className="text-sm text-gray-500">
-                            Updated At
-                        </p>
-
-                        <p className="mt-1 text-sm">
-                            {staff.updatedAt
-                                ? new Date(
-                                    staff.updatedAt
-                                ).toLocaleString()
-                                : "-"}
-
-                        </p>
-
-                    </div>
-
                 </div>
 
-            </section>
+                {/* Compact Details Table */}
+                <div className="overflow-x-auto">
+                    <table className="w-full min-w-[620px] text-left text-xs sm:text-sm border-collapse">
+                        <tbody>
+                            {/* Section 1: Personal Information */}
+                            <tr className="border-b border-neutral-100 bg-neutral-50/70">
+                                <th
+                                    colSpan={4}
+                                    className="px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-neutral-500"
+                                >
+                                    <div className="flex items-center gap-1.5">
+                                        <User className="h-3.5 w-3.5 text-neutral-400" />
+                                        <span>Personal Information</span>
+                                    </div>
+                                </th>
+                            </tr>
+                            <tr className="border-b border-neutral-100 divide-x divide-neutral-100">
+                                <td className="w-1/6 bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                    Full Name
+                                </td>
+                                <td className="w-2/6 px-4 py-2.5 font-semibold text-neutral-800">
+                                    {staff.name}
+                                </td>
+                                <td className="w-1/6 bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                    Phone Number
+                                </td>
+                                <td className="w-2/6 px-4 py-2.5 font-semibold font-mono text-neutral-800">
+                                    {staff.phone}
+                                </td>
+                            </tr>
+                            <tr className="border-b border-neutral-100 divide-x divide-neutral-100">
+                                <td className="bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                    Email Address
+                                </td>
+                                <td className="px-4 py-2.5 font-semibold text-neutral-800 break-all">
+                                    {staff.email || "—"}
+                                </td>
+                                <td className="bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                    Gender
+                                </td>
+                                <td className="px-4 py-2.5 font-semibold text-neutral-800 capitalize">
+                                    {staff.gender || "—"}
+                                </td>
+                            </tr>
+                            <tr className="border-b border-neutral-100 divide-x divide-neutral-100">
+                                <td className="bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                    Date of Birth
+                                </td>
+                                <td className="px-4 py-2.5 font-semibold text-neutral-800">
+                                    {formatDate(staff.dateOfBirth)}
+                                </td>
+                                <td className="bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                    Status
+                                </td>
+                                <td className="px-4 py-2.5 font-semibold text-neutral-800">
+                                    <StaffStatsBadge status={staff.status} size="sm" />
+                                </td>
+                            </tr>
+                            <tr className="border-b border-neutral-100 divide-x divide-neutral-100">
+                                <td className="bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                    Permanent Address
+                                </td>
+                                <td colSpan={3} className="px-4 py-2.5 font-semibold text-neutral-800">
+                                    {staff.address || "—"}
+                                </td>
+                            </tr>
 
+                            {/* Section 2: Employment & Branch Details */}
+                            <tr className="border-b border-neutral-100 bg-neutral-50/70">
+                                <th
+                                    colSpan={4}
+                                    className="px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-neutral-500"
+                                >
+                                    <div className="flex items-center gap-1.5">
+                                        <Briefcase className="h-3.5 w-3.5 text-neutral-400" />
+                                        <span>Employment & Branch Assignment</span>
+                                    </div>
+                                </th>
+                            </tr>
+                            <tr className="border-b border-neutral-100 divide-x divide-neutral-100">
+                                <td className="bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                    Employee ID
+                                </td>
+                                <td className="px-4 py-2.5 font-semibold font-mono text-neutral-800">
+                                    {staff.employeeId || "—"}
+                                </td>
+                                <td className="bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                    Assigned Branch
+                                </td>
+                                <td className="px-4 py-2.5 font-semibold text-neutral-800">
+                                    {branchName}
+                                </td>
+                            </tr>
+                            <tr className="border-b border-neutral-100 divide-x divide-neutral-100">
+                                <td className="bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                    Designation / Role
+                                </td>
+                                <td className="px-4 py-2.5 font-semibold text-neutral-800">
+                                    <StaffRoleBadge role={staff.role} size="sm" />
+                                </td>
+                                <td className="bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                    Joining Date
+                                </td>
+                                <td className="px-4 py-2.5 font-semibold text-neutral-800">
+                                    {formatDate(staff.joinedDate)}
+                                </td>
+                            </tr>
+
+                            {/* Section 3: Compensation & Payroll */}
+                            <tr className="border-b border-neutral-100 bg-neutral-50/70">
+                                <th
+                                    colSpan={4}
+                                    className="px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-neutral-500"
+                                >
+                                    <div className="flex items-center gap-1.5">
+                                        <IndianRupee className="h-3.5 w-3.5 text-neutral-400" />
+                                        <span>Compensation & Payroll Information</span>
+                                    </div>
+                                </th>
+                            </tr>
+                            <tr className="border-b border-neutral-100 divide-x divide-neutral-100">
+                                <td className="bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                    Current Salary
+                                </td>
+                                <td className="px-4 py-2.5 font-bold text-neutral-900 text-sm">
+                                    {formatSalary(staff.salary, staff.salaryType)}
+                                </td>
+                                <td className="bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                    Salary Frequency
+                                </td>
+                                <td className="px-4 py-2.5 font-semibold text-neutral-800 capitalize">
+                                    {staff.salaryType}
+                                </td>
+                            </tr>
+                            {staff.salaryType === "monthly" && (
+                                <tr className="border-b border-neutral-100 divide-x divide-neutral-100">
+                                    <td className="bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                        Salary Payout Day
+                                    </td>
+                                    <td colSpan={3} className="px-4 py-2.5 font-semibold text-neutral-800">
+                                        {staff.paymentDay ? `Day ${staff.paymentDay} of each month` : "Not specified"}
+                                    </td>
+                                </tr>
+                            )}
+
+                            {/* Section 4: System Record Metadata */}
+                            <tr className="border-b border-neutral-100 bg-neutral-50/70">
+                                <th
+                                    colSpan={4}
+                                    className="px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-neutral-500"
+                                >
+                                    <div className="flex items-center gap-1.5">
+                                        <Clock className="h-3.5 w-3.5 text-neutral-400" />
+                                        <span>Audit & Record Information</span>
+                                    </div>
+                                </th>
+                            </tr>
+                            <tr className="divide-x divide-neutral-100">
+                                <td className="bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                    Record Created
+                                </td>
+                                <td className="px-4 py-2.5 text-xs text-neutral-600">
+                                    {staff.createdAt ? new Date(staff.createdAt).toLocaleString() : "—"}
+                                </td>
+                                <td className="bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                    Last Updated
+                                </td>
+                                <td className="px-4 py-2.5 text-xs text-neutral-600">
+                                    {staff.updatedAt ? new Date(staff.updatedAt).toLocaleString() : "—"}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-    )
+    );
 }
