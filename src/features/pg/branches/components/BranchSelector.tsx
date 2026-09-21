@@ -1,6 +1,7 @@
 import { Building2, Check, MapPin } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import type { Branch } from "../types/branch.types";
+import { BranchStatusBadge } from "./BranchStatusBadge";
 
 interface BranchSelectorProps {
     branches: Branch[];
@@ -66,7 +67,7 @@ export function BranchSelector({
                                 disabled && "cursor-not-allowed opacity-60"
                             )}
                         >
-                            {/* Top row: Icon & Badges */}
+                            {/* Top row: Icon, Status & Code */}
                             <div className="flex items-start justify-between gap-2 min-w-0">
                                 <div
                                     className={cn(
@@ -79,22 +80,23 @@ export function BranchSelector({
                                     <Building2 className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
                                 </div>
 
-                                <div className="flex items-center gap-1.5 shrink-0">
+                                <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
                                     {branch.code && (
-                                        <span className="rounded-md bg-neutral-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-neutral-600">
+                                        <span className="rounded-md bg-neutral-100 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-neutral-600">
                                             {branch.code}
                                         </span>
                                     )}
+                                    <BranchStatusBadge status={branch.status} size="sm" />
                                     {isSelected && (
                                         <span className="inline-flex items-center gap-1 rounded-md bg-neutral-900 px-2 py-0.5 text-[10px] font-bold text-white shadow-2xs">
                                             <Check className="h-2.5 w-2.5" />
-                                            Active
+                                            Selected
                                         </span>
                                     )}
                                 </div>
                             </div>
 
-                            {/* Middle & Bottom row: Branch Details */}
+                            {/* Branch Details */}
                             <div className="mt-3 min-w-0">
                                 <h3 className="truncate text-sm font-bold text-neutral-900 tracking-tight">
                                     {branch.name}
@@ -103,7 +105,7 @@ export function BranchSelector({
                                 <div className="mt-1 flex items-center gap-1 text-[11px] text-neutral-400">
                                     <MapPin className="h-3 w-3 shrink-0 text-neutral-400" />
                                     <span className="truncate">
-                                        {branch.city || branch.address || "All Floors"}
+                                        {[branch.city, branch.state].filter(Boolean).join(", ") || branch.address || "Main Location"}
                                     </span>
                                 </div>
                             </div>
