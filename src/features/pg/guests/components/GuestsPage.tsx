@@ -201,8 +201,8 @@ export function GuestsPage() {
                 </div>
             )}
 
-            {/* Loading State */}
-            {loading ? (
+            {/* Loading State: Only show skeleton on initial load when there is no data */}
+            {loading && guests.length === 0 ? (
                 <div className="space-y-4">
                     {/* Summary Skeleton */}
                     <div className="grid grid-cols-2 gap-2 sm:gap-2.5 lg:grid-cols-4 sm:gap-3 animate-pulse">

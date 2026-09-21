@@ -71,10 +71,30 @@ export function GuestDetailsPage() {
 
     if (loading) {
         return (
-            <div className="flex min-h-[360px] items-center justify-center p-8 text-neutral-400">
-                <div className="text-center space-y-2">
-                    <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-neutral-900 border-t-transparent" />
-                    <p className="text-xs font-medium">Loading guest profile...</p>
+            <div className="w-full min-w-0 space-y-4 p-4 sm:p-6 animate-pulse">
+                {/* Action Bar Skeleton */}
+                <div className="flex items-center justify-between">
+                    <div className="h-4 w-28 rounded bg-neutral-100" />
+                    <div className="flex gap-2">
+                        <div className="h-7 w-16 rounded-xl bg-neutral-100" />
+                        <div className="h-7 w-16 rounded-xl bg-neutral-100" />
+                    </div>
+                </div>
+
+                {/* Card Table Skeleton */}
+                <div className="rounded-2xl border border-neutral-100 bg-white p-5 shadow-2xs space-y-4">
+                    <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-xl bg-neutral-200" />
+                        <div className="space-y-1.5">
+                            <div className="h-4 w-36 rounded bg-neutral-200" />
+                            <div className="h-3 w-48 rounded bg-neutral-100" />
+                        </div>
+                    </div>
+                    <div className="space-y-3 pt-2">
+                        <div className="h-8 rounded-lg bg-neutral-50" />
+                        <div className="h-8 rounded-lg bg-neutral-50" />
+                        <div className="h-8 rounded-lg bg-neutral-50" />
+                    </div>
                 </div>
             </div>
         );
