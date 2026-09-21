@@ -1,47 +1,71 @@
 import { FormEvent, useState } from "react";
+import { AlignLeft, CreditCard, Receipt } from "lucide-react";
 import { CreatePaymentInput, Payment, PaymentMethod } from "../types/payment.types";
 
 interface PaymentFormProps {
-    payment?: Payment
-    organizationId: string
-    branchId: string
-    customerId: string
-    bookingId: string
-    invoiceId?: string
-    totalAmount: number
-    paidAmount: number
-    dueAmount: number
-    onSubmit: (data: CreatePaymentInput) => Promise<void>
-    onCancel?: () => void
+    payment?: Payment;
+    organizationId: string;
+    branchId: string;
+    customerId: string;
+    bookingId: string;
+    invoiceId?: string;
+    totalAmount: number;
+    paidAmount: number;
+    dueAmount: number;
+    onSubmit: (data: CreatePaymentInput) => Promise<void>;
+    onCancel?: () => void;
 }
 
-export function PaymentForm({ payment, organizationId, branchId, customerId, bookingId, invoiceId, totalAmount, paidAmount, dueAmount, onSubmit, onCancel }: PaymentFormProps) {
-    const [paymentNumber, setPaymentNumber] = useState(payment?.paymentNumber ?? '')
-    const [amount, setAmount] = useState(payment?.amount?.toString() ?? '')
-    const [paymentDate, setPaymentDate] = useState(payment?.paymentDate ? payment.paymentDate.slice(0, 10) : new Date().toISOString().slice(0, 10))
-    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(payment?.paymentMethod ?? 'cash')
-    const [referenceNumber, setReferenceNumber] = useState(payment?.referenceNumber ?? '')
-    const [notes, setNotes] = useState(payment?.notes ?? '')
-    const [status, setStatus] = useState<Payment['status']>(payment?.status ?? 'completed')
-    const [submitting, setSubmitting] = useState(false)
+function formatCurrency(amount: number): string {
+    return new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 0,
+    }).format(Number(amount || 0));
+}
+
+export function PaymentForm({
+    payment,
+    organizationId,
+    branchId,
+    customerId,
+    bookingId,
+    invoiceId,
+    totalAmount,
+    paidAmount,
+    dueAmount,
+    onSubmit,
+    onCancel,
+}: PaymentFormProps) {
+    const [paymentNumber, setPaymentNumber] = useState(payment?.paymentNumber ?? "");
+    const [amount, setAmount] = useState(payment?.amount?.toString() ?? "");
+    const [paymentDate, setPaymentDate] = useState(
+        payment?.paymentDate ? payment.paymentDate.slice(0, 10) : new Date().toISOString().slice(0, 10)
+    );
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(payment?.paymentMethod ?? "cash");
+    const [referenceNumber, setReferenceNumber] = useState(payment?.referenceNumber ?? "");
+    const [notes, setNotes] = useState(payment?.notes ?? "");
+    const [status, setStatus] = useState<Payment["status"]>(payment?.status ?? "completed");
+    const [submitting, setSubmitting] = useState(false);
+
+    const paymentAmount = Number(amount || 0);
+    const remainingDue = Math.max(dueAmount - paymentAmount, 0);
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault()
-
-        const paymentAmount =Number(amount)
+        event.preventDefault();
 
         if (paymentAmount <= 0) {
-            alert('Payment amount must be greater than 0')
-            return
+            alert("Payment amount must be greater than 0");
+            return;
         }
 
         if (paymentAmount > dueAmount) {
-            alert(`Payment can not exceed due amount of ₹${dueAmount.toLocaleString('en-IN')}`)
-            return
+            alert(`Payment cannot exceed due amount of ₹${dueAmount.toLocaleString("en-IN")}`);
+            return;
         }
 
         try {
-            setSubmitting(true)
+            setSubmitting(true);
 
             const data: CreatePaymentInput = {
                 organizationId,
@@ -50,335 +74,227 @@ export function PaymentForm({ payment, organizationId, branchId, customerId, boo
                 bookingId,
                 invoiceId,
                 paymentNumber,
-                amount: Number(amount || 0),
+                amount: paymentAmount,
                 paymentDate,
                 paymentMethod,
                 status,
                 referenceNumber: referenceNumber || undefined,
-                notes: notes || undefined
-            }
+                notes: notes || undefined,
+            };
 
-            await onSubmit(data)
-
-        } catch(error) {
-            console.error('Payment submission failed', error)
-            alert(error instanceof Error ? error.message : 'Failed to create payment')
-
-        }  finally {
-            setSubmitting(false)
+            await onSubmit(data);
+        } catch (error) {
+            console.error("Payment submission failed", error);
+            alert(error instanceof Error ? error.message : "Failed to create payment");
+        } finally {
+            setSubmitting(false);
         }
-
-    }
+    };
 
     return (
         <form
             onSubmit={handleSubmit}
-            className="space-y-6"
+            className="space-y-6 rounded-2xl border border-neutral-100 bg-white p-5 sm:p-6 shadow-2xs"
         >
-            {/* Invoice Summary */}
-            <div className="rounded-lg border bg-gray-50 p-4">
-                <h2 className="mb-4 text-lg font-semibold text-gray-800">
-                    Invoice Summary
-                </h2>
+            {/* Invoice Summary Strip */}
+            <div className="space-y-3">
+                <div className="flex items-center gap-2 border-b border-neutral-100 pb-2">
+                    <Receipt className="h-4 w-4 text-neutral-500" />
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-800">
+                        Invoice Balance Summary
+                    </h3>
+                </div>
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    {/* Total */}
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Total Amount
-                        </p>
-
-                        <p className="text-lg font-semibold text-gray-900">
-                            ₹
-                            {totalAmount.toLocaleString(
-                                "en-IN"
-                            )}
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <div className="rounded-xl border border-neutral-100 bg-neutral-50/70 p-3.5 shadow-2xs">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+                            Total Invoiced
+                        </span>
+                        <p className="mt-1 text-base sm:text-lg font-bold text-neutral-900">
+                            {formatCurrency(totalAmount)}
                         </p>
                     </div>
 
-                    {/* Paid */}
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Paid Amount
-                        </p>
-
-                        <p className="text-lg font-semibold text-green-600">
-                            ₹
-                            {paidAmount.toLocaleString(
-                                "en-IN"
-                            )}
+                    <div className="rounded-xl border border-neutral-100 bg-neutral-50/70 p-3.5 shadow-2xs">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+                            Already Paid
+                        </span>
+                        <p className="mt-1 text-base sm:text-lg font-bold text-emerald-700">
+                            {formatCurrency(paidAmount)}
                         </p>
                     </div>
 
-                    {/* Due */}
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Due Amount
-                        </p>
-
-                        <p className="text-lg font-semibold text-red-600">
-                            ₹
-                            {dueAmount.toLocaleString(
-                                "en-IN"
-                            )}
+                    <div className="rounded-xl border border-neutral-100 bg-neutral-50/70 p-3.5 shadow-2xs">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+                            Outstanding Balance
+                        </span>
+                        <p className="mt-1 text-base sm:text-lg font-bold text-amber-700">
+                            {formatCurrency(dueAmount)}
                         </p>
                     </div>
                 </div>
             </div>
 
-            {/* Payment Information */}
-            <div className="rounded-lg border bg-white p-6">
-                <h2 className="mb-6 text-lg font-semibold text-gray-800">
-                    Payment Information
-                </h2>
+            {/* Payment Details */}
+            <div className="space-y-4">
+                <div className="flex items-center gap-2 border-b border-neutral-100 pb-2">
+                    <CreditCard className="h-4 w-4 text-neutral-500" />
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-800">
+                        Transaction Details
+                    </h3>
+                </div>
 
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {/* Payment Number */}
                     <div>
-                        <label
-                            htmlFor="paymentNumber"
-                            className="mb-1 block text-sm font-medium text-gray-700"
-                        >
-                            Payment Number
+                        <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-neutral-700">
+                            Payment Number <span className="text-red-500">*</span>
                         </label>
-
                         <input
-                            id="paymentNumber"
                             type="text"
                             value={paymentNumber}
-                            onChange={(event) =>
-                                setPaymentNumber(
-                                    event.target.value
-                                )
-                            }
-                            placeholder="PAY-001"
+                            onChange={(e) => setPaymentNumber(e.target.value)}
+                            placeholder="e.g. PAY-001"
                             required
-                            className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-blue-500"
+                            disabled={submitting}
+                            className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs sm:text-sm text-neutral-900 font-mono placeholder:text-neutral-400 outline-none transition-colors focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 shadow-2xs"
                         />
                     </div>
 
                     {/* Payment Amount */}
                     <div>
-                        <label
-                            htmlFor="amount"
-                            className="mb-1 block text-sm font-medium text-gray-700"
-                        >
-                            Payment Amount
+                        <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-neutral-700">
+                            Payment Amount (₹) <span className="text-red-500">*</span>
                         </label>
-
                         <input
-                            id="amount"
                             type="number"
                             min="0.01"
                             max={dueAmount}
                             step="0.01"
                             value={amount}
-                            onChange={(event) =>
-                                setAmount(
-                                    event.target.value
-                                )
-                            }
-                            placeholder="Enter payment amount"
+                            onChange={(e) => setAmount(e.target.value)}
+                            placeholder={`Max ₹${dueAmount.toLocaleString("en-IN")}`}
                             required
-                            className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-blue-500"
+                            disabled={submitting}
+                            className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs sm:text-sm text-neutral-900 outline-none transition-colors focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 shadow-2xs"
                         />
-
-                        <p className="mt-1 text-sm text-gray-500">
-                            Maximum payment: ₹
-                            {dueAmount.toLocaleString(
-                                "en-IN"
-                            )}
-                        </p>
                     </div>
 
                     {/* Payment Date */}
                     <div>
-                        <label
-                            htmlFor="paymentDate"
-                            className="mb-1 block text-sm font-medium text-gray-700"
-                        >
-                            Payment Date
+                        <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-neutral-700">
+                            Payment Date <span className="text-red-500">*</span>
                         </label>
-
                         <input
-                            id="paymentDate"
                             type="date"
                             value={paymentDate}
-                            onChange={(event) =>
-                                setPaymentDate(
-                                    event.target.value
-                                )
-                            }
+                            onChange={(e) => setPaymentDate(e.target.value)}
                             required
-                            className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-blue-500"
+                            disabled={submitting}
+                            className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs sm:text-sm text-neutral-900 outline-none transition-colors focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 shadow-2xs cursor-pointer"
                         />
                     </div>
 
                     {/* Payment Method */}
                     <div>
-                        <label
-                            htmlFor="paymentMethod"
-                            className="mb-1 block text-sm font-medium text-gray-700"
-                        >
+                        <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-neutral-700">
                             Payment Method
                         </label>
-
                         <select
-                            id="paymentMethod"
                             value={paymentMethod}
-                            onChange={(event) =>
-                                setPaymentMethod(
-                                    event.target
-                                        .value as PaymentMethod
-                                )
-                            }
-                            className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-blue-500"
+                            onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                            disabled={submitting}
+                            className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-neutral-800 outline-none transition-colors focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 shadow-2xs cursor-pointer"
                         >
-                            <option value="cash">
-                                Cash
-                            </option>
-
-                            <option value="upi">
-                                UPI
-                            </option>
-
-                            <option value="card">
-                                Card
-                            </option>
-
-                            <option value="bank_transfer">
-                                Bank Transfer
-                            </option>
-
-                            <option value="other">
-                                Other
-                            </option>
+                            <option value="cash">Cash</option>
+                            <option value="upi">UPI</option>
+                            <option value="card">Card</option>
+                            <option value="bank_transfer">Bank Transfer</option>
+                            <option value="other">Other</option>
                         </select>
                     </div>
 
                     {/* Reference Number */}
                     <div>
-                        <label
-                            htmlFor="referenceNumber"
-                            className="mb-1 block text-sm font-medium text-gray-700"
-                        >
-                            Reference Number
+                        <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-neutral-700">
+                            Reference Number (Optional)
                         </label>
-
                         <input
-                            id="referenceNumber"
                             type="text"
                             value={referenceNumber}
-                            onChange={(event) =>
-                                setReferenceNumber(
-                                    event.target.value
-                                )
-                            }
-                            placeholder="UPI / transaction reference"
-                            className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-blue-500"
+                            onChange={(e) => setReferenceNumber(e.target.value)}
+                            placeholder="UPI / UTR / Cheque #"
+                            disabled={submitting}
+                            className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs sm:text-sm text-neutral-900 font-mono placeholder:text-neutral-400 outline-none transition-colors focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 shadow-2xs"
                         />
                     </div>
 
                     {/* Status */}
                     <div>
-                        <label
-                            htmlFor="status"
-                            className="mb-1 block text-sm font-medium text-gray-700"
-                        >
-                            Status
+                        <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-neutral-700">
+                            Payment Status
                         </label>
-
                         <select
-                            id="status"
                             value={status}
-                            onChange={(event) =>
-                                setStatus(
-                                    event.target
-                                        .value as Payment["status"]
-                                )
-                            }
-                            className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-blue-500"
+                            onChange={(e) => setStatus(e.target.value as Payment["status"])}
+                            disabled={submitting}
+                            className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-neutral-800 outline-none transition-colors focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 shadow-2xs cursor-pointer"
                         >
-                            <option value="completed">
-                                Completed
-                            </option>
-
-                            <option value="pending">
-                                Pending
-                            </option>
-
-                            <option value="failed">
-                                Failed
-                            </option>
-
-                            <option value="refunded">
-                                Refunded
-                            </option>
+                            <option value="completed">Completed</option>
+                            <option value="pending">Pending</option>
+                            <option value="failed">Failed</option>
+                            <option value="refunded">Refunded</option>
                         </select>
                     </div>
                 </div>
+            </div>
 
-                {/* Notes */}
-                <div className="mt-5">
-                    <label
-                        htmlFor="notes"
-                        className="mb-1 block text-sm font-medium text-gray-700"
-                    >
-                        Notes
+            {/* Payment Summary Preview */}
+            <div className="rounded-xl border border-neutral-100 bg-neutral-50/70 p-4 shadow-2xs space-y-2 text-xs sm:text-sm">
+                <div className="flex items-center justify-between text-neutral-600">
+                    <span>Payment Recorded Now:</span>
+                    <span className="font-bold text-neutral-900">{formatCurrency(paymentAmount)}</span>
+                </div>
+                <div className="flex items-center justify-between text-neutral-600 border-t border-neutral-200/80 pt-2">
+                    <span>Remaining Balance After Payment:</span>
+                    <span className={`font-bold ${remainingDue > 0 ? "text-amber-600" : "text-emerald-600"}`}>
+                        {formatCurrency(remainingDue)}
+                    </span>
+                </div>
+            </div>
+
+            {/* Notes */}
+            <div className="space-y-4">
+                <div className="flex items-center gap-2 border-b border-neutral-100 pb-2">
+                    <AlignLeft className="h-4 w-4 text-neutral-500" />
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-800">
+                        Notes & Remarks
+                    </h3>
+                </div>
+
+                <div>
+                    <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-neutral-700">
+                        Payment Notes (Optional)
                     </label>
-
                     <textarea
-                        id="notes"
                         value={notes}
-                        onChange={(event) =>
-                            setNotes(event.target.value)
-                        }
-                        rows={4}
-                        placeholder="Add payment notes..."
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-blue-500"
+                        onChange={(e) => setNotes(e.target.value)}
+                        disabled={submitting}
+                        rows={3}
+                        placeholder="Add any transaction remarks or payment notes..."
+                        className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm text-neutral-900 placeholder:text-neutral-400 outline-none transition-colors focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 shadow-2xs"
                     />
                 </div>
             </div>
 
-            {/* Payment Preview */}
-            <div className="rounded-lg border bg-blue-50 p-4">
-                <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">
-                        Payment Amount
-                    </span>
-
-                    <span className="text-lg font-semibold text-gray-900">
-                        ₹
-                        {(
-                            Number(amount) || 0
-                        ).toLocaleString("en-IN")}
-                    </span>
-                </div>
-
-                <div className="mt-2 flex items-center justify-between">
-                    <span className="text-sm text-gray-600">
-                        Remaining Due
-                    </span>
-
-                    <span className="text-lg font-semibold text-red-600">
-                        ₹
-                        {Math.max(
-                            dueAmount -
-                                (Number(amount) || 0),
-                            0
-                        ).toLocaleString("en-IN")}
-                    </span>
-                </div>
-            </div>
-
-            {/* Buttons */}
-            <div className="flex justify-end gap-3">
+            {/* Actions */}
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-neutral-100">
                 {onCancel && (
                     <button
                         type="button"
                         onClick={onCancel}
                         disabled={submitting}
-                        className="rounded-lg border border-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-xl border border-neutral-200 bg-white px-4 py-2 text-xs font-semibold text-neutral-700 shadow-2xs hover:bg-neutral-50 hover:text-neutral-900 transition-colors cursor-pointer disabled:opacity-50"
                     >
                         Cancel
                     </button>
@@ -387,7 +303,7 @@ export function PaymentForm({ payment, organizationId, branchId, customerId, boo
                 <button
                     type="submit"
                     disabled={submitting || dueAmount <= 0}
-                    className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex items-center justify-center rounded-xl bg-neutral-900 px-5 py-2 text-xs font-semibold text-white shadow-2xs hover:bg-neutral-800 transition-all cursor-pointer disabled:opacity-50"
                 >
                     {submitting
                         ? "Saving..."

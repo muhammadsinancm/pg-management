@@ -1,142 +1,132 @@
+import { LayoutGrid, RotateCcw, Search, Table as TableIcon, X } from "lucide-react";
 import { BillingCycle, BillingStatus } from "../types/billing.types";
+import { InvoiceStatus } from "../types/invoice.types";
 
 interface BillingFiltersProps {
-    billingCycle: BillingCycle | 'all'
-    status: BillingStatus | 'all'
-    search: string
-    onBillingCycleChange: (value: BillingCycle | 'all') => void
-    onStatusChange: (value: BillingStatus | 'all') => void
-    onSearchChange: (value: string) => void
-    onReset: () => void
+    search: string;
+    onSearchChange: (value: string) => void;
+    status: InvoiceStatus | BillingStatus | "all";
+    onStatusChange: (value: any) => void;
+    billingCycle?: BillingCycle | "all";
+    onBillingCycleChange?: (value: BillingCycle | "all") => void;
+    viewMode?: "table" | "card";
+    onViewModeChange?: (mode: "table" | "card") => void;
+    onReset: () => void;
 }
 
-export function BillingFilters({billingCycle, status, search, onBillingCycleChange, onStatusChange, onReset, onSearchChange}: BillingFiltersProps) {
+export function BillingFilters({
+    billingCycle,
+    status,
+    search,
+    onBillingCycleChange,
+    onStatusChange,
+    onReset,
+    onSearchChange,
+    viewMode,
+    onViewModeChange,
+}: BillingFiltersProps) {
     return (
-        <div className="rounded-lg border bg-white p-4">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-
-                {/* Search */}
-                <div>
-                    <label
-                        htmlFor="billing-search"
-                        className="mb-1 block text-sm font-medium"
+        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+            {/* Search Input */}
+            <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-400" />
+                <input
+                    id="billing-search"
+                    type="text"
+                    value={search}
+                    onChange={(e) => onSearchChange(e.target.value)}
+                    placeholder="Search by invoice #, customer ID, or notes..."
+                    className="w-full rounded-xl border border-neutral-200 bg-white pl-9 pr-8 py-2 text-xs sm:text-sm text-neutral-900 placeholder:text-neutral-400 outline-none transition-colors focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 shadow-2xs"
+                />
+                {search && (
+                    <button
+                        type="button"
+                        onClick={() => onSearchChange("")}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 cursor-pointer p-0.5"
                     >
-                        Search
-                    </label>
+                        <X className="h-3 w-3" />
+                    </button>
+                )}
+            </div>
 
-                    <input
-                        id="billing-search"
-                        type="text"
-                        value={search}
-                        onChange={(e) =>
-                            onSearchChange(e.target.value)
-                        }
-                        placeholder="Search customer or billing..."
-                        className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2"
-                    />
-                </div>
-
-                {/* Billing Cycle */}
-                <div>
-                    <label
-                        htmlFor="billing-cycle"
-                        className="mb-1 block text-sm font-medium"
-                    >
-                        Billing Cycle
-                    </label>
-
+            {/* Filter Controls & Switcher */}
+            <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto flex-wrap">
+                {/* Billing Cycle Filter (if provided) */}
+                {billingCycle !== undefined && onBillingCycleChange && (
                     <select
                         id="billing-cycle"
                         value={billingCycle}
-                        onChange={(e) =>
-                            onBillingCycleChange(
-                                e.target.value as BillingCycle | "all"
-                            )
-                        }
-                        className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2"
+                        onChange={(e) => onBillingCycleChange(e.target.value as BillingCycle | "all")}
+                        className="flex-1 sm:flex-initial rounded-xl border border-neutral-200 bg-white px-3 py-2 text-xs font-semibold text-neutral-800 shadow-2xs outline-none transition-colors focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 cursor-pointer"
                     >
-                        <option value="all">
-                            All Cycles
-                        </option>
-
-                        <option value="daily">
-                            Daily
-                        </option>
-
-                        <option value="weekly">
-                            Weekly
-                        </option>
-
-                        <option value="monthly">
-                            Monthly
-                        </option>
-
-                        <option value="custom">
-                            Custom
-                        </option>
+                        <option value="all">All Cycles</option>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="custom">Custom</option>
                     </select>
-                </div>
+                )}
 
-                {/* Status */}
-                <div>
-                    <label
-                        htmlFor="billing-status"
-                        className="mb-1 block text-sm font-medium"
-                    >
-                        Status
-                    </label>
+                {/* Status Filter */}
+                <select
+                    id="billing-status"
+                    value={status}
+                    onChange={(e) => onStatusChange(e.target.value)}
+                    className="flex-1 sm:flex-initial rounded-xl border border-neutral-200 bg-white px-3 py-2 text-xs font-semibold text-neutral-800 shadow-2xs outline-none transition-colors focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 cursor-pointer"
+                >
+                    <option value="all">All Statuses</option>
+                    <option value="paid">Paid</option>
+                    <option value="partial">Partial</option>
+                    <option value="issued">Issued</option>
+                    <option value="draft">Draft</option>
+                    <option value="overdue">Overdue</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
 
-                    <select
-                        id="billing-status"
-                        value={status}
-                        onChange={(e) =>
-                            onStatusChange(
-                                e.target.value as BillingStatus | "all"
-                            )
-                        }
-                        className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2"
-                    >
-                        <option value="all">
-                            All Status
-                        </option>
+                {/* Reset Button */}
+                <button
+                    type="button"
+                    onClick={onReset}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-xs font-semibold text-neutral-700 shadow-2xs hover:bg-neutral-50 hover:text-neutral-900 transition-colors cursor-pointer"
+                    title="Reset Filters"
+                >
+                    <RotateCcw className="h-3 w-3 text-neutral-400" />
+                    <span className="hidden sm:inline">Reset</span>
+                </button>
 
-                        <option value="draft">
-                            Draft
-                        </option>
+                {/* View Switcher (if provided) */}
+                {viewMode && onViewModeChange && (
+                    <div className="inline-flex items-center rounded-xl border border-neutral-200 bg-white p-0.5 shadow-2xs">
+                        <button
+                            type="button"
+                            onClick={() => onViewModeChange("table")}
+                            className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer ${
+                                viewMode === "table"
+                                    ? "bg-neutral-900 text-white shadow-2xs"
+                                    : "text-neutral-500 hover:text-neutral-900"
+                            }`}
+                            title="Table View"
+                        >
+                            <TableIcon className="h-3.5 w-3.5" />
+                            <span className="hidden sm:inline">Table</span>
+                        </button>
 
-                        <option value="pending">
-                            Pending
-                        </option>
-
-                        <option value="paid">
-                            Paid
-                        </option>
-
-                        <option value="partial">
-                            Partial
-                        </option>
-
-                        <option value="overdue">
-                            Overdue
-                        </option>
-
-                        <option value="cancelled">
-                            Cancelled
-                        </option>
-                    </select>
-                </div>
-
-                {/* Reset */}
-                <div className="flex items-end">
-                    <button
-                        type="button"
-                        onClick={onReset}
-                        className="w-full rounded-md border px-4 py-2 text-sm font-medium hover:bg-gray-50"
-                    >
-                        Reset Filters
-                    </button>
-                </div>
+                        <button
+                            type="button"
+                            onClick={() => onViewModeChange("card")}
+                            className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer ${
+                                viewMode === "card"
+                                    ? "bg-neutral-900 text-white shadow-2xs"
+                                    : "text-neutral-500 hover:text-neutral-900"
+                            }`}
+                            title="Card View"
+                        >
+                            <LayoutGrid className="h-3.5 w-3.5" />
+                            <span className="hidden sm:inline">Cards</span>
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
-    )
+    );
 }
