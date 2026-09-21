@@ -1,33 +1,33 @@
-import { BranchStatus } from "../types/branch.types";
+import { MealStatus } from "../types/meal.types";
 
-interface BranchStatusBadgeProps {
-    status: BranchStatus | string;
+interface MealStatusBadgeProps {
+    status: MealStatus | string;
     size?: "sm" | "md";
 }
 
-export function BranchStatusBadge({ status, size = "md" }: BranchStatusBadgeProps) {
+export function MealStatusBadge({ status, size = "md" }: MealStatusBadgeProps) {
     const config: Record<
-        string,
+        MealStatus,
         { label: string; badge: string; dot: string }
     > = {
-        active: {
-            label: "Active",
-            badge: "bg-emerald-50 text-emerald-800 border-emerald-200/80",
-            dot: "bg-emerald-500",
-        },
-        inactive: {
-            label: "Inactive",
-            badge: "bg-neutral-100 text-neutral-700 border-neutral-200",
-            dot: "bg-neutral-400",
-        },
-        maintenance: {
-            label: "Maintenance",
+        scheduled: {
+            label: "Scheduled",
             badge: "bg-amber-50 text-amber-800 border-amber-200/80",
             dot: "bg-amber-500",
         },
+        served: {
+            label: "Served",
+            badge: "bg-emerald-50 text-emerald-800 border-emerald-200/80",
+            dot: "bg-emerald-500",
+        },
+        cancelled: {
+            label: "Cancelled",
+            badge: "bg-red-50 text-red-800 border-red-200/80",
+            dot: "bg-red-500",
+        },
     };
 
-    const current = config[status] || {
+    const current = config[status as MealStatus] || {
         label: typeof status === "string" ? status.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) : "Unknown",
         badge: "bg-neutral-100 text-neutral-700 border-neutral-200",
         dot: "bg-neutral-400",
@@ -46,3 +46,5 @@ export function BranchStatusBadge({ status, size = "md" }: BranchStatusBadgeProp
         </span>
     );
 }
+
+export default MealStatusBadge;

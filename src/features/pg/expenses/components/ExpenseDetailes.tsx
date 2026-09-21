@@ -1,286 +1,287 @@
+import {
+    ArrowLeft,
+    Building2,
+    Calendar,
+    CreditCard,
+    FileText,
+    Pencil,
+    Receipt,
+    Shield,
+    Trash2,
+} from "lucide-react";
 import { Expense } from "../types/expense.types";
+import { ExpenseCategoryBadge, ExpenseStatusBadge } from "./ExpenseCategoryBadge";
 
 interface ExpenseDetailsProps {
-    expense: Expense
+    expense: Expense;
+    onBack?: () => void;
+    onEdit?: (expense: Expense) => void;
+    onDelete?: (expenseId: string) => void;
 }
 
-function formatCategory(category: Expense['category']) {
-    return category.replace('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase())
-}
-
-function formatPaymentMethod(method: Expense['paymentMethod']) {
-    return method.replace('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase())
-}
-
-function formatStatus(status: Expense['status']) {
-    return status.replace('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase())
+function formatPaymentMethod(method?: string) {
+    if (!method) return "—";
+    const labels: Record<string, string> = {
+        cash: "Cash",
+        upi: "UPI",
+        bank_transfer: "Bank Transfer",
+        card: "Credit / Debit Card",
+    };
+    return labels[method] || method.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 function formatAmount(amount: number) {
-    return new Intl.NumberFormat('en-IN', {
-        style: 'currency',
-        currency: 'INR',
-        maximumFractionDigits: 2
-    }).format(amount)
+    return new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 2,
+    }).format(amount);
 }
 
-function formatDate(date: string) {
-    const parsedDate = new Date(date)
-
-    if (Number.isNaN(parsedDate.getTime())) {
-        return '-'
-    }
-
-    return parsedDate.toLocaleDateString('en-IN', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-    })
+function formatDate(dateString?: string) {
+    if (!dateString) return "—";
+    const parsedDate = new Date(dateString);
+    if (Number.isNaN(parsedDate.getTime())) return "—";
+    return parsedDate.toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+    });
 }
 
-export function ExpenseDetails({ expense }: ExpenseDetailsProps) {
+function formatDateTime(dateString?: string) {
+    if (!dateString) return "—";
+    const parsedDate = new Date(dateString);
+    if (Number.isNaN(parsedDate.getTime())) return "—";
+    return parsedDate.toLocaleString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+}
+
+export function ExpenseDetails({
+    expense,
+    onBack,
+    onEdit,
+    onDelete,
+}: ExpenseDetailsProps) {
     return (
-        <div className="space-y-6">
+        <div className="space-y-3 sm:space-y-4">
+            {/* Top Action Bar */}
+            {(onBack || onEdit || onDelete) && (
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                    {onBack ? (
+                        <button
+                            type="button"
+                            onClick={onBack}
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-500 hover:text-neutral-900 transition-colors cursor-pointer"
+                        >
+                            <ArrowLeft className="h-3.5 w-3.5" />
+                            <span>Back to Expenses</span>
+                        </button>
+                    ) : (
+                        <div />
+                    )}
 
-            {/* Summary */}
-
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-
-                <div className="rounded-lg border border-gray-200 bg-white p-4">
-                    <p className="text-sm text-gray-500">
-                        Amount
-                    </p>
-
-                    <p className="mt-1 text-xl font-semibold text-gray-900">
-                        {formatAmount(expense.amount)}
-                    </p>
-                </div>
-
-                <div className="rounded-lg border border-gray-200 bg-white p-4">
-                    <p className="text-sm text-gray-500">
-                        Category
-                    </p>
-
-                    <p className="mt-1 text-lg font-semibold text-gray-900">
-                        {formatCategory(expense.category)}
-                    </p>
-                </div>
-
-                <div className="rounded-lg border border-gray-200 bg-white p-4">
-                    <p className="text-sm text-gray-500">
-                        Payment Method
-                    </p>
-
-                    <p className="mt-1 text-lg font-semibold text-gray-900">
-                        {formatPaymentMethod(
-                            expense.paymentMethod
+                    <div className="flex items-center gap-2">
+                        {onEdit && (
+                            <button
+                                type="button"
+                                onClick={() => onEdit(expense)}
+                                className="inline-flex items-center gap-1.5 rounded-xl bg-neutral-900 px-3.5 py-1.5 text-xs font-semibold text-white shadow-2xs hover:bg-neutral-800 transition-all cursor-pointer"
+                            >
+                                <Pencil className="h-3.5 w-3.5" />
+                                <span>Edit Expense</span>
+                            </button>
                         )}
-                    </p>
-                </div>
 
-                <div className="rounded-lg border border-gray-200 bg-white p-4">
-                    <p className="text-sm text-gray-500">
-                        Status
-                    </p>
-
-                    <span
-                        className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${expense.status === "paid"
-                                ? "bg-green-100 text-green-700"
-                                : expense.status === "pending"
-                                    ? "bg-yellow-100 text-yellow-700"
-                                    : "bg-red-100 text-red-700"
-                            }`}
-                    >
-                        {formatStatus(expense.status)}
-                    </span>
-                </div>
-
-            </div>
-
-            {/* Details */}
-            <div className="rounded-lg border border-gray-200 bg-white">
-                <div className="border-b border-gray-200 px-6 py-4">
-                    <h2 className="text-base font-semibold text-gray-900">
-                        Expense Details
-                    </h2>
-                </div>
-
-                <div className="grid gap-6 p-6 sm:grid-cols-2">
-
-                    {/* Expense Number */}
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Expense Number
-                        </p>
-
-                        <p className="mt-1 text-sm font-medium text-gray-900">
-                            {expense.expenseNumber}
-                        </p>
+                        {onDelete && (
+                            <button
+                                type="button"
+                                onClick={() => onDelete(expense.id)}
+                                className="inline-flex items-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-neutral-700 shadow-2xs hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all cursor-pointer"
+                            >
+                                <Trash2 className="h-3.5 w-3.5" />
+                                <span>Delete</span>
+                            </button>
+                        )}
                     </div>
+                </div>
+            )}
 
-                    {/* Expense ID */}
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Expense ID
-                        </p>
-
-                        <p className="mt-1 break-all text-sm font-medium text-gray-900">
-                            {expense.id}
-                        </p>
-                    </div>
-
-                    {/* Vendor / Supplier */}
-                    {expense.vendorName && (
+            {/* Single Unified Container */}
+            <div className="w-full min-w-0 overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-2xs">
+                {/* Header Strip inside the container */}
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-100 bg-neutral-50/50 px-4 py-3.5 sm:px-5">
+                    <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-neutral-900 text-white shadow-2xs">
+                            <Receipt className="h-5 w-5" />
+                        </div>
                         <div>
-                            <p className="text-sm text-gray-500">
-                                Vendor / Supplier
-                            </p>
-
-                            <p className="mt-1 text-sm font-medium text-gray-900">
-                                {expense.vendorName}
-                            </p>
-                        </div>
-                    )}
-
-                    {/* Expense Date */}
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Expense Date
-                        </p>
-
-                        <p className="mt-1 text-sm font-medium text-gray-900">
-                            {formatDate(expense.expenseDate)}
-                        </p>
-                    </div>
-
-                    {/* Organization ID */}
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Organization ID
-                        </p>
-
-                        <p className="mt-1 break-all text-sm font-medium text-gray-900">
-                            {expense.organizationId}
-                        </p>
-                    </div>
-
-                    {/* Branch ID */}
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Branch ID
-                        </p>
-
-                        <p className="mt-1 break-all text-sm font-medium text-gray-900">
-                            {expense.branchId}
-                        </p>
-                    </div>
-
-                    {/* Category */}
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Category
-                        </p>
-
-                        <p className="mt-1 text-sm font-medium text-gray-900">
-                            {formatCategory(expense.category)}
-                        </p>
-                    </div>
-
-                    {/* Payment Method */}
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Payment Method
-                        </p>
-
-                        <p className="mt-1 text-sm font-medium text-gray-900">
-                            {formatPaymentMethod(expense.paymentMethod)}
-                        </p>
-                    </div>
-
-                    {/* Reference Number */}
-                    {expense.referenceNumber && (
-                        <div>
-                            <p className="text-sm text-gray-500">
-                                Reference Number
-                            </p>
-
-                            <p className="mt-1 text-sm font-medium text-gray-900">
-                                {expense.referenceNumber}
+                            <div className="flex flex-wrap items-center gap-2">
+                                <h2 className="text-base sm:text-lg font-bold text-neutral-900 leading-tight">
+                                    {expense.expenseNumber}
+                                </h2>
+                                <ExpenseCategoryBadge category={expense.category} size="sm" />
+                                <ExpenseStatusBadge status={expense.status} size="sm" />
+                            </div>
+                            <p className="mt-0.5 text-xs text-neutral-500">
+                                {expense.vendorName ? `Vendor: ${expense.vendorName}` : "Operational Expense"}
+                                {expense.referenceNumber ? ` • Ref: ${expense.referenceNumber}` : ""}
                             </p>
                         </div>
-                    )}
-
-                    {/* Status */}
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Status
-                        </p>
-
-                        <p className="mt-1 text-sm font-medium text-gray-900">
-                            {formatStatus(expense.status)}
-                        </p>
                     </div>
 
-                    {/* Description */}
-                    {expense.description && (
-                        <div className="sm:col-span-2">
-                            <p className="text-sm text-gray-500">
-                                Description
-                            </p>
-
-                            <p className="mt-1 text-sm font-medium text-gray-900">
-                                {expense.description}
-                            </p>
-                        </div>
-                    )}
-
+                    <div className="text-right">
+                        <span className="block text-[11px] font-bold uppercase tracking-wider text-neutral-400">
+                            Total Amount
+                        </span>
+                        <span className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900">
+                            {formatAmount(expense.amount)}
+                        </span>
+                    </div>
                 </div>
-            </div>
 
-            {/* Timestamps */}
+                {/* Compact Details Table */}
+                <div className="overflow-x-auto">
+                    <table className="w-full min-w-[620px] text-left text-xs sm:text-sm border-collapse">
+                        <tbody>
+                            {/* Section 1: Overview & Financial Information */}
+                            <tr className="border-b border-neutral-100 bg-neutral-50/70">
+                                <th
+                                    colSpan={4}
+                                    className="px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-neutral-500"
+                                >
+                                    <div className="flex items-center gap-1.5">
+                                        <CreditCard className="h-3.5 w-3.5 text-neutral-400" />
+                                        <span>Payment & Financial Overview</span>
+                                    </div>
+                                </th>
+                            </tr>
+                            <tr className="border-b border-neutral-100 divide-x divide-neutral-100">
+                                <td className="w-1/6 bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                    Amount
+                                </td>
+                                <td className="w-2/6 px-4 py-2.5 font-bold text-neutral-900">
+                                    {formatAmount(expense.amount)}
+                                </td>
+                                <td className="w-1/6 bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                    Expense Date
+                                </td>
+                                <td className="w-2/6 px-4 py-2.5 font-semibold text-neutral-800">
+                                    <div className="flex items-center gap-1.5">
+                                        <Calendar className="h-3.5 w-3.5 text-neutral-400" />
+                                        <span>{formatDate(expense.expenseDate)}</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr className="border-b border-neutral-100 divide-x divide-neutral-100">
+                                <td className="bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                    Category
+                                </td>
+                                <td className="px-4 py-2.5 font-semibold text-neutral-800">
+                                    <ExpenseCategoryBadge category={expense.category} size="sm" />
+                                </td>
+                                <td className="bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                    Payment Method
+                                </td>
+                                <td className="px-4 py-2.5 font-semibold text-neutral-800">
+                                    {formatPaymentMethod(expense.paymentMethod)}
+                                </td>
+                            </tr>
+                            <tr className="border-b border-neutral-100 divide-x divide-neutral-100">
+                                <td className="bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                    Status
+                                </td>
+                                <td className="px-4 py-2.5 font-semibold text-neutral-800">
+                                    <ExpenseStatusBadge status={expense.status} size="sm" />
+                                </td>
+                                <td className="bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                    Reference No.
+                                </td>
+                                <td className="px-4 py-2.5 font-mono text-neutral-700">
+                                    {expense.referenceNumber || "—"}
+                                </td>
+                            </tr>
 
-            {(expense.createdAt ||
-                expense.updatedAt) && (
-                    <div className="rounded-lg border border-gray-200 bg-white p-6">
+                            {/* Section 2: Vendor & Additional Details */}
+                            <tr className="border-b border-neutral-100 bg-neutral-50/70">
+                                <th
+                                    colSpan={4}
+                                    className="px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-neutral-500"
+                                >
+                                    <div className="flex items-center gap-1.5">
+                                        <Building2 className="h-3.5 w-3.5 text-neutral-400" />
+                                        <span>Vendor & Description</span>
+                                    </div>
+                                </th>
+                            </tr>
+                            <tr className="border-b border-neutral-100 divide-x divide-neutral-100">
+                                <td className="bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                    Vendor / Supplier
+                                </td>
+                                <td colSpan={3} className="px-4 py-2.5 font-semibold text-neutral-800">
+                                    {expense.vendorName || "—"}
+                                </td>
+                            </tr>
+                            <tr className="border-b border-neutral-100 divide-x divide-neutral-100">
+                                <td className="bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 align-top">
+                                    Description
+                                </td>
+                                <td colSpan={3} className="px-4 py-2.5 text-neutral-700 whitespace-pre-wrap leading-relaxed">
+                                    {expense.description || "No description provided."}
+                                </td>
+                            </tr>
 
-                        <h2 className="text-base font-semibold text-gray-900">
-                            Record Information
-                        </h2>
-
-                        <div className="mt-4 grid gap-6 sm:grid-cols-2">
-
-                            {expense.createdAt && (
-                                <div>
-                                    <p className="text-sm text-gray-500">
+                            {/* Section 3: Audit & Metadata */}
+                            <tr className="border-b border-neutral-100 bg-neutral-50/70">
+                                <th
+                                    colSpan={4}
+                                    className="px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-neutral-500"
+                                >
+                                    <div className="flex items-center gap-1.5">
+                                        <Shield className="h-3.5 w-3.5 text-neutral-400" />
+                                        <span>System Record Information</span>
+                                    </div>
+                                </th>
+                            </tr>
+                            <tr className="border-b border-neutral-100 divide-x divide-neutral-100">
+                                <td className="bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                    Expense ID
+                                </td>
+                                <td className="px-4 py-2.5 font-mono text-neutral-600 break-all">
+                                    {expense.id}
+                                </td>
+                                <td className="bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                                    Branch ID
+                                </td>
+                                <td className="px-4 py-2.5 font-mono text-neutral-600 break-all">
+                                    {expense.branchId || "—"}
+                                </td>
+                            </tr>
+                            {(expense.createdAt || expense.updatedAt) && (
+                                <tr className="divide-x divide-neutral-100">
+                                    <td className="bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
                                         Created At
-                                    </p>
-
-                                    <p className="mt-1 text-sm text-gray-900">
-                                        {formatDate(
-                                            expense.createdAt
-                                        )}
-                                    </p>
-                                </div>
-                            )}
-
-                            {expense.updatedAt && (
-                                <div>
-                                    <p className="text-sm text-gray-500">
+                                    </td>
+                                    <td className="px-4 py-2.5 text-neutral-600">
+                                        {formatDateTime(expense.createdAt)}
+                                    </td>
+                                    <td className="bg-neutral-50/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
                                         Updated At
-                                    </p>
-
-                                    <p className="mt-1 text-sm text-gray-900">
-                                        {formatDate(
-                                            expense.updatedAt
-                                        )}
-                                    </p>
-                                </div>
+                                    </td>
+                                    <td className="px-4 py-2.5 text-neutral-600">
+                                        {formatDateTime(expense.updatedAt)}
+                                    </td>
+                                </tr>
                             )}
-
-                        </div>
-                    </div>
-                )}
-
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-    )
+    );
 }

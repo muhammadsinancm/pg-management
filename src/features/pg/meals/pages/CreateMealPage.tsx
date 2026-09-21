@@ -1,34 +1,51 @@
 import { useNavigate } from "react-router";
+import { AlertCircle, ArrowLeft } from "lucide-react";
 import { useMeals } from "../hooks/useMeals";
 import { CreateMealInput, UpdateMealInput } from "../types/meal.types";
 import { MealForm } from "../components/MealForm";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
-export default function CreateMealPage() {
-    const navigate = useNavigate()
-
-    const { addMeal, loading, error } = useMeals()
-
-    const { user } = useAuth()
+export function CreateMealPage() {
+    const navigate = useNavigate();
+    const { addMeal, loading, error } = useMeals();
+    const { user } = useAuth();
 
     if (!user) {
         return (
-            <div className="p-6">
-                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-                    Please login to create a meal.
+            <div className="space-y-4">
+                <button
+                    type="button"
+                    onClick={() => navigate("/pg/meals")}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-500 hover:text-neutral-900 transition-colors cursor-pointer"
+                >
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    <span>Back to Meals</span>
+                </button>
+                <div className="flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50/80 p-4 text-xs font-semibold text-red-700 shadow-2xs">
+                    <AlertCircle className="h-4 w-4 shrink-0 text-red-600" />
+                    <span>Please log in to create a meal.</span>
                 </div>
             </div>
         );
     }
 
-    const organizationId = user.organizationId
-    const branchId = user.branchId ?? ''
+    const organizationId = user.organizationId;
+    const branchId = user.branchId ?? "";
 
     if (!organizationId) {
         return (
-            <div className="p-6">
-                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-                    Your account is not assigned to an organization.
+            <div className="space-y-4">
+                <button
+                    type="button"
+                    onClick={() => navigate("/pg/meals")}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-500 hover:text-neutral-900 transition-colors cursor-pointer"
+                >
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    <span>Back to Meals</span>
+                </button>
+                <div className="flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50/80 p-4 text-xs font-semibold text-red-700 shadow-2xs">
+                    <AlertCircle className="h-4 w-4 shrink-0 text-red-600" />
+                    <span>Your account is not assigned to an organization.</span>
                 </div>
             </div>
         );
@@ -36,59 +53,83 @@ export default function CreateMealPage() {
 
     if (!branchId) {
         return (
-            <div className="p-6">
-                <div className="rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-700">
-                    Your account is not assigned to a branch.
+            <div className="space-y-4">
+                <button
+                    type="button"
+                    onClick={() => navigate("/pg/meals")}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-500 hover:text-neutral-900 transition-colors cursor-pointer"
+                >
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    <span>Back to Meals</span>
+                </button>
+                <div className="flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-xs font-semibold text-amber-800 shadow-2xs">
+                    <AlertCircle className="h-4 w-4 shrink-0 text-amber-600" />
+                    <span>Your account is not assigned to a branch.</span>
                 </div>
             </div>
         );
     }
 
     const handleSubmit = async (data: CreateMealInput | UpdateMealInput) => {
-        if (!('organizationId' in data)) {
-            return
-        }
+        if (!("organizationId" in data)) return;
+
         await addMeal({
             ...data,
             organizationId,
-            branchId
-        })
+            branchId,
+        });
 
-        navigate('/pg/meals')
-    }
+        navigate("/pg/meals");
+    };
 
     const handleCancel = () => {
-        navigate('/pg/meals')
-    }
+        navigate("/pg/meals");
+    };
 
     return (
-        <div className="space-y-6 p-6">
+        <div className="w-full min-w-0 space-y-4">
+            {/* Top Action / Back Link */}
+            <div className="flex items-center justify-between">
+                <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-500 hover:text-neutral-900 transition-colors cursor-pointer"
+                >
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    <span>Back to Meals</span>
+                </button>
+            </div>
+
             {/* Header */}
             <div>
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900">
                     Add Meal
                 </h1>
-
-                <p className="mt-1 text-sm text-gray-500">
-                    Create a new meal and menu
+                <p className="mt-0.5 text-xs text-neutral-400">
+                    Create a new meal schedule and daily menu for residents
                 </p>
             </div>
 
-            {/* Error */}
+            {/* Error Banner */}
             {error && (
-                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-                    {error}
+                <div className="flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50/80 p-3.5 text-xs font-semibold text-red-700 shadow-2xs">
+                    <AlertCircle className="h-4 w-4 shrink-0 text-red-600" />
+                    <span>{error}</span>
                 </div>
             )}
 
-            {/* Form */}
-            <MealForm
-                organizationId={organizationId}
-                branchId={branchId}
-                onSubmit={handleSubmit}
-                onCancel={handleCancel}
-                loading={loading}
-            />
+            {/* Card Form Container */}
+            <div className="rounded-2xl border border-neutral-200/80 bg-white p-5 sm:p-6 shadow-2xs max-w-3xl">
+                <MealForm
+                    organizationId={organizationId}
+                    branchId={branchId}
+                    onSubmit={handleSubmit}
+                    onCancel={handleCancel}
+                    loading={loading}
+                />
+            </div>
         </div>
-    )
+    );
 }
+
+export default CreateMealPage;

@@ -87,8 +87,8 @@ export function BookingsPage() {
                 </div>
             )}
 
-            {/* Loading State */}
-            {loading ? (
+            {/* Loading State: Only show skeleton on initial load when there is no data */}
+            {loading && bookings.length === 0 ? (
                 <div className="space-y-4">
                     <BookingSummarySkeleton />
                     <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between animate-pulse">
